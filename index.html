@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Journal Boo</title>
+  <style>
+    :root{
+      --bg: #0f0f12;            /* warm near-black */
+      --surface: #17171c;       /* slightly lighter */
+      --surface2:#1e1e25;
+      --text: #f1efe9;          /* soft off-white */
+      --muted: #b9b6ad;
+      --muted2:#8f8b81;
+      --accent:#c9a76a;         /* muted warm accent */
+      --danger:#d67d7d;
+      --ok:#8fcf9a;
+
+      --radius: 18px;
+      --pad: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --line: 1px solid rgba(255,255,255,.06);
+
+      --font: ui-serif, Georgia, "Times New Roman", Times, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: var(--font);
+      background: radial-gradient(1200px 800px at 20% 0%, rgba(201,167,106,.10), transparent 55%),
+                  radial-gradient(900px 600px at 85% 15%, rgba(201,167,106,.06), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      letter-spacing: .1px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .app{
+      min-height: 100%;
+      display:flex;
+      justify-content:center;
+      padding: 28px 14px 40px;
+    }
+
+    .shell{
+      width: min(780px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 8px 4px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+    .brand h1{
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+    .brand p{
+      margin: 0;
+      color: var(--muted2);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      border: var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill:hover{ background: rgba(255,255,255,.05); }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-inner{
+      padding: 20px;
+    }
+
+    .title{
+      font-size: 24px;
+      margin: 0 0 10px;
+      font-weight: 600;
+    }
+    .subtitle{
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 16px;
+    }
+
+    .choices{
+      display:grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .choice{
+      border: var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 16px;
+      padding: 14px 14px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .choice:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .choice h3{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .choice p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content:flex-start;
+    }
+
+    .btn{
+      border: var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      cursor:pointer;
+      color: var(--text);
+      user-select:none;
+    }
+    .btn:hover{ background: rgba(255,255,255,.05); }
+    .btn.primary{
+      background: rgba(201,167,106,.16);
+      border: 1px solid rgba(201,167,106,.35);
+    }
+    .btn.primary:hover{
+      background: rgba(201,167,106,.22);
+    }
+    .btn.ghost{
+      background: transparent;
+    }
+    .btn.danger{
+      border: 1px solid rgba(214,125,125,.35);
+      background: rgba(214,125,125,.10);
+    }
+
+    .divider{
+      height: 1px;
+      background: rgba(255,255,255,.06);
+      margin: 18px 0;
+    }
+
+    textarea, input[type="text"]{
+      width: 100%;
+      border: var(--line);
+      background: rgba(0,0,0,.15);
+      border-radius: 16px;
+      color: var(--text);
+      padding: 14px 14px;
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      outline: none;
+    }
+    textarea:focus, input[type="text"]:focus{
+      border-color: rgba(201,167,106,.45);
+      box-shadow: 0 0 0 3px rgba(201,167,106,.10);
+    }
+
+    .hint{
+      margin-top: 10px;
+      color: var(--muted2);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .kicker{
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .qblock{
+      border: var(--line);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 14px 14px;
+      margin-bottom: 10px;
+    }
+    .qblock .q{
+      font-size: 16px;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    .mood-grid{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mood{
+      border: var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 9px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-size: 14px;
+      color: var(--text);
+      user-select:none;
+    }
+    .mood:hover{ background: rgba(255,255,255,.05); }
+    .mood.selected{
+      background: rgba(201,167,106,.16);
+      border-color: rgba(201,167,106,.35);
+    }
+
+    .footer-note{
+      color: var(--muted2);
+      font-size: 12.5px;
+      line-height: 1.45;
+      padding: 0 4px;
+    }
+
+    .list{
+      display:grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .entry{
+      border: var(--line);
+      background: rgba(255,255,255,.02);
+      border-radius: 16px;
+      padding: 14px 14px;
+    }
+    .entry .meta{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      color: var(--muted2);
+      font-size: 12.5px;
+      margin-bottom: 8px;
+    }
+    .entry .preview{
+      margin: 0;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .small{
+      font-size: 12.5px;
+      color: var(--muted2);
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,.35);
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 520px){
+      .title{ font-size: 22px; }
+      .subtitle{ font-size: 15px; }
+      textarea{ font-size: 16px; }
+      .top-actions{ gap: 8px; }
+      .pill{ padding: 9px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <header>
+        <div class="brand">
+          <h1>Journal Boo</h1>
+          <p>a quiet companion for writing, reflection, and unwinding</p>
+        </div>
+
+        <div class="top-actions">
+          <button class="pill" id="btnHome" title="Home">Home</button>
+          <button class="pill" id="btnJournal" title="My Journal">My Journal</button>
+
+          <button class="pill" id="btnMusicToggle" title="Toggle music">
+            Music: <span id="musicState">Off</span>
+          </button>
+          <button class="pill" id="btnMusicNext" title="Change music">
+            Track: <span id="musicTrackLabel">—</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="card">
+        <div class="card-inner" id="view"></div>
+      </main>
+
+      <div class="footer-note">
+        Your writing is saved locally in this browser. (V1) If you clear site data, it will be removed.
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <audio id="bgm" preload="auto" loop></audio>
+
+  <script>
+    /***********************
+     * Journal Boo (V1)
+     * All-in-one: routing, music, storage
+     ***********************/
+
+    // --- Music assets (adjust extensions if needed) ---
+    const TRACKS = [
+      { id: "devi-song",       label: "devi-song",       src: "assets/music/devi-song.mp3" },
+      { id: "labour-of-love",  label: "labour-of-love",  src: "assets/music/labour-of-love.mp3" },
+      { id: "crying-out",      label: "crying-out",      src: "assets/music/crying-out.mp3" },
+    ];
+
+    // Meditation -> track mapping (as you specified)
+    const MEDITATION_TRACK_MAP = {
+      light: "crying-out",
+      river: "labour-of-love",
+      sleep: "devi-song",
+    };
+
+    // Writing defaults (sane defaults; easy to tweak)
+    const DEFAULT_TRACK_BY_MODE = {
+      free: "devi-song",
+      guided: "labour-of-love",
+      home: null,
+      journal: null,
+      medList: null,
+      meditation: null,
+      complete: null,
+    };
+
+    // --- Storage keys ---
+    const LS_KEY = "journal_boo_entries_v1";
+    const LS_SETTINGS = "journal_boo_settings_v1";
+
+    // --- App state ---
+    const state = {
+      route: "home",
+      // music settings
+      musicOn: false,
+      trackId: "devi-song",
+      // current activity context
+      freeText: "",
+      guidedText: "",
+      guidedMood: null,
+      meditationId: null,
+    };
+
+    // --- UI elements ---
+    const viewEl = document.getElementById("view");
+    const toastEl = document.getElementById("toast");
+
+    const bgm = document.getElementById("bgm");
+    const musicStateEl = document.getElementById("musicState");
+    const musicTrackLabelEl = document.getElementById("musicTrackLabel");
+
+    // Buttons
+    document.getElementById("btnHome").addEventListener("click", () => go("home"));
+    document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
+
+    document.getElementById("btnMusicToggle").addEventListener("click", () => {
+      setMusicOn(!state.musicOn);
+      toast(state.musicOn ? "Music on." : "Music off.");
+    });
+
+    document.getElementById("btnMusicNext").addEventListener("click", () => {
+      cycleTrack();
+      if (state.musicOn) fadeToTrack(state.trackId);
+      toast("Changed music.");
+    });
+
+    // --- Helpers ---
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function nowIso(){
+      return new Date().toISOString();
+    }
+    function prettyDate(iso){
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }
+
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(() => toastEl.classList.remove("show"), 1600);
+    }
+
+    // --- Persistence ---
+    function loadSettings(){
+      try{
+        const raw = localStorage.getItem(LS_SETTINGS);
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (typeof s.musicOn === "boolean") state.musicOn = s.musicOn;
+        if (typeof s.trackId === "string") state.trackId = s.trackId;
+      }catch{}
+    }
+    function saveSettings(){
+      try{
+        localStorage.setItem(LS_SETTINGS, JSON.stringify({
+          musicOn: state.musicOn,
+          trackId: state.trackId,
+        }));
+      }catch{}
+    }
+
+    function loadEntries(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      }catch{
+        return [];
+      }
+    }
+    function saveEntries(entries){
+      localStorage.setItem(LS_KEY, JSON.stringify(entries));
+    }
+
+    function addEntry(entry){
+      const entries = loadEntries();
+      entries.unshift(entry);
+      saveEntries(entries);
+    }
+
+    // --- Music engine (gentle fade) ---
+    let fadeTimer = null;
+    function setMusicOn(on){
+      state.musicOn = on;
+      saveSettings();
+      syncMusicUI();
+
+      if (!on){
+        fadeOut(300);
+      } else {
+        fadeToTrack(state.trackId, 300);
+      }
+    }
+
+    function setTrack(trackId){
+      state.trackId = trackId;
+      saveSettings();
+      syncMusicUI();
+    }
+
+    function cycleTrack(){
+      const idx = TRACKS.findIndex(t => t.id === state.trackId);
+      const next = TRACKS[(idx + 1 + TRACKS.length) % TRACKS.length];
+      setTrack(next.id);
+    }
+
+    function getTrack(trackId){
+      return TRACKS.find(t => t.id === trackId) || TRACKS[0];
+    }
+
+    function fadeToTrack(trackId, ms=350){
+      const t = getTrack(trackId);
+      const targetSrc = t.src;
+
+      // If already playing this src, just fade in a bit if needed.
+      if (bgm.src && bgm.src.endsWith(targetSrc)){
+        fadeIn(ms);
+        return;
+      }
+
+      // Smoothly fade out, swap src, fade in.
+      clearInterval(fadeTimer);
+      const startVol = bgm.paused ? 0 : bgm.volume;
+      const steps = 12;
+      const stepMs = Math.max(16, Math.floor(ms / steps));
+
+      let i = 0;
+      fadeTimer = setInterval(() => {
+        i++;
+        const v = Math.max(0, startVol * (1 - i/steps));
+        bgm.volume = v;
+
+        if (i >= steps){
+          clearInterval(fadeTimer);
+          bgm.src = targetSrc;
+          bgm.volume = 0;
+          bgm.play().catch(() => {});
+          fadeIn(ms);
+        }
+      }, stepMs);
+    }
+
+    function fadeIn(ms=350){
+      clearInterval(fadeTimer);
+      const steps = 12;
+      const stepMs = Math.max(16, Math.floor(ms / steps));
+      let i = 0;
+      fadeTimer = setInterval(() => {
+        i++;
+        bgm.volume = Math.min(0.55, (i/steps) * 0.55);
+        if (i >= steps){
+          clearInterval(fadeTimer);
+        }
+      }, stepMs);
+    }
+
+    function fadeOut(ms=350){
+      clearInterval(fadeTimer);
+      const steps = 12;
+      const stepMs = Math.max(16, Math.floor(ms / steps));
+      const startVol = bgm.paused ? 0 : bgm.volume;
+      let i = 0;
+      fadeTimer = setInterval(() => {
+        i++;
+        bgm.volume = Math.max(0, startVol * (1 - i/steps));
+        if (i >= steps){
+          clearInterval(fadeTimer);
+          bgm.pause();
+        }
+      }, stepMs);
+    }
+
+    function syncMusicUI(){
+      musicStateEl.textContent = state.musicOn ? "On" : "Off";
+      const t = getTrack(state.trackId);
+      musicTrackLabelEl.textContent = t.label;
+    }
+
+    // Apply mode defaults (only if music is ON, and only if mode requests a default)
+    function applyModeMusic(mode){
+      const desired = DEFAULT_TRACK_BY_MODE[mode] ?? null;
+      if (!desired) return; // keep whatever the user has
+      setTrack(desired);
+      if (state.musicOn) fadeToTrack(desired);
+    }
+
+    // --- Routes / Views ---
+    function go(route, payload={}){
+      state.route = route;
+
+      // handle route-level music defaults
+      if (route === "home") applyModeMusic("home");
+      if (route === "free") applyModeMusic("free");
+      if (route === "guided") applyModeMusic("guided");
+      if (route === "journal") applyModeMusic("journal");
+      if (route === "medList") applyModeMusic("medList");
+      if (route === "complete") applyModeMusic("complete");
+
+      // payload usage
+      if (route === "meditation" && payload.meditationId){
+        state.meditationId = payload.meditationId;
+        // set meditation-specific track
+        const mappedTrack = MEDITATION_TRACK_MAP[payload.meditationId] || state.trackId;
+        setTrack(mappedTrack);
+        if (state.musicOn) fadeToTrack(mappedTrack);
+      }
+
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function render(){
+      switch(state.route){
+        case "home": return renderHome();
+        case "free": return renderFree();
+        case "guided": return renderGuided();
+        case "medList": return renderMeditationList();
+        case "meditation": return renderMeditation(state.meditationId);
+        case "completeFree": return renderCompleteFree();
+        case "completeGuided": return renderCompleteGuided();
+        case "completeMeditation": return renderCompleteMeditation();
+        case "journal": return renderJournal();
+        default: return renderHome();
+      }
+    }
+
+    // --- Views ---
+    function renderHome(){
+      viewEl.innerHTML = `
+        <h2 class="title">Hi, I’m Journal Boo.</h2>
+        <p class="subtitle">I’m your personal journaling companion. What would you like to do today? 🙂</p>
+
+        <div class="choices">
+          <div class="choice" data-route="free">
+            <h3>1) Free writing</h3>
+            <p>Write freely about whatever’s on your mind.</p>
+          </div>
+
+          <div class="choice" data-route="guided">
+            <h3>2) Guided journaling</h3>
+            <p>I’ll offer gentle prompts to help you reflect.</p>
+          </div>
+
+          <div class="choice" data-route="medList">
+            <h3>3) Unwinding meditation</h3>
+            <p>Choose a calm written meditation to read at your own pace.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="small">Tip: You can turn music on and switch tracks at any time using the buttons at the top.</p>
+      `;
+
+      viewEl.querySelectorAll(".choice").forEach(el => {
+        el.addEventListener("click", () => go(el.dataset.route));
+      });
+    }
+
+    function renderFree(){
+      viewEl.innerHTML = `
+        <p class="kicker">Free writing</p>
+        <h2 class="title">Take your time.</h2>
+        <p class="subtitle">Write freely. No prompts. No pressure. Your words save automatically.</p>
+
+        <textarea id="freeText" rows="14" placeholder="Start anywhere...">${escapeHtml(state.freeText || "")}</textarea>
+
+        <div class="row" style="margin-top:14px;">
+          <button class="btn primary" id="btnFinishFree">I’m done for now</button>
+          <button class="btn ghost" id="btnBackHome">Back</button>
+        </div>
+
+        <p class="hint">Music: toggle on/off and change tracks in the top bar (like Munchkin Boo).</p>
+      `;
+
+      // Start music if user has it on; otherwise keep off. Free-writing default track applied by route.
+      const ta = document.getElementById("freeText");
+      ta.addEventListener("input", () => {
+        state.freeText = ta.value;
+        // simple autosave buffer only; actual entry is saved on finish (keeps journal cleaner)
+      });
+
+      document.getElementById("btnFinishFree").addEventListener("click", () => {
+        const text = (state.freeText || "").trim();
+        if (text.length){
+          addEntry({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
+            createdAt: nowIso(),
+            type: "Free writing",
+            mood: null,
+            content: text,
+          });
+          toast("Saved.");
+        } else {
+          toast("Nothing to save — that’s okay.");
+        }
+        state.freeText = "";
+        go("completeFree");
+      });
+
+      document.getElementById("btnBackHome").addEventListener("click", () => go("home"));
+    }
+
+    function renderCompleteFree(){
+      viewEl.innerHTML = `
+        <h2 class="title">This is really thoughtful work.</h2>
+        <p class="subtitle">What would you like to do next?</p>
+
+        <div class="row">
+          <button class="btn primary" id="btnGoMeditation">Gentle guided meditation</button>
+          <button class="btn" id="btnDone">I’m done for now</button>
+        </div>
+      `;
+
+      document.getElementById("btnGoMeditation").addEventListener("click", () => go("medList"));
+      document.getElementById("btnDone").addEventListener("click", () => go("home"));
+    }
+
+    function renderGuided(){
+      viewEl.innerHTML = `
+        <p class="kicker">Guided journaling</p>
+        <h2 class="title">Welcome to your guided journal.</h2>
+        <p class="subtitle">
+          This is a space where we can explore what’s important to you, notice how you’re feeling, and gently reflect together.<br><br>
+          Let me ask you something 🙂
+        </p>
+
+        <div class="qblock"><p class="q">1) What is something important in your life right now?</p></div>
+        <div class="qblock"><p class="q">2) How do you feel about it?</p></div>
+        <div class="qblock"><p class="q">3) What do you understand about this part of your life right now?</p></div>
+
+        <textarea id="guidedText" rows="12" placeholder="You can answer in any way you like...">${escapeHtml(state.guidedText || "")}</textarea>
+        <div class="row" style="margin-top:10px; justify-content:space-between;">
+          <span class="small" id="wordCount">0 / 500 words</span>
+          <span class="small">Soft limit (no pressure).</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="kicker" style="margin-bottom:6px;">How are you feeling right now?</p>
+        <div class="mood-grid" id="moods"></div>
+
+        <div class="row" style="margin-top:14px;">
+          <button class="btn primary" id="btnFinishGuided">Continue</button>
+          <button class="btn ghost" id="btnBackHome2">Back</button>
+        </div>
+      `;
+
+      const moods = [
+        "🙂 Okay",
+        "🌿 Calm",
+        "🫧 Numb",
+        "🌧️ Heavy",
+        "💛 Tender",
+        "🔥 Restless",
+        "✨ Hopeful",
+        "😴 Tired",
+      ];
+
+      const moodsEl = document.getElementById("moods");
+      moods.forEach(m => {
+        const b = document.createElement("button");
+        b.className = "mood" + (state.guidedMood === m ? " selected" : "");
+        b.type = "button";
+        b.textContent = m;
+        b.addEventListener("click", () => {
+          state.guidedMood = m;
+          [...moodsEl.children].forEach(ch => ch.classList.remove("selected"));
+          b.classList.add("selected");
+        });
+        moodsEl.appendChild(b);
+      });
+
+      const ta = document.getElementById("guidedText");
+      const wc = document.getElementById("wordCount");
+
+      function updateWordCount(){
+        const words = (ta.value || "").trim().split(/\s+/).filter(Boolean);
+        const n = ta.value.trim().length ? words.length : 0;
+        wc.textContent = `${n} / 500 words`;
+      }
+      updateWordCount();
+
+      ta.addEventListener("input", () => {
+        state.guidedText = ta.value;
+        updateWordCount();
+      });
+
+      document.getElementById("btnFinishGuided").addEventListener("click", () => {
+        const text = (state.guidedText || "").trim();
+        if (text.length){
+          addEntry({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
+            createdAt: nowIso(),
+            type: "Guided journaling",
+            mood: state.guidedMood,
+            content:
+              "1) What is something important in your life right now?\n" +
+              "2) How do you feel about it?\n" +
+              "3) What do you understand about this part of your life right now?\n\n" +
+              text
+          });
+          toast("Saved.");
+        } else {
+          toast("Nothing to save — that’s okay.");
+        }
+
+        // reset draft, keep mood optional
+        state.guidedText = "";
+        state.guidedMood = null;
+        go("completeGuided");
+      });
+
+      document.getElementById("btnBackHome2").addEventListener("click", () => go("home"));
+    }
+
+    function renderCompleteGuided(){
+      viewEl.innerHTML = `
+        <h2 class="title">You did really meaningful work today.</h2>
+        <p class="subtitle">Would you like to wind down with a gentle guided meditation or do some free writing?</p>
+
+        <div class="row">
+          <button class="btn primary" id="btnGuidedToMeditation">Gentle guided meditation</button>
+          <button class="btn" id="btnGuidedToFree">Free writing</button>
+          <button class="btn ghost" id="btnGuidedDone">I’m done for now</button>
+        </div>
+      `;
+
+      document.getElementById("btnGuidedToMeditation").addEventListener("click", () => go("medList"));
+      document.getElementById("btnGuidedToFree").addEventListener("click", () => go("free"));
+      document.getElementById("btnGuidedDone").addEventListener("click", () => go("home"));
+    }
+
+    function renderMeditationList(){
+      viewEl.innerHTML = `
+        <p class="kicker">Unwinding meditation</p>
+        <h2 class="title">Welcome.</h2>
+        <p class="subtitle">
+          You can choose a meditation that feels right for you right now.
+          There’s no wrong choice — just follow what you need.
+        </p>
+
+        <div class="choices">
+          <div class="choice" data-med="light">
+            <h3>🌟 Following the Light</h3>
+            <p>This meditation invites you to imagine a soft, steady light guiding you into a peaceful place where you can rest and feel safe. You can move at your own pace — there’s nothing to rush.</p>
+          </div>
+
+          <div class="choice" data-med="river">
+            <h3>🍃 Leaves on the River</h3>
+            <p>This meditation offers a simple way to set your thoughts down and let them drift away, like leaves floating along a calm river. You don’t need to change anything — just notice and let go.</p>
+          </div>
+
+          <div class="choice" data-med="sleep">
+            <h3>🌙 Drifting Into Rest</h3>
+            <p>This meditation is designed to gently ease you toward rest and sleep, without any pressure to fall asleep. You can read at your own pace and allow your body to soften.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <button class="btn primary" id="btnStartMeditationDefault">Start with “Drifting Into Rest”</button>
+          <button class="btn ghost" id="btnBackHome3">Back</button>
+        </div>
+
+        <p class="hint">You can stop or switch at any time.</p>
+      `;
+
+      viewEl.querySelectorAll(".choice").forEach(el => {
+        el.addEventListener("click", () => go("meditation", { meditationId: el.dataset.med }));
+      });
+
+      document.getElementById("btnStartMeditationDefault").addEventListener("click", () => go("meditation", { meditationId: "sleep" }));
+      document.getElementById("btnBackHome3").addEventListener("click", () => go("home"));
+    }
+
+    function renderMeditation(medId){
+      const med = getMeditation(medId);
+      viewEl.innerHTML = `
+        <p class="kicker">Meditation</p>
+        <h2 class="title">${med.title}</h2>
+        <p class="subtitle">${med.intro}</p>
+
+        <div class="card" style="background:rgba(255,255,255,.02); border: var(--line); box-shadow:none;">
+          <div class="card-inner" style="padding:18px;">
+            <div style="white-space:pre-wrap; line-height:1.75; font-size:16px; color: var(--text);">
+              ${escapeHtml(med.body)}
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <button class="btn primary" id="btnMeditationFinished">I’m finished</button>
+          <button class="btn" id="btnSwitchMeditation">Choose another</button>
+          <button class="btn ghost" id="btnMeditationQuit">I’m done for now</button>
+        </div>
+
+        <p class="hint">Music for this meditation is set automatically, but you can change it anytime.</p>
+      `;
+
+      document.getElementById("btnMeditationFinished").addEventListener("click", () => go("completeMeditation"));
+      document.getElementById("btnSwitchMeditation").addEventListener("click", () => go("medList"));
+      document.getElementById("btnMeditationQuit").addEventListener("click", () => go("home"));
+    }
+
+    function renderCompleteMeditation(){
+      viewEl.innerHTML = `
+        <h2 class="title">Thanks for taking this time for yourself.</h2>
+        <p class="subtitle">What would you like to do next?</p>
+
+        <div class="row">
+          <button class="btn primary" id="btnMedToFree">Free writing</button>
+          <button class="btn" id="btnMedToGuided">Guided journaling</button>
+          <button class="btn ghost" id="btnMedDone">I’m done for now</button>
+        </div>
+      `;
+
+      document.getElementById("btnMedToFree").addEventListener("click", () => go("free"));
+      document.getElementById("btnMedToGuided").addEventListener("click", () => go("guided"));
+      document.getElementById("btnMedDone").addEventListener("click", () => go("home"));
+    }
+
+    function renderJournal(){
+      const entries = loadEntries();
+      viewEl.innerHTML = `
+        <p class="kicker">My Journal</p>
+        <h2 class="title">Your saved writing</h2>
+        <p class="subtitle">Everything here is stored locally in this browser.</p>
+
+        <div class="row">
+          <button class="btn primary" id="btnNewFree">New free writing</button>
+          <button class="btn" id="btnNewGuided">New guided journaling</button>
+          <button class="btn danger" id="btnClearAll">Clear all (local)</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="list" id="entryList"></div>
+        <p class="small" style="margin-top:10px;">Tip: If you want accounts later, we can add sign-in and sync — but this V1 keeps things quiet and local.</p>
+      `;
+
+      document.getElementById("btnNewFree").addEventListener("click", () => go("free"));
+      document.getElementById("btnNewGuided").addEventListener("click", () => go("guided"));
+
+      document.getElementById("btnClearAll").addEventListener("click", () => {
+        const ok = confirm("Clear all saved entries from this browser?");
+        if (!ok) return;
+        saveEntries([]);
+        toast("Cleared.");
+        renderJournal();
+      });
+
+      const list = document.getElementById("entryList");
+      if (!entries.length){
+        list.innerHTML = `
+          <div class="entry">
+            <div class="meta"><span>Nothing saved yet</span><span></span></div>
+            <p class="preview">When you finish a writing session, it will appear here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      entries.forEach(e => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        const mood = e.mood ? ` • ${e.mood}` : "";
+        div.innerHTML = `
+          <div class="meta">
+            <span>${escapeHtml(e.type)}${mood}</span>
+            <span>${prettyDate(e.createdAt)}</span>
+          </div>
+          <p class="preview">${escapeHtml(preview(e.content, 420))}</p>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" data-open="${escapeHtml(e.id)}">Open</button>
+            <button class="btn danger" data-del="${escapeHtml(e.id)}">Delete</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+
+      list.querySelectorAll("button[data-open]").forEach(btn => {
+        btn.addEventListener("click", () => openEntry(btn.getAttribute("data-open")));
+      });
+      list.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => deleteEntry(btn.getAttribute("data-del")));
+      });
+
+      function preview(txt, max){
+        const s = (txt || "").trim();
+        if (s.length <= max) return s;
+        return s.slice(0, max).trim() + "…";
+      }
+
+      function openEntry(id){
+        const entries = loadEntries();
+        const e = entries.find(x => x.id === id);
+        if (!e) return;
+
+        viewEl.innerHTML = `
+          <p class="kicker">My Journal</p>
+          <h2 class="title">${escapeHtml(e.type)}</h2>
+          <p class="subtitle">${prettyDate(e.createdAt)}${e.mood ? " • " + escapeHtml(e.mood) : ""}</p>
+
+          <div class="card" style="background:rgba(255,255,255,.02); border: var(--line); box-shadow:none;">
+            <div class="card-inner" style="padding:18px;">
+              <div style="white-space:pre-wrap; line-height:1.75; font-size:16px;">
+                ${escapeHtml(e.content)}
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:14px;">
+            <button class="btn primary" id="btnBackToList">Back to entries</button>
+            <button class="btn danger" id="btnDeleteThis">Delete</button>
+            <button class="btn" id="btnGoHomeFromOpen">Home</button>
+          </div>
+        `;
+
+        document.getElementById("btnBackToList").addEventListener("click", () => go("journal"));
+        document.getElementById("btnGoHomeFromOpen").addEventListener("click", () => go("home"));
+        document.getElementById("btnDeleteThis").addEventListener("click", () => deleteEntry(id));
+      }
+
+      function deleteEntry(id){
+        const ok = confirm("Delete this entry?");
+        if (!ok) return;
+        const entries = loadEntries().filter(e => e.id !== id);
+        saveEntries(entries);
+        toast("Deleted.");
+        go("journal");
+      }
+    }
+
+    // --- Meditation content (written-only) ---
+    function getMeditation(id){
+      const meds = {
+        light: {
+          title: "🌟 Following the Light",
+          intro: "A gentle visualization where you follow a soft light into a peaceful, safe place.",
+          body:
+`Hi.
+You can take this moment just for yourself. There’s nothing you need to do perfectly. Just being here is enough.
+
+If it feels okay, let your body settle into a comfortable position.
+You might notice the place where you’re sitting or lying down. The support beneath you. The quiet weight of your body being held.
+
+Now, imagine there’s a soft light somewhere nearby.
+Not bright or overwhelming — just warm and steady.
+The kind of light that feels kind, like it’s been waiting for you.
+
+You don’t have to rush toward it.
+Just notice it.
+And when you’re ready, you can gently begin to follow it.
+
+With each slow breath, the light guides you forward.
+As you move closer, the world around you feels calmer.
+Quieter.
+Like things are slowly finding their place.
+
+The light leads you to a peaceful space.
+This place feels safe.
+Nothing is expected of you here.
+Everything feels… right.
+
+Take a moment to look around this place in your mind.
+Notice the colors.
+The stillness.
+The sense that you are welcome exactly as you are.
+
+If there’s anything heavy you’ve been carrying, you don’t need to hold it so tightly here.
+You can set it down — even just for a moment.
+
+Take your time here.
+Let the calm settle gently around you.
+Let yourself rest in it.
+
+And when you’re ready, you can begin to bring your attention back.
+Knowing this peaceful place is always something you can return to.
+
+Thank you for taking this time for yourself.
+You did beautifully.`
+        },
+
+        river: {
+          title: "🍃 Leaves on the River",
+          intro: "Rest your thoughts on floating leaves and let them drift away on a calm river.",
+          body:
+`Hi.
+This is a quiet moment just for you. There’s nowhere you need to be right now, and nothing you need to solve.
+
+If it feels comfortable, let your body settle.
+You might notice your breathing, just as it is — no need to change it.
+Simply noticing can be enough.
+
+Now, imagine you’re sitting beside a calm, slow-moving river.
+The water is steady and smooth, flowing at its own gentle pace.
+The air feels fresh. Peaceful.
+
+Floating along the surface of the river are soft leaves.
+Each leaf drifts by easily, carried by the water.
+
+As thoughts come to you — plans, worries, memories, or questions — you don’t have to push them away.
+Instead, imagine placing each thought gently onto a leaf.
+One by one, you can set them down.
+
+There’s no need to judge the thoughts.
+Nothing to fix.
+Just notice them, place them on a leaf, and watch as the river carries them along.
+
+Some leaves may move slowly.
+Some may drift quickly out of view.
+However they go is okay.
+
+You don’t have to follow them downstream.
+You can stay right here, resting on the riverbank, watching the water flow.
+
+If new thoughts appear, that’s okay too.
+There’s always another leaf ready to carry them.
+
+Take your time here.
+Feel the steadiness of the river.
+The sense that things can move along without your effort.
+
+When you feel ready, you can gently bring your awareness back.
+Bringing with you the feeling of space you’ve created.
+
+Thank you for spending this time with yourself.
+You can return to this river whenever you need.`
+        },
+
+        sleep: {
+          title: "🌙 Drifting Into Rest",
+          intro: "A soothing sleep meditation to help your body soften, with no pressure to fall asleep.",
+          body:
+`Hi.
+You’ve made it to the end of the day, and that’s something to honor.
+This moment is for rest. Nothing else is required of you.
+
+If you’re lying down, let your body settle into the surface beneath you.
+You might notice how you’re supported — how you don’t have to hold yourself up right now.
+The day can begin to soften.
+
+Imagine that night is slowly wrapping around you, like a warm, familiar blanket.
+Not heavy.
+Just comforting.
+A gentle signal that it’s safe to let go.
+
+With each breath out, you can allow your body to sink a little deeper.
+Your shoulders don’t need to stay lifted.
+Your jaw doesn’t need to stay tight.
+Even your thoughts can loosen their grip.
+
+If your mind wanders, that’s okay.
+You don’t need to follow every thought to the end.
+You can let them fade into the background, like distant sounds growing quieter.
+
+Imagine a slow, steady rhythm around you — like the hush of the night itself.
+Everything is moving at a calm, unhurried pace.
+There’s nothing you’re missing.
+Nothing you need to remember right now.
+
+If sleep comes, you don’t need to think about it.
+You don’t have to try.
+You can simply rest here, letting your body take over.
+
+And if you’re still awake, that’s okay too.
+Rest is still rest.
+Your body knows what it needs.
+
+Take your time here.
+Breathing.
+Softening.
+Letting the night hold you.
+
+Thank you for taking this moment to slow down.
+You can let this moment hold you while you drift.`
+        }
+      };
+
+      return meds[id] || meds.sleep;
+    }
+
+    // --- Init ---
+    (function init(){
+      loadSettings();
+      syncMusicUI();
+
+      // If music is ON, ensure audio has a source and is ready
+      const t = getTrack(state.trackId);
+      bgm.src = t.src;
+      bgm.volume = 0;
+
+      // Autoplay policies: user must click once on many browsers.
+      // We'll keep music OFF by default; if they turned it ON before, we try.
+      if (state.musicOn){
+        bgm.play().then(() => fadeIn(300)).catch(() => {
+          // If blocked, reflect state but tell them to toggle
+          toast("Tap Music to start.");
+        });
+      }
+
+      // Start at home
+      go("home");
+    })();
+  </script>
+</body>
+</html>
