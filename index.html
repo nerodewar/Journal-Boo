@@ -381,7 +381,6 @@
       sleep: "devi-song",
     };
 
-    // Writing defaults
     const DEFAULT_TRACK_BY_MODE = {
       free: "devi-song",
       guided: "labour-of-love",
@@ -392,16 +391,14 @@
       done: null
     };
 
-    // --- Storage keys ---
     const LS_KEY = "journal_boo_entries_v1";
     const LS_SETTINGS = "journal_boo_settings_v1";
     const LS_EMAIL = "journal_boo_email_v1";
 
-    // --- App state ---
     const state = {
       route: "home",
 
-      // Music MUST start off automatically (per your request)
+      // Always start OFF on load
       musicOn: false,
       trackId: "devi-song",
 
@@ -414,12 +411,9 @@
       guidedMood: null,
 
       meditationId: null,
-
-      // remember last saved entry id (helpful for Done screen defaults)
       lastSavedEntryId: null,
     };
 
-    // --- UI elements ---
     const viewEl = document.getElementById("view");
     const toastEl = document.getElementById("toast");
     const bgm = document.getElementById("bgm");
@@ -440,7 +434,6 @@
       toast("Changed music.");
     });
 
-    // --- Helpers ---
     function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, (m) => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
@@ -459,10 +452,8 @@
       setTimeout(() => toastEl.classList.remove("show"), 1500);
     }
 
-    // --- Persistence ---
     function loadSettings(){
-      // Important: We DO NOT restore musicOn.
-      // Music starts OFF automatically every load (your request).
+      // Music starts OFF always; only restore track preference.
       try{
         const raw = localStorage.getItem(LS_SETTINGS);
         if (!raw) return;
@@ -472,10 +463,7 @@
     }
     function saveSettings(){
       try{
-        localStorage.setItem(LS_SETTINGS, JSON.stringify({
-          // track only; not musicOn
-          trackId: state.trackId,
-        }));
+        localStorage.setItem(LS_SETTINGS, JSON.stringify({ trackId: state.trackId }));
       }catch{}
     }
 
@@ -500,9 +488,7 @@
     }
 
     function loadEmail(){
-      try{
-        return localStorage.getItem(LS_EMAIL) || "";
-      }catch{ return ""; }
+      try{ return localStorage.getItem(LS_EMAIL) || ""; }catch{ return ""; }
     }
     function saveEmail(email){
       try{ localStorage.setItem(LS_EMAIL, email || ""); }catch{}
@@ -517,8 +503,21 @@
 
       if (!on){
         fadeOut(280);
-      } else {
-        fadeToTrack(state.trackId, 280);
+        return;
+      }
+
+      // ✅ When turning ON, always ensure playback begins immediately.
+      // This is a user gesture, so play() should be allowed.
+      ensurePlaying();
+      fadeToTrack(state.trackId, 280);
+    }
+
+    function ensurePlaying(){
+      if (!bgm.src) bgm.src = getTrack(state.trackId).src;
+      if (bgm.paused){
+        bgm.play().catch(() => {
+          toast("Tap Music again to start.");
+        });
       }
     }
 
@@ -542,7 +541,9 @@
       const t = getTrack(trackId);
       const targetSrc = t.src;
 
+      // ✅ If same track, still ensure playing then fade in.
       if (bgm.src && bgm.src.endsWith(targetSrc)){
+        ensurePlaying();
         fadeIn(ms);
         return;
       }
@@ -560,7 +561,7 @@
           clearInterval(fadeTimer);
           bgm.src = targetSrc;
           bgm.volume = 0;
-          bgm.play().catch(() => {});
+          ensurePlaying();
           fadeIn(ms);
         }
       }, stepMs);
@@ -568,9 +569,14 @@
 
     function fadeIn(ms=320){
       clearInterval(fadeTimer);
+
+      // ✅ If music is on, make sure playback is running.
+      if (state.musicOn) ensurePlaying();
+
       const steps = 12;
       const stepMs = Math.max(16, Math.floor(ms / steps));
       let i = 0;
+
       fadeTimer = setInterval(() => {
         i++;
         bgm.volume = Math.min(0.55, (i/steps) * 0.55);
@@ -624,7 +630,6 @@
     }
 
     // --- Email compose (mailto:) ---
-    // This opens the user's mail app with a pre-filled email. The user taps Send.
     function composeEmail(to, subject, body){
       const url =
         "mailto:" + encodeURIComponent(to) +
@@ -981,12 +986,9 @@ ${A3}`.trim()
         </div>
 
         <div class="divider"></div>
-
         <div class="row">
           <button class="btn ghost" id="back">Back</button>
         </div>
-
-        <p class="hint">Music is optional. You can turn it on anytime.</p>
       `);
 
       viewEl.querySelectorAll(".option").forEach(el => {
@@ -1042,7 +1044,7 @@ ${A3}`.trim()
       const email = loadEmail();
       const defaultId = state.lastSavedEntryId || (entries[0]?.id || "");
 
-      const options = entries.slice(0, 20).map(e => {
+      const options = entries.slice(0, 30).map(e => {
         const label = `${e.type} — ${prettyDate(e.createdAt)}${e.mood ? " • " + e.mood : ""}`;
         const selected = e.id === defaultId ? "selected" : "";
         return `<option value="${escapeHtml(e.id)}" ${selected}>${escapeHtml(label)}</option>`;
@@ -1069,9 +1071,7 @@ ${A3}`.trim()
             <button class="btn ghost" id="goJournal">My Journal</button>
           </div>
 
-          <p class="hint">
-            This opens your email app with the entry filled in. You can review it, then press Send.
-          </p>
+          <p class="hint">This opens your email app with the entry filled in. You can review it, then press Send.</p>
         </div>
       `);
 
@@ -1211,7 +1211,7 @@ ${e.content}
 
           <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="backList">Back</button>
-            <button class="btn" id="emailThis">Compose email</button>
+            <button class="btn" id="emailThis">Email this</button>
             <button class="btn danger" id="delThis">Delete</button>
             <button class="btn ghost" id="home">Home</button>
           </div>
@@ -1238,7 +1238,6 @@ ${e.content}
       }
     }
 
-    // --- Meditation content (written-only) ---
     function getMeditation(id){
       const meds = {
         light: {
@@ -1386,16 +1385,15 @@ You can let this moment hold you while you drift.`
       return meds[id] || meds.sleep;
     }
 
-    // --- Init ---
     (function init(){
       loadSettings();
       syncMusicUI();
 
-      // Force music OFF on load (even if audio was playing in another session)
+      // Start OFF always; do not auto-play
       state.musicOn = false;
       bgm.pause();
 
-      // Prepare audio src (but do not auto-play)
+      // Prepare audio src, but keep silent until user toggles on
       bgm.src = getTrack(state.trackId).src;
       bgm.volume = 0;
 
