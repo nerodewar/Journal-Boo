@@ -124,7 +124,6 @@
       font-size: 16px;
     }
 
-    /* Home options: calmer, less "buttony" */
     .option-grid{
       display:grid;
       grid-template-columns: 1fr;
@@ -188,23 +187,25 @@
       margin: 18px 0;
     }
 
-    textarea{
+    textarea, input[type="text"], input[type="email"], select{
       width: 100%;
       border: var(--line);
       background: rgba(0,0,0,.16);
       border-radius: 16px;
       color: var(--text);
-      padding: 14px 14px;
+      padding: 12px 14px;
       font-family: var(--font);
       font-size: 16px;
-      line-height: 1.65;
+      line-height: 1.6;
       outline: none;
       transition: box-shadow .15s ease, border-color .15s ease;
     }
-    textarea:focus{
+    textarea:focus, input:focus, select:focus{
       border-color: rgba(201,167,106,.45);
       box-shadow: 0 0 0 3px rgba(201,167,106,.10);
     }
+
+    select { font-size: 15px; }
 
     .kicker{
       font-size: 14px;
@@ -219,7 +220,6 @@
     }
     .small{ font-size: 12.5px; color: var(--muted2); }
 
-    /* Stepper */
     .stepbar{
       display:flex;
       align-items:center;
@@ -248,7 +248,7 @@
       white-space: nowrap;
     }
 
-    /* Fade transitions (requested) */
+    /* Fade transitions */
     .fade{
       opacity: 0;
       transform: translateY(6px);
@@ -277,7 +277,6 @@
       padding: 0 4px;
     }
 
-    /* Journal list */
     .list{ display:grid; gap: 10px; margin-top: 8px; }
     .entry{
       border: var(--line);
@@ -344,7 +343,7 @@
             Music: <span id="musicState">Off</span>
           </button>
           <button class="pill" id="btnMusicNext" title="Change music">
-            Track: <span id="musicTrackLabel">—</span>
+            Track: <span id="musicTrackLabel">Devi’s Song</span>
           </button>
         </div>
       </header>
@@ -354,7 +353,7 @@
       </main>
 
       <div class="footer-note">
-        Your writing is saved locally in this browser. (V1) If you clear site data, it will be removed.
+        Your writing is saved locally in this browser. (V1)
       </div>
     </div>
   </div>
@@ -365,24 +364,24 @@
   <script>
     /***********************
      * Journal Boo (V1)
-     * All-in-one: routing, music, storage, stepper, fades
+     * All-in-one: routing, music, storage, stepper, fades, email compose
      ***********************/
 
-    // --- Music assets ---
+    // --- Music assets (labels updated) ---
     const TRACKS = [
-      { id: "devi-song",       label: "Devi's Song",       src: "assets/music/devi-song.mp3" },
-      { id: "labour-of-love",  label: "Labour Of Love",  src: "assets/music/labour-of-love.mp3" },
-      { id: "crying-out",      label: "Crying Out",      src: "assets/music/crying-out.mp3" },
+      { id: "devi-song",       label: "Devi’s Song",      src: "assets/music/devi-song.mp3" },
+      { id: "labour-of-love",  label: "Labour Of Love",   src: "assets/music/labour-of-love.mp3" },
+      { id: "crying-out",      label: "Crying Out",       src: "assets/music/crying-out.mp3" },
     ];
 
-    // Meditation -> track mapping (your updated canonical pairing)
+    // Meditation -> track mapping
     const MEDITATION_TRACK_MAP = {
       light: "crying-out",
       river: "labour-of-love",
       sleep: "devi-song",
     };
 
-    // Writing defaults (keep simple)
+    // Writing defaults
     const DEFAULT_TRACK_BY_MODE = {
       free: "devi-song",
       guided: "labour-of-love",
@@ -390,43 +389,43 @@
       journal: null,
       medList: null,
       meditation: null,
+      done: null
     };
 
     // --- Storage keys ---
     const LS_KEY = "journal_boo_entries_v1";
     const LS_SETTINGS = "journal_boo_settings_v1";
+    const LS_EMAIL = "journal_boo_email_v1";
 
     // --- App state ---
     const state = {
       route: "home",
 
-      // music settings
-      musicOn: False,
+      // Music MUST start off automatically (per your request)
+      musicOn: false,
       trackId: "devi-song",
 
-      // free writing draft
       freeText: "",
 
-      // guided journaling stepper
-      guidedStep: 1, // 1..4 (4 = mood/finish)
+      guidedStep: 1,
       guidedA1: "",
       guidedA2: "",
       guidedA3: "",
       guidedMood: null,
 
-      // meditation
       meditationId: null,
+
+      // remember last saved entry id (helpful for Done screen defaults)
+      lastSavedEntryId: null,
     };
 
     // --- UI elements ---
     const viewEl = document.getElementById("view");
     const toastEl = document.getElementById("toast");
-
     const bgm = document.getElementById("bgm");
     const musicStateEl = document.getElementById("musicState");
     const musicTrackLabelEl = document.getElementById("musicTrackLabel");
 
-    // Buttons
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
 
@@ -462,18 +461,19 @@
 
     // --- Persistence ---
     function loadSettings(){
+      // Important: We DO NOT restore musicOn.
+      // Music starts OFF automatically every load (your request).
       try{
         const raw = localStorage.getItem(LS_SETTINGS);
         if (!raw) return;
         const s = JSON.parse(raw);
-        if (typeof s.musicOn === "boolean") state.musicOn = s.musicOn;
         if (typeof s.trackId === "string") state.trackId = s.trackId;
       }catch{}
     }
     function saveSettings(){
       try{
         localStorage.setItem(LS_SETTINGS, JSON.stringify({
-          musicOn: state.musicOn,
+          // track only; not musicOn
           trackId: state.trackId,
         }));
       }catch{}
@@ -496,6 +496,16 @@
       const entries = loadEntries();
       entries.unshift(entry);
       saveEntries(entries);
+      state.lastSavedEntryId = entry.id;
+    }
+
+    function loadEmail(){
+      try{
+        return localStorage.getItem(LS_EMAIL) || "";
+      }catch{ return ""; }
+    }
+    function saveEmail(email){
+      try{ localStorage.setItem(LS_EMAIL, email || ""); }catch{}
     }
 
     // --- Music engine (gentle fade) ---
@@ -503,7 +513,6 @@
 
     function setMusicOn(on){
       state.musicOn = on;
-      saveSettings();
       syncMusicUI();
 
       if (!on){
@@ -598,14 +607,9 @@
       if (state.musicOn) fadeToTrack(desired);
     }
 
-    // --- Fade rendering helpers (requested) ---
-    function fadeInView(){
-      // allow DOM paint then show
-      requestAnimationFrame(() => viewEl.classList.add("show"));
-    }
-    function fadeOutView(){
-      viewEl.classList.remove("show");
-    }
+    // --- Fade helpers ---
+    function fadeInView(){ requestAnimationFrame(() => viewEl.classList.add("show")); }
+    function fadeOutView(){ viewEl.classList.remove("show"); }
     function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
 
     async function setViewHtml(html, {fade=true}={}){
@@ -614,16 +618,28 @@
         await wait(140);
       }
       viewEl.innerHTML = html;
-      // Re-trigger fade
       viewEl.classList.remove("show");
       await wait(10);
       fadeInView();
     }
 
+    // --- Email compose (mailto:) ---
+    // This opens the user's mail app with a pre-filled email. The user taps Send.
+    function composeEmail(to, subject, body){
+      const url =
+        "mailto:" + encodeURIComponent(to) +
+        "?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(body);
+      window.location.href = url;
+    }
+
+    function getEntryById(id){
+      const entries = loadEntries();
+      return entries.find(e => e.id === id) || null;
+    }
+
     // --- Routing ---
     async function go(route, payload={}){
-      // fade out on guided journaling + meditation flows per your request,
-      // but honestly it feels good everywhere. We'll do it globally.
       state.route = route;
 
       if (route === "home") applyModeMusic("home");
@@ -631,6 +647,7 @@
       if (route === "guided") applyModeMusic("guided");
       if (route === "journal") applyModeMusic("journal");
       if (route === "medList") applyModeMusic("medList");
+      if (route === "done") applyModeMusic("done");
 
       if (route === "meditation" && payload.meditationId){
         state.meditationId = payload.meditationId;
@@ -654,6 +671,7 @@
         case "meditation": return renderMeditation(state.meditationId);
         case "completeMeditation": return renderCompleteMeditation();
         case "journal": return renderJournal();
+        case "done": return renderDone();
         default: return renderHome();
       }
     }
@@ -682,7 +700,7 @@
         </div>
 
         <div class="divider"></div>
-        <p class="small">Tip: You can turn music on and switch tracks anytime in the top bar.</p>
+        <p class="small">Music starts off by default. You can turn it on anytime in the top bar.</p>
       `);
 
       viewEl.querySelectorAll(".option").forEach(el => {
@@ -702,8 +720,6 @@
           <button class="btn primary" id="btnFinishFree">I’m done for now</button>
           <button class="btn ghost" id="btnBackHome">Back</button>
         </div>
-
-        <p class="hint">Music: toggle on/off and change tracks in the top bar.</p>
       `);
 
       const ta = document.getElementById("freeText");
@@ -712,13 +728,14 @@
       document.getElementById("btnFinishFree").addEventListener("click", async () => {
         const text = (state.freeText || "").trim();
         if (text.length){
-          addEntry({
+          const entry = {
             id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
             createdAt: nowIso(),
             type: "Free writing",
             mood: null,
             content: text,
-          });
+          };
+          addEntry(entry);
           toast("Saved.");
         } else {
           toast("Nothing to save — that’s okay.");
@@ -736,16 +753,15 @@
         <p class="subtitle">What would you like to do next?</p>
 
         <div class="row">
-          <button class="btn primary" id="btnGoMeditation">Gentle guided meditation</button>
+          <button class="btn primary" id="btnGoMeditation">Unwinding meditation</button>
           <button class="btn" id="btnDone">I’m done for now</button>
         </div>
       `);
 
       document.getElementById("btnGoMeditation").addEventListener("click", () => go("medList"));
-      document.getElementById("btnDone").addEventListener("click", () => go("home"));
+      document.getElementById("btnDone").addEventListener("click", () => go("done"));
     }
 
-    // Guided journaling stepper (requested)
     async function renderGuidedStepper(){
       const step = state.guidedStep;
 
@@ -787,8 +803,6 @@
             <button class="btn ghost" id="back">Back</button>
           </div>
         `);
-
-        // fade the question block in (extra, per-step)
         requestAnimationFrame(() => document.getElementById("qfade").classList.add("show"));
 
         const a1 = document.getElementById("a1");
@@ -812,10 +826,9 @@
           <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="next">Next</button>
             <button class="btn" id="prev">Previous</button>
-            <button class="btn ghost" id="backHome">Home</button>
+            <button class="btn ghost" id="home">Home</button>
           </div>
         `);
-
         requestAnimationFrame(() => document.getElementById("qfade").classList.add("show"));
 
         const a2 = document.getElementById("a2");
@@ -823,7 +836,7 @@
 
         document.getElementById("next").addEventListener("click", () => { state.guidedStep = 3; go("guided"); });
         document.getElementById("prev").addEventListener("click", () => { state.guidedStep = 1; go("guided"); });
-        document.getElementById("backHome").addEventListener("click", () => go("home"));
+        document.getElementById("home").addEventListener("click", () => go("home"));
         return;
       }
 
@@ -887,7 +900,7 @@
 
           const any = A1.length || A2.length || A3.length;
           if (any){
-            addEntry({
+            const entry = {
               id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
               createdAt: nowIso(),
               type: "Guided journaling",
@@ -901,13 +914,13 @@ ${A2}
 
 3) ${q3}
 ${A3}`.trim()
-            });
+            };
+            addEntry(entry);
             toast("Saved.");
           } else {
             toast("Nothing to save — that’s okay.");
           }
 
-          // reset guided
           state.guidedStep = 1;
           state.guidedA1 = "";
           state.guidedA2 = "";
@@ -920,7 +933,6 @@ ${A3}`.trim()
         return;
       }
 
-      // fallback
       state.guidedStep = 1;
       return go("guided");
     }
@@ -928,10 +940,10 @@ ${A3}`.trim()
     async function renderCompleteGuided(){
       await setViewHtml(`
         <h2 class="title">You did really meaningful work today.</h2>
-        <p class="subtitle">Would you like to wind down with a gentle guided meditation or do some free writing?</p>
+        <p class="subtitle">Would you like to wind down with an unwinding meditation or do some free writing?</p>
 
         <div class="row">
-          <button class="btn primary" id="toMed">Gentle guided meditation</button>
+          <button class="btn primary" id="toMed">Unwinding meditation</button>
           <button class="btn" id="toFree">Free writing</button>
           <button class="btn ghost" id="done">I’m done for now</button>
         </div>
@@ -939,7 +951,7 @@ ${A3}`.trim()
 
       document.getElementById("toMed").addEventListener("click", () => go("medList"));
       document.getElementById("toFree").addEventListener("click", () => go("free"));
-      document.getElementById("done").addEventListener("click", () => go("home"));
+      document.getElementById("done").addEventListener("click", () => go("done"));
     }
 
     async function renderMeditationList(){
@@ -974,7 +986,7 @@ ${A3}`.trim()
           <button class="btn ghost" id="back">Back</button>
         </div>
 
-        <p class="hint">You can stop or switch at any time.</p>
+        <p class="hint">Music is optional. You can turn it on anytime.</p>
       `);
 
       viewEl.querySelectorAll(".option").forEach(el => {
@@ -999,16 +1011,13 @@ ${A3}`.trim()
           <button class="btn" id="choose">Choose another</button>
           <button class="btn ghost" id="quit">I’m done for now</button>
         </div>
-
-        <p class="hint">Music is set automatically for this meditation, but you can change it anytime.</p>
       `);
 
-      // additional fade-in for the meditation text block
       requestAnimationFrame(() => document.getElementById("medfade").classList.add("show"));
 
       document.getElementById("finished").addEventListener("click", () => go("completeMeditation"));
       document.getElementById("choose").addEventListener("click", () => go("medList"));
-      document.getElementById("quit").addEventListener("click", () => go("home"));
+      document.getElementById("quit").addEventListener("click", () => go("done"));
     }
 
     async function renderCompleteMeditation(){
@@ -1025,7 +1034,94 @@ ${A3}`.trim()
 
       document.getElementById("toFree").addEventListener("click", () => go("free"));
       document.getElementById("toGuided").addEventListener("click", () => go("guided"));
-      document.getElementById("done").addEventListener("click", () => go("home"));
+      document.getElementById("done").addEventListener("click", () => go("done"));
+    }
+
+    async function renderDone(){
+      const entries = loadEntries();
+      const email = loadEmail();
+      const defaultId = state.lastSavedEntryId || (entries[0]?.id || "");
+
+      const options = entries.slice(0, 20).map(e => {
+        const label = `${e.type} — ${prettyDate(e.createdAt)}${e.mood ? " • " + e.mood : ""}`;
+        const selected = e.id === defaultId ? "selected" : "";
+        return `<option value="${escapeHtml(e.id)}" ${selected}>${escapeHtml(label)}</option>`;
+      }).join("");
+
+      await setViewHtml(`
+        <h2 class="title">You can rest now, if you want.</h2>
+        <p class="subtitle">If you’d like, you can email yourself a saved entry.</p>
+
+        <div class="fade" id="donefade">
+          <p class="kicker">Your email address</p>
+          <input type="email" id="email" placeholder="name@example.com" value="${escapeHtml(email)}" />
+
+          <div style="height:12px;"></div>
+
+          <p class="kicker">Choose an entry</p>
+          <select id="entrySelect">
+            ${options || `<option value="">No saved entries yet</option>`}
+          </select>
+
+          <div class="row" style="margin-top:14px;">
+            <button class="btn primary" id="sendEmail">Compose email</button>
+            <button class="btn" id="goHome">Home</button>
+            <button class="btn ghost" id="goJournal">My Journal</button>
+          </div>
+
+          <p class="hint">
+            This opens your email app with the entry filled in. You can review it, then press Send.
+          </p>
+        </div>
+      `);
+
+      requestAnimationFrame(() => document.getElementById("donefade").classList.add("show"));
+
+      document.getElementById("goHome").addEventListener("click", () => go("home"));
+      document.getElementById("goJournal").addEventListener("click", () => go("journal"));
+
+      document.getElementById("sendEmail").addEventListener("click", () => {
+        const emailEl = document.getElementById("email");
+        const entryId = document.getElementById("entrySelect").value;
+
+        const to = (emailEl.value || "").trim();
+        if (!to){
+          toast("Add an email address first.");
+          emailEl.focus();
+          return;
+        }
+        saveEmail(to);
+
+        if (!entryId){
+          toast("No entry selected.");
+          return;
+        }
+
+        const e = getEntryById(entryId);
+        if (!e){
+          toast("Couldn’t find that entry.");
+          return;
+        }
+
+        const subject = `Journal Boo — ${e.type} (${new Date(e.createdAt).toLocaleDateString()})`;
+        const body =
+`Hi,
+
+Here’s a saved entry from Journal Boo.
+
+${e.type}${e.mood ? " • " + e.mood : ""}
+${prettyDate(e.createdAt)}
+
+--------------------
+
+${e.content}
+
+--------------------
+
+(From Journal Boo)`;
+
+        composeEmail(to, subject, body);
+      });
     }
 
     async function renderJournal(){
@@ -1039,16 +1135,17 @@ ${A3}`.trim()
         <div class="row">
           <button class="btn primary" id="newFree">New free writing</button>
           <button class="btn" id="newGuided">New guided journaling</button>
+          <button class="btn" id="toDone">I’m done for now</button>
           <button class="btn danger" id="clearAll">Clear all (local)</button>
         </div>
 
         <div class="divider"></div>
-
         <div class="list" id="entryList"></div>
       `);
 
       document.getElementById("newFree").addEventListener("click", () => go("free"));
       document.getElementById("newGuided").addEventListener("click", () => { state.guidedStep = 1; go("guided"); });
+      document.getElementById("toDone").addEventListener("click", () => go("done"));
 
       document.getElementById("clearAll").addEventListener("click", () => {
         const ok = confirm("Clear all saved entries from this browser?");
@@ -1110,20 +1207,25 @@ ${A3}`.trim()
           <h2 class="title">${escapeHtml(e.type)}</h2>
           <p class="subtitle">${prettyDate(e.createdAt)}${e.mood ? " • " + escapeHtml(e.mood) : ""}</p>
 
-          <div class="med-box" style="border-radius:18px;">${escapeHtml(e.content)}</div>
+          <div class="med-box">${escapeHtml(e.content)}</div>
 
           <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="backList">Back</button>
+            <button class="btn" id="emailThis">Compose email</button>
             <button class="btn danger" id="delThis">Delete</button>
             <button class="btn ghost" id="home">Home</button>
           </div>
         `);
-
         fadeInView();
 
         document.getElementById("backList").addEventListener("click", () => go("journal"));
         document.getElementById("home").addEventListener("click", () => go("home"));
         document.getElementById("delThis").addEventListener("click", () => deleteEntry(id));
+
+        document.getElementById("emailThis").addEventListener("click", () => {
+          state.lastSavedEntryId = e.id;
+          go("done");
+        });
       }
 
       function deleteEntry(id){
@@ -1289,18 +1391,14 @@ You can let this moment hold you while you drift.`
       loadSettings();
       syncMusicUI();
 
-      // Prepare audio source
+      // Force music OFF on load (even if audio was playing in another session)
+      state.musicOn = false;
+      bgm.pause();
+
+      // Prepare audio src (but do not auto-play)
       bgm.src = getTrack(state.trackId).src;
       bgm.volume = 0;
 
-      // Try resume music if previously enabled (may be blocked)
-      if (state.musicOn){
-        bgm.play().then(() => fadeIn(260)).catch(() => {
-          toast("Tap Music to start.");
-        });
-      }
-
-      // Start view
       viewEl.classList.remove("show");
       go("home").then(() => {});
     })();
