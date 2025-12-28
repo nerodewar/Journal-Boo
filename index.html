@@ -685,7 +685,7 @@
     async function renderHome(){
       await setViewHtml(`
         <h2 class="title">Hi, I’m Journal Boo.</h2>
-        <p class="subtitle">I’m your personal journaling companion. What would you like to do today? 🙂</p>
+        <p class="subtitle">I’m your personal journal companion. What would you like to do today? 🙂</p>
 
         <div class="option-grid">
           <div class="option" data-route="free">
@@ -694,7 +694,7 @@
           </div>
 
           <div class="option" data-route="guided">
-            <h3>Guided journaling</h3>
+            <h3>Guided journal</h3>
             <p>Gentle prompts, one step at a time.</p>
           </div>
 
@@ -771,7 +771,7 @@
       const step = state.guidedStep;
 
       const intro = `
-        <p class="kicker">Guided journaling</p>
+        <p class="kicker">Guided journal</p>
         <h2 class="title">Welcome to your guided journal.</h2>
         <p class="subtitle">
           This is a space where we can explore what’s important to you, notice how you’re feeling, and gently reflect together.
@@ -908,7 +908,7 @@
             const entry = {
               id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
               createdAt: nowIso(),
-              type: "Guided journaling",
+              type: "Guided journal",
               mood: state.guidedMood,
               content:
 `1) ${q1}
@@ -1029,7 +1029,7 @@ ${A3}`.trim()
 
         <div class="row">
           <button class="btn primary" id="toFree">Free writing</button>
-          <button class="btn" id="toGuided">Guided journaling</button>
+          <button class="btn" id="toGuided">Guided journal</button>
           <button class="btn ghost" id="done">I’m done for now</button>
         </div>
       `);
@@ -1134,7 +1134,7 @@ ${e.content}
 
         <div class="row">
           <button class="btn primary" id="newFree">New free writing</button>
-          <button class="btn" id="newGuided">New guided journaling</button>
+          <button class="btn" id="newGuided">New guided journal</button>
           <button class="btn" id="toDone">I’m done for now</button>
           <button class="btn danger" id="clearAll">Clear all (local)</button>
         </div>
