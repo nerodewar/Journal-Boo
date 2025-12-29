@@ -364,6 +364,12 @@
       padding: 0 4px;
     }
 
+    .footer-note a{
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     .list{ display:grid; gap: 10px; margin-top: 8px; }
     .entry{
       border: var(--line);
@@ -464,6 +470,7 @@
 
       <div class="footer-note">
         Your writing is saved locally in this browser. (V1)<br />
+        <a href="#" id="privacyLink">Privacy &amp; data use</a><br />
         © James Ritchie 2025
       </div>
     </div>
@@ -579,6 +586,12 @@
 
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
+
+    // ✅ Footer: privacy page link
+    document.getElementById("privacyLink")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      go("privacy");
+    });
 
     document.getElementById("btnMusicToggle").addEventListener("click", () => {
       setMusicOn(!state.musicOn);
@@ -916,8 +929,43 @@
         case "journal": return renderJournal();
         case "done": return renderDone();
         case "blog": return renderBlog();
+        case "privacy": return renderPrivacy();   // ✅ NEW
         default: return renderHome();
       }
+    }
+
+    async function renderPrivacy(){
+      await setViewHtml(`
+        <p class="kicker">Privacy & data use</p>
+        <h2 class="title">Your privacy matters here.</h2>
+
+        <div class="med-box">
+Journal Boo does not collect, store, or transmit any personal or sensitive information about you.
+
+All journal entries you create are saved only in your own browser, using local storage. This means:
+
+• Your writing never leaves your device
+• Journal Boo cannot see, read, or access your entries
+• Nothing is uploaded to a server
+• Nothing is shared with third parties
+
+If you clear your browser data, use private browsing, or switch devices, your saved journal entries will no longer be available — because they were never stored anywhere else.
+
+The optional background music and written meditations are delivered as static files only.
+
+If you choose to email an entry to yourself, Journal Boo simply opens your email app with the text filled in. The message is sent only by you, through your own email provider.
+
+Journal Boo is designed to be a quiet, private space for reflection — not a platform that watches or tracks you.
+        </div>
+
+        <div class="row" style="margin-top:16px;">
+          <button class="btn primary" id="backHome">Home</button>
+          <button class="btn" id="backJournal">My Journal</button>
+        </div>
+      `);
+
+      document.getElementById("backHome").addEventListener("click", () => go("home"));
+      document.getElementById("backJournal").addEventListener("click", () => go("journal"));
     }
 
     async function renderHome(){
