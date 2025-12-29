@@ -493,6 +493,42 @@
       try{ localStorage.setItem(LS_EMAIL, email || ""); }catch{}
     }
 
+    // --- Developer blog helpers ---
+    async function fetchBlogJson(){
+      const candidates = [
+        "assets/blog/munchkinboo",
+        "assets/blog/munchkinboo.json",
+      ];
+
+      let lastErr = null;
+
+      for (const url of candidates){
+        try{
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return { url, data };
+        }catch(err){
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error("Unable to load blog JSON.");
+    }
+
+    function normalizeBlogPosts(data){
+      const posts = Array.isArray(data) ? data
+        : (data && Array.isArray(data.posts)) ? data.posts
+        : (data && (data.title || data.body || data.content || data.text)) ? [data]
+        : [];
+
+      return posts.map((p, idx) => ({
+        id: String(p.id ?? idx),
+        title: String(p.title ?? "Untitled"),
+        date: p.date ? String(p.date) : (p.createdAt ? String(p.createdAt) : ""),
+        body: String(p.body ?? p.content ?? p.text ?? ""),
+      }));
+    }
+
     // --- Music engine (gentle fade) ---
     let fadeTimer = null;
 
@@ -658,6 +694,7 @@
         case "completeMeditation": return renderCompleteMeditation();
         case "journal": return renderJournal();
         case "done": return renderDone();
+        case "blog": return renderBlog();
         default: return renderHome();
       }
     }
@@ -665,7 +702,7 @@
     async function renderHome(){
       await setViewHtml(`
         <h2 class="title">Hi, I’m Journal Boo.</h2>
-        <p class="subtitle">I’m your personal journal companion. What would you like to do today?</p>
+        <p class="subtitle">I’m your personal journal companion. What would you like to do today? 🙂</p>
 
         <div class="option-grid">
           <div class="option" data-route="free">
@@ -685,12 +722,93 @@
         </div>
 
         <div class="divider"></div>
-        <p class="small">Music starts off by default. You can turn it on anytime in the top bar.</p>
+
+        <div class="list">
+          <div class="entry" id="blogLink" style="cursor:pointer;">
+            <div class="meta">
+              <span>Munchkin Boo’s rivals journal… Keep out!</span>
+              <span>Developer blog</span>
+            </div>
+            <p class="preview">Click to read updates and notes about Journal Boo.</p>
+          </div>
+        </div>
       `);
 
       viewEl.querySelectorAll(".option").forEach(el => {
         el.addEventListener("click", () => go(el.dataset.route));
       });
+
+      const blogLink = document.getElementById("blogLink");
+      if (blogLink) blogLink.addEventListener("click", () => go("blog"));
+    }
+
+    async function renderBlog(){
+      await setViewHtml(`
+        <p class="kicker">Developer blog</p>
+        <h2 class="title">Munchkin Boo’s rivals journal… Keep out!</h2>
+        <p class="subtitle">Notes and updates about Journal Boo.</p>
+
+        <div class="list" id="blogList">
+          <div class="entry">
+            <div class="meta"><span>Loading…</span><span></span></div>
+            <p class="preview">Fetching posts…</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="row">
+          <button class="btn primary" id="backHome">Home</button>
+          <button class="btn" id="backJournal">My Journal</button>
+        </div>
+      `);
+
+      document.getElementById("backHome").addEventListener("click", () => go("home"));
+      document.getElementById("backJournal").addEventListener("click", () => go("journal"));
+
+      const listEl = document.getElementById("blogList");
+
+      try{
+        const { data } = await fetchBlogJson();
+        const posts = normalizeBlogPosts(data);
+
+        if (!posts.length){
+          listEl.innerHTML = `
+            <div class="entry">
+              <div class="meta"><span>No posts found</span><span></span></div>
+              <p class="preview">Your JSON loaded, but it didn’t contain any posts.</p>
+            </div>
+          `;
+          return;
+        }
+
+        listEl.innerHTML = "";
+        posts.forEach(p => {
+          const div = document.createElement("div");
+          div.className = "entry";
+
+          let right = "";
+          if (p.date){
+            const asDate = new Date(p.date);
+            right = isNaN(asDate.getTime()) ? p.date : prettyDate(asDate.toISOString());
+          }
+
+          div.innerHTML = `
+            <div class="meta">
+              <span>${escapeHtml(p.title)}</span>
+              <span>${escapeHtml(right)}</span>
+            </div>
+            <p class="preview">${escapeHtml(p.body || "")}</p>
+          `;
+          listEl.appendChild(div);
+        });
+      }catch(err){
+        listEl.innerHTML = `
+          <div class="entry">
+            <div class="meta"><span>Couldn’t load blog</span><span></span></div>
+            <p class="preview">${escapeHtml(err?.message || "Unknown error")}</p>
+          </div>
+        `;
+      }
     }
 
     async function renderFree(){
@@ -1185,7 +1303,6 @@ ${e.content}
         return s.slice(0, max).trim() + "…";
       }
 
-      // ✅ FIX: make openEntry async and await setViewHtml BEFORE binding button handlers.
       async function openEntry(id){
         const entries = loadEntries();
         const e = entries.find(x => x.id === id);
@@ -1206,7 +1323,6 @@ ${e.content}
           </div>
         `);
 
-        // Now the elements exist, so handlers attach correctly.
         document.getElementById("backList").addEventListener("click", () => go("journal"));
         document.getElementById("home").addEventListener("click", () => go("home"));
 
