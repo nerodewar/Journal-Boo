@@ -330,32 +330,15 @@
   <script>
     /***********************
      * Journal Boo (V1)
-     * All-in-one: routing, music, storage, dynamic guided question sets, fades, email compose
+     * All-in-one: routing, music (no auto-switch on page change), storage, dynamic guided question sets, fades, email compose
      ***********************/
 
-    // --- Music assets (labels updated) ---
+    // --- Music assets ---
     const TRACKS = [
       { id: "devi-song",       label: "Devi’s Song",      src: "assets/music/devi-song.mp3" },
       { id: "labour-of-love",  label: "Labour Of Love",   src: "assets/music/labour-of-love.mp3" },
       { id: "crying-out",      label: "Crying Out",       src: "assets/music/crying-out.mp3" },
     ];
-
-    // Meditation -> track mapping
-    const MEDITATION_TRACK_MAP = {
-      light: "crying-out",
-      river: "labour-of-love",
-      sleep: "devi-song",
-    };
-
-    const DEFAULT_TRACK_BY_MODE = {
-      free: "devi-song",
-      guided: "labour-of-love",
-      home: null,
-      journal: null,
-      medList: null,
-      meditation: null,
-      done: null
-    };
 
     // --- Guided Journal: dynamic question sets ---
     const GUIDED_SETS = [
@@ -406,7 +389,6 @@
       }
     ];
 
-    // Random selection (swap to daily rotation if desired)
     function pickGuidedSet(){
       return GUIDED_SETS[Math.floor(Math.random() * GUIDED_SETS.length)];
     }
@@ -418,7 +400,7 @@
     const state = {
       route: "home",
 
-      // Always start OFF on load
+      // Always start OFF on load; keep chosen track while browsing
       musicOn: false,
       trackId: "devi-song",
 
@@ -476,7 +458,7 @@
     }
 
     function loadSettings(){
-      // Music starts OFF always; only restore track preference.
+      // Music starts OFF always; restore only track preference.
       try{
         const raw = localStorage.getItem(LS_SETTINGS);
         if (!raw) return;
@@ -627,13 +609,6 @@
       musicTrackLabelEl.textContent = getTrack(state.trackId).label;
     }
 
-    function applyModeMusic(mode){
-      const desired = DEFAULT_TRACK_BY_MODE[mode] ?? null;
-      if (!desired) return;
-      setTrack(desired);
-      if (state.musicOn) fadeToTrack(desired);
-    }
-
     // --- Fade helpers ---
     function fadeInView(){ requestAnimationFrame(() => viewEl.classList.add("show")); }
     function fadeOutView(){ viewEl.classList.remove("show"); }
@@ -668,12 +643,8 @@
     async function go(route, payload={}){
       state.route = route;
 
-      if (route === "home") applyModeMusic("home");
-      if (route === "free") applyModeMusic("free");
-      if (route === "guided") applyModeMusic("guided");
-      if (route === "journal") applyModeMusic("journal");
-      if (route === "medList") applyModeMusic("medList");
-      if (route === "done") applyModeMusic("done");
+      // IMPORTANT: No auto-switching tracks on page changes.
+      // The chosen song continues across the whole app.
 
       // Choose a dynamic guided set when entering guided journal fresh
       if (route === "guided" && !state.guidedQs.length){
@@ -685,9 +656,6 @@
 
       if (route === "meditation" && payload.meditationId){
         state.meditationId = payload.meditationId;
-        const mappedTrack = MEDITATION_TRACK_MAP[payload.meditationId] || state.trackId;
-        setTrack(mappedTrack);
-        if (state.musicOn) fadeToTrack(mappedTrack);
       }
 
       await render();
@@ -714,7 +682,7 @@
     async function renderHome(){
       await setViewHtml(`
         <h2 class="title">Hi, I’m Journal Boo.</h2>
-        <p class="subtitle">I’m your personal journal companion. What would you like to do today?</p>
+        <p class="subtitle">I’m your personal journal companion. What would you like to do today? 🙂</p>
 
         <div class="option-grid">
           <div class="option" data-route="free">
@@ -796,7 +764,6 @@
       document.getElementById("btnDone").addEventListener("click", () => go("done"));
     }
 
-    // Guided journal stepper + dynamic questions
     async function renderGuidedStepper(){
       const step = state.guidedStep;
 
@@ -963,7 +930,6 @@ ${A3}`.trim()
             toast("Nothing to save — that’s okay.");
           }
 
-          // Reset guided flow + clear set so the next visit picks a new set
           state.guidedStep = 1;
           state.guidedSetId = null;
           state.guidedSetTitle = "";
@@ -1076,7 +1042,7 @@ ${A3}`.trim()
       `);
 
       document.getElementById("toFree").addEventListener("click", () => go("free"));
-      document.getElementById("toGuided").addEventListener("click", () => go("guided"));
+      document.getElementById("toGuided").addEventListener("click", () => { state.guidedQs = []; state.guidedStep = 1; go("guided"); });
       document.getElementById("done").addEventListener("click", () => go("done"));
     }
 
@@ -1279,7 +1245,6 @@ ${e.content}
       }
     }
 
-    // --- Meditation content (written-only) ---
     function getMeditation(id){
       const meds = {
         light: {
@@ -1435,7 +1400,7 @@ You can let this moment hold you while you drift.`
       state.musicOn = false;
       bgm.pause();
 
-      // Prepare audio src, but keep silent until user toggles on
+      // Prepare audio src (current chosen track), but keep silent until user toggles on
       bgm.src = getTrack(state.trackId).src;
       bgm.volume = 0;
 
