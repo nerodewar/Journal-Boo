@@ -6,6 +6,7 @@
   <title>Journal Boo</title>
   <style>
     :root{
+      /* Default theme (charcoal) */
       --bg: #0f0f12;
       --text: #f1efe9;
       --muted: #b9b6ad;
@@ -17,6 +18,48 @@
       --shadow: 0 14px 38px rgba(0,0,0,.35);
       --font: ui-serif, Georgia, "Times New Roman", Times, serif;
     }
+
+    /* ✅ Theme palettes */
+    body[data-theme="charcoal"]{
+      --bg: #0f0f12;
+      --text: #f1efe9;
+      --muted: #b9b6ad;
+      --muted2:#8f8b81;
+      --accent:#c9a76a;
+      --line: 1px solid rgba(255,255,255,.07);
+      --shadow: 0 14px 38px rgba(0,0,0,.35);
+    }
+
+    body[data-theme="light"]{
+      --bg: #f7f5ef;
+      --text: #171615;
+      --muted: #4b4a46;
+      --muted2:#6a6862;
+      --accent:#8a6a2b;
+      --line: 1px solid rgba(0,0,0,.10);
+      --shadow: 0 14px 38px rgba(0,0,0,.10);
+    }
+
+    body[data-theme="racing-green"]{
+      --bg: #07100c;
+      --text: #f1efe9;
+      --muted: #b7c4bd;
+      --muted2:#92a39a;
+      --accent:#1fa46d;
+      --line: 1px solid rgba(255,255,255,.08);
+      --shadow: 0 14px 38px rgba(0,0,0,.40);
+    }
+
+    body[data-theme="rose-pink"]{
+      --bg: #140b10;
+      --text: #f6eef1;
+      --muted: #d3b9c2;
+      --muted2:#b895a1;
+      --accent:#e07aa0;
+      --line: 1px solid rgba(255,255,255,.09);
+      --shadow: 0 14px 38px rgba(0,0,0,.42);
+    }
+
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body{
@@ -79,6 +122,60 @@
       transition: background .12s ease, transform .12s ease;
     }
     .pill:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+
+    /* ✅ Pill-style dropdown */
+    .pill-select{
+      border: var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      transition: background .12s ease, transform .12s ease;
+    }
+    .pill-select:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .pill-select label{
+      color: var(--text);
+      font-size: 13px;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .pill-select select{
+      width: auto;
+      padding: 0;
+      margin: 0;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+    /* Simple chevron */
+    .pill-select .chev{
+      width: 0; height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid rgba(255,255,255,.55);
+      margin-left: 2px;
+      transform: translateY(1px);
+    }
+    body[data-theme="light"] .pill-select .chev{
+      border-top-color: rgba(0,0,0,.45);
+    }
+    /* Dropdown menu colors */
+    .pill-select select option{
+      background: var(--bg);
+      color: var(--text);
+    }
 
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
@@ -302,6 +399,7 @@
       .title{ font-size: 23px; }
       .subtitle{ font-size: 15px; }
       .pill{ padding: 9px 10px; }
+      .pill-select{ padding: 9px 10px; }
       .card-inner{ padding: 18px; }
     }
   </style>
@@ -320,6 +418,18 @@
         <div class="top-actions">
           <button class="pill" id="btnHome" title="Home">Home</button>
           <button class="pill" id="btnJournal" title="My Journal">My Journal</button>
+
+          <!-- ✅ Theme dropdown (pill-style) -->
+          <div class="pill-select" title="Theme">
+            <label for="themeSelect">Theme:</label>
+            <select id="themeSelect" aria-label="Theme">
+              <option value="charcoal">Charcoal Grey</option>
+              <option value="light">Light</option>
+              <option value="racing-green">Racing Green</option>
+              <option value="rose-pink">Rose Pink</option>
+            </select>
+            <span class="chev" aria-hidden="true"></span>
+          </div>
 
           <button class="pill" id="btnMusicToggle" title="Toggle music">
             Music: <span id="musicState">Off</span>
@@ -414,10 +524,16 @@
     const LS_SETTINGS = "journal_boo_settings_v1";
     const LS_EMAIL = "journal_boo_email_v1";
 
+    /* ✅ Theme persistence */
+    const LS_THEME = "journal_boo_theme_v1";
+
     const state = {
       route: "home",
       musicOn: false,
       trackId: "devi-song",
+
+      /* ✅ Theme state */
+      theme: "charcoal",
 
       freeText: "",
 
@@ -441,6 +557,9 @@
     const musicStateEl = document.getElementById("musicState");
     const musicTrackLabelEl = document.getElementById("musicTrackLabel");
 
+    /* ✅ Theme dropdown element */
+    const themeSelectEl = document.getElementById("themeSelect");
+
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
 
@@ -454,6 +573,30 @@
       if (state.musicOn) fadeToTrack(state.trackId);
       toast("Changed music.");
     });
+
+    /* ✅ Theme: load/apply/save */
+    function loadTheme(){
+      try{
+        const t = localStorage.getItem(LS_THEME);
+        if (t) state.theme = t;
+      }catch{}
+    }
+    function saveTheme(){
+      try{ localStorage.setItem(LS_THEME, state.theme); }catch{}
+    }
+    function applyTheme(){
+      document.body.setAttribute("data-theme", state.theme || "charcoal");
+      if (themeSelectEl) themeSelectEl.value = state.theme || "charcoal";
+    }
+
+    if (themeSelectEl){
+      themeSelectEl.addEventListener("change", () => {
+        state.theme = themeSelectEl.value;
+        saveTheme();
+        applyTheme();
+        toast("Theme changed.");
+      });
+    }
 
     function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, (m) => ({
@@ -1196,6 +1339,11 @@ ${A3}`.trim()
         btn.addEventListener("click", () => {
           toggleMeditationAudio("assets/meditation/following-the-light.mp3", btn);
         });
+
+        // Keep button label correct if audio ends
+        medPlayer.onended = () => { btn.textContent = "Play"; };
+      } else {
+        medPlayer.onended = null;
       }
 
       document.getElementById("finished").addEventListener("click", () => go("completeMeditation"));
@@ -1566,6 +1714,8 @@ You can let this moment hold you while you drift.`
 
     (function init(){
       loadSettings();
+      loadTheme();
+      applyTheme();
       syncMusicUI();
 
       state.musicOn = false;
