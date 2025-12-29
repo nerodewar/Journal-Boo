@@ -233,6 +233,23 @@
       font-size: 16px;
     }
 
+    /* ✅ Meditation audio player */
+    .audio-player{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .audio-player .label{
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .audio-player .btn{
+      min-width: 140px;
+      text-align: center;
+    }
+
     .footer-note{
       color: var(--muted2);
       font-size: 12.5px;
@@ -326,6 +343,8 @@
 
   <div class="toast" id="toast"></div>
   <audio id="bgm" preload="auto" loop></audio>
+  <!-- ✅ Meditation audio element -->
+  <audio id="medPlayer" preload="none"></audio>
 
   <script>
     /***********************
@@ -418,6 +437,7 @@
     const viewEl = document.getElementById("view");
     const toastEl = document.getElementById("toast");
     const bgm = document.getElementById("bgm");
+    const medPlayer = document.getElementById("medPlayer");
     const musicStateEl = document.getElementById("musicState");
     const musicTrackLabelEl = document.getElementById("musicTrackLabel");
 
@@ -533,7 +553,44 @@
     // --- Music engine (gentle fade) ---
     let fadeTimer = null;
 
+    // ✅ Meditation audio control
+    function stopMeditationAudio(){
+      medPlayer.pause();
+      medPlayer.currentTime = 0;
+    }
+
+    // ✅ REQUIRED: hard-stop background music when meditation starts
+    function stopBackgroundMusic(){
+      clearInterval(fadeTimer);
+      bgm.pause();
+      bgm.currentTime = 0;
+      bgm.volume = 0;
+    }
+
+    function toggleMeditationAudio(src, btn){
+      if (!medPlayer.src || !medPlayer.src.endsWith(src)){
+        medPlayer.src = src;
+      }
+
+      if (medPlayer.paused){
+        stopBackgroundMusic();
+        state.musicOn = false;
+        syncMusicUI();
+
+        medPlayer.play().catch(() => toast("Tap Play again to start."));
+        btn.textContent = "Stop";
+      } else {
+        stopMeditationAudio();
+        btn.textContent = "Play";
+      }
+    }
+
     function setMusicOn(on){
+      // If meditation audio is playing, stop it before turning music on.
+      if (!medPlayer.paused){
+        stopMeditationAudio();
+      }
+
       state.musicOn = on;
       syncMusicUI();
 
@@ -666,6 +723,9 @@
 
     // --- Routing ---
     async function go(route, payload={}){
+      // ✅ Stop meditation audio whenever navigating
+      stopMeditationAudio();
+
       state.route = route;
 
       if (route === "guided" && !state.guidedQs.length){
@@ -1112,6 +1172,13 @@ ${A3}`.trim()
         <p class="subtitle">${escapeHtml(med.intro)}</p>
 
         <div class="fade" id="medfade">
+          ${medId === "light" ? `
+            <div class="audio-player">
+              <div class="label">Following The Light</div>
+              <button class="btn" id="toggleMedAudio">Play</button>
+            </div>
+          ` : ""}
+
           <div class="med-box">${escapeHtml(med.body)}</div>
         </div>
 
@@ -1123,6 +1190,13 @@ ${A3}`.trim()
       `);
 
       requestAnimationFrame(() => document.getElementById("medfade").classList.add("show"));
+
+      if (medId === "light"){
+        const btn = document.getElementById("toggleMedAudio");
+        btn.addEventListener("click", () => {
+          toggleMeditationAudio("assets/meditation/following-the-light.mp3", btn);
+        });
+      }
 
       document.getElementById("finished").addEventListener("click", () => go("completeMeditation"));
       document.getElementById("choose").addEventListener("click", () => go("medList"));
