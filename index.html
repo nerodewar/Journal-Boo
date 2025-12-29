@@ -214,7 +214,6 @@
       white-space: nowrap;
     }
 
-    /* Fade transitions */
     .fade{
       opacity: 0;
       transform: translateY(6px);
@@ -330,17 +329,15 @@
   <script>
     /***********************
      * Journal Boo (V1)
-     * All-in-one: routing, music (no auto-switch on page change), storage, dynamic guided question sets, fades, email compose
+     * Fix included: buttons on opened saved entry page now work (await setViewHtml before binding handlers)
      ***********************/
 
-    // --- Music assets ---
     const TRACKS = [
       { id: "devi-song",       label: "Devi’s Song",      src: "assets/music/devi-song.mp3" },
       { id: "labour-of-love",  label: "Labour Of Love",   src: "assets/music/labour-of-love.mp3" },
       { id: "crying-out",      label: "Crying Out",       src: "assets/music/crying-out.mp3" },
     ];
 
-    // --- Guided Journal: dynamic question sets ---
     const GUIDED_SETS = [
       {
         id: "values",
@@ -399,8 +396,6 @@
 
     const state = {
       route: "home",
-
-      // Always start OFF on load; keep chosen track while browsing
       musicOn: false,
       trackId: "devi-song",
 
@@ -458,7 +453,6 @@
     }
 
     function loadSettings(){
-      // Music starts OFF always; restore only track preference.
       try{
         const raw = localStorage.getItem(LS_SETTINGS);
         if (!raw) return;
@@ -510,8 +504,6 @@
         fadeOut(280);
         return;
       }
-
-      // Ensure playback begins immediately on toggle
       ensurePlaying();
       fadeToTrack(state.trackId, 280);
     }
@@ -519,9 +511,7 @@
     function ensurePlaying(){
       if (!bgm.src) bgm.src = getTrack(state.trackId).src;
       if (bgm.paused){
-        bgm.play().catch(() => {
-          toast("Tap Music again to start.");
-        });
+        bgm.play().catch(() => toast("Tap Music again to start."));
       }
     }
 
@@ -545,7 +535,6 @@
       const t = getTrack(trackId);
       const targetSrc = t.src;
 
-      // If same track, still ensure playing then fade in
       if (bgm.src && bgm.src.endsWith(targetSrc)){
         ensurePlaying();
         fadeIn(ms);
@@ -573,7 +562,6 @@
 
     function fadeIn(ms=320){
       clearInterval(fadeTimer);
-
       if (state.musicOn) ensurePlaying();
 
       const steps = 12;
@@ -643,10 +631,6 @@
     async function go(route, payload={}){
       state.route = route;
 
-      // IMPORTANT: No auto-switching tracks on page changes.
-      // The chosen song continues across the whole app.
-
-      // Choose a dynamic guided set when entering guided journal fresh
       if (route === "guided" && !state.guidedQs.length){
         const set = pickGuidedSet();
         state.guidedSetId = set.id;
@@ -678,11 +662,10 @@
       }
     }
 
-    // --- Views ---
     async function renderHome(){
       await setViewHtml(`
         <h2 class="title">Hi, I’m Journal Boo.</h2>
-        <p class="subtitle">I’m your personal journal companion. What would you like to do today?</p>
+        <p class="subtitle">I’m your personal journal companion. What would you like to do today? 🙂</p>
 
         <div class="option-grid">
           <div class="option" data-route="free">
@@ -702,7 +685,7 @@
         </div>
 
         <div class="divider"></div>
-        <p class="small"></p>
+        <p class="small">Music starts off by default. You can turn it on anytime in the top bar.</p>
       `);
 
       viewEl.querySelectorAll(".option").forEach(el => {
@@ -730,14 +713,13 @@
       document.getElementById("btnFinishFree").addEventListener("click", async () => {
         const text = (state.freeText || "").trim();
         if (text.length){
-          const entry = {
+          addEntry({
             id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
             createdAt: nowIso(),
             type: "Free writing",
             mood: null,
             content: text,
-          };
-          addEntry(entry);
+          });
           toast("Saved.");
         } else {
           toast("Nothing to save — that’s okay.");
@@ -907,7 +889,7 @@
 
           const any = A1.length || A2.length || A3.length;
           if (any){
-            const entry = {
+            addEntry({
               id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
               createdAt: nowIso(),
               type: "Guided journal",
@@ -923,8 +905,7 @@ ${A2}
 
 3) ${q3}
 ${A3}`.trim()
-            };
-            addEntry(entry);
+            });
             toast("Saved.");
           } else {
             toast("Nothing to save — that’s okay.");
@@ -1204,12 +1185,13 @@ ${e.content}
         return s.slice(0, max).trim() + "…";
       }
 
-      function openEntry(id){
+      // ✅ FIX: make openEntry async and await setViewHtml BEFORE binding button handlers.
+      async function openEntry(id){
         const entries = loadEntries();
         const e = entries.find(x => x.id === id);
         if (!e) return;
 
-        setViewHtml(`
+        await setViewHtml(`
           <p class="kicker">My Journal</p>
           <h2 class="title">${escapeHtml(e.type)}</h2>
           <p class="subtitle">${prettyDate(e.createdAt)}${e.mood ? " • " + escapeHtml(e.mood) : ""}</p>
@@ -1223,10 +1205,11 @@ ${e.content}
             <button class="btn ghost" id="home">Home</button>
           </div>
         `);
-        fadeInView();
 
+        // Now the elements exist, so handlers attach correctly.
         document.getElementById("backList").addEventListener("click", () => go("journal"));
         document.getElementById("home").addEventListener("click", () => go("home"));
+
         document.getElementById("delThis").addEventListener("click", () => deleteEntry(id));
 
         document.getElementById("emailThis").addEventListener("click", () => {
@@ -1293,7 +1276,6 @@ Knowing this peaceful place is always something you can return to.
 Thank you for taking this time for yourself.
 You did beautifully.`
         },
-
         river: {
           title: "Leaves on the River",
           intro: "As thoughts come, you can place each one onto a leaf, and let the river carry it along.",
@@ -1340,7 +1322,6 @@ Bringing with you the feeling of space you’ve created.
 Thank you for spending this time with yourself.
 You can return to this river whenever you need.`
         },
-
         sleep: {
           title: "Drifting Into Rest",
           intro: "This is a gentle sleep meditation. There’s no pressure to fall asleep.",
@@ -1396,11 +1377,9 @@ You can let this moment hold you while you drift.`
       loadSettings();
       syncMusicUI();
 
-      // Start OFF always; do not auto-play
       state.musicOn = false;
       bgm.pause();
 
-      // Prepare audio src (current chosen track), but keep silent until user toggles on
       bgm.src = getTrack(state.trackId).src;
       bgm.volume = 0;
 
