@@ -6,7 +6,7 @@
   <title>Journal Boo</title>
   <style>
     :root{
-      /* Default theme (light) */
+      /* Default vars (will be overridden by body[data-theme]) */
       --bg: #f7f5ef;
       --text: #171615;
       --muted: #4b4a46;
@@ -40,24 +40,26 @@
       --shadow: 0 14px 38px rgba(0,0,0,.10);
     }
 
+    /* ✅ Brighter green */
     body[data-theme="racing-green"]{
-      --bg: #07100c;
-      --text: #f1efe9;
-      --muted: #b7c4bd;
-      --muted2:#92a39a;
-      --accent:#1fa46d;
-      --line: 1px solid rgba(255,255,255,.08);
-      --shadow: 0 14px 38px rgba(0,0,0,.40);
+      --bg: #07130e;              /* slightly less black */
+      --text: #f3f1ea;
+      --muted: #c2d2c8;           /* a touch brighter */
+      --muted2:#9bb3a8;           /* a touch brighter */
+      --accent:#31c981;           /* brighter green accent */
+      --line: 1px solid rgba(255,255,255,.09);
+      --shadow: 0 14px 38px rgba(0,0,0,.38);
     }
 
+    /* ✅ Lighter rose pink */
     body[data-theme="rose-pink"]{
-      --bg: #140b10;
-      --text: #f6eef1;
-      --muted: #d3b9c2;
-      --muted2:#b895a1;
-      --accent:#e07aa0;
-      --line: 1px solid rgba(255,255,255,.09);
-      --shadow: 0 14px 38px rgba(0,0,0,.42);
+      --bg: #1b0f15;              /* lifted background */
+      --text: #fbf3f6;            /* brighter text */
+      --muted: #e2c5d0;           /* brighter muted */
+      --muted2:#caa0af;           /* brighter muted2 */
+      --accent:#ff97ba;           /* lighter/brighter accent */
+      --line: 1px solid rgba(255,255,255,.10);
+      --shadow: 0 14px 38px rgba(0,0,0,.40);
     }
 
     * { box-sizing: border-box; }
@@ -253,6 +255,9 @@
       background: rgba(255,255,255,.07);
       margin: 18px 0;
     }
+    body[data-theme="light"] .divider{
+      background: rgba(0,0,0,.10);
+    }
 
     textarea, input[type="email"], select{
       width: 100%;
@@ -304,6 +309,11 @@
       background: rgba(201,167,106,.55);
       border-color: rgba(201,167,106,.45);
     }
+    body[data-theme="light"] .dot{
+      background: rgba(0,0,0,.12);
+      border-color: rgba(0,0,0,.10);
+    }
+
     .steptext{
       color: var(--muted2);
       font-size: 13px;
@@ -394,6 +404,11 @@
       box-shadow: 0 10px 25px rgba(0,0,0,.35);
     }
     .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
+    body[data-theme="light"] .toast{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(0,0,0,.10);
+      box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
 
     @media (max-width: 520px){
       .title{ font-size: 23px; }
@@ -404,9 +419,12 @@
     }
   </style>
 </head>
-    <script data-goatcounter="https://munchkin-boo.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
-<body>
+
+<script data-goatcounter="https://munchkin-boo.goatcounter.com/count"
+  async src="//gc.zgo.at/count.js"></script>
+
+<!-- ✅ Light is the default theme -->
+<body data-theme="light">
   <div class="app">
     <div class="shell">
       <header>
@@ -459,7 +477,6 @@
   <script>
     /***********************
      * Journal Boo (V1)
-     * Fix included: buttons on opened saved entry page now work (await setViewHtml before binding handlers)
      ***********************/
 
     const TRACKS = [
@@ -532,8 +549,8 @@
       musicOn: false,
       trackId: "devi-song",
 
-      /* ✅ Theme state */
-      theme: "charcoal",
+      /* ✅ Default theme is LIGHT */
+      theme: "light",
 
       freeText: "",
 
@@ -585,8 +602,8 @@
       try{ localStorage.setItem(LS_THEME, state.theme); }catch{}
     }
     function applyTheme(){
-      document.body.setAttribute("data-theme", state.theme || "charcoal");
-      if (themeSelectEl) themeSelectEl.value = state.theme || "charcoal";
+      document.body.setAttribute("data-theme", state.theme || "light");
+      if (themeSelectEl) themeSelectEl.value = state.theme || "light";
     }
 
     if (themeSelectEl){
@@ -1340,7 +1357,6 @@ ${A3}`.trim()
           toggleMeditationAudio("assets/meditation/following-the-light.mp3", btn);
         });
 
-        // Keep button label correct if audio ends
         medPlayer.onended = () => { btn.textContent = "Play"; };
       } else {
         medPlayer.onended = null;
@@ -1714,8 +1730,11 @@ You can let this moment hold you while you drift.`
 
     (function init(){
       loadSettings();
+
+      // ✅ Theme: default light, but saved preference still wins
       loadTheme();
       applyTheme();
+
       syncMusicUI();
 
       state.musicOn = false;
