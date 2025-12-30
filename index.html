@@ -75,6 +75,77 @@
       letter-spacing: .1px;
     }
 
+    /* ✅ Landing / Welcome screen */
+    .jbScreen{
+      position: fixed;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 520ms ease;
+      background:
+        radial-gradient(1100px 800px at 18% 0%, rgba(201,167,106,.10), transparent 58%),
+        radial-gradient(900px 600px at 88% 12%, rgba(201,167,106,.07), transparent 60%),
+        var(--bg);
+      z-index: 9999;
+    }
+    .jbScreen.active{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .jbCenter{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 14px;
+      text-align:center;
+      max-width: 760px;
+    }
+    .jbWelcomeTitle{
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 600;
+      letter-spacing:.2px;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+    .jbWelcomeSub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+    .jbStartBtn{
+      border: var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      color: var(--text);
+      cursor:pointer;
+      user-select:none;
+      transition: background .12s ease, transform .12s ease, opacity 700ms ease, transform 700ms ease;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .jbStartBtn:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .jbWelcomeTitle.show,
+    .jbWelcomeSub.show,
+    .jbStartBtn.show{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hide main app until started */
+    .app.hidden{ display:none; }
+
     .app{
       min-height: 100%;
       display:flex;
@@ -429,9 +500,20 @@
 <script data-goatcounter="https://munchkin-boo.goatcounter.com/count"
   async src="//gc.zgo.at/count.js"></script>
 
-<!-- ✅ Light is the default theme -->
-<body data-theme="light">
-  <div class="app">
+<!-- ✅ DEFAULT THEME IS NOW RACING GREEN -->
+<body data-theme="racing-green">
+
+  <!-- ✅ LANDING PAGE -->
+  <section id="jbWelcome" class="jbScreen active" aria-label="Welcome">
+    <div class="jbCenter">
+      <div id="jbWelcomeTitle" class="jbWelcomeTitle">Hello and welcome to Journal Boo...</div>
+      <p id="jbWelcomeSub" class="jbWelcomeSub">...I’m your personal journal companion!</p>
+      <button id="jbStartBtn" class="jbStartBtn" type="button">Let’s get started.</button>
+    </div>
+  </section>
+
+  <!-- ✅ MAIN APP (hidden until start) -->
+  <div id="jbApp" class="app hidden">
     <div class="shell">
       <header>
         <div class="brand">
@@ -556,8 +638,8 @@
       musicOn: false,
       trackId: "devi-song",
 
-      /* ✅ Default theme is LIGHT */
-      theme: "light",
+      /* ✅ Default theme is now RACING GREEN (saved preference still wins) */
+      theme: "racing-green",
 
       freeText: "",
 
@@ -615,8 +697,9 @@
       try{ localStorage.setItem(LS_THEME, state.theme); }catch{}
     }
     function applyTheme(){
-      document.body.setAttribute("data-theme", state.theme || "light");
-      if (themeSelectEl) themeSelectEl.value = state.theme || "light";
+      const t = state.theme || "racing-green";
+      document.body.setAttribute("data-theme", t);
+      if (themeSelectEl) themeSelectEl.value = t;
     }
 
     if (themeSelectEl){
@@ -627,6 +710,37 @@
         toast("Theme changed.");
       });
     }
+
+    /* ✅ Landing page wiring */
+    const jbWelcome = document.getElementById("jbWelcome");
+    const jbWelcomeTitle = document.getElementById("jbWelcomeTitle");
+    const jbWelcomeSub = document.getElementById("jbWelcomeSub");
+    const jbStartBtn = document.getElementById("jbStartBtn");
+    const jbApp = document.getElementById("jbApp");
+
+    function runWelcomeAnimation(){
+      setTimeout(() => jbWelcomeTitle.classList.add("show"), 160);
+      setTimeout(() => jbWelcomeSub.classList.add("show"), 520);
+      setTimeout(() => jbStartBtn.classList.add("show"), 900);
+    }
+
+    function startApp(){
+      jbWelcome.classList.remove("active");
+      setTimeout(() => {
+        jbWelcome.style.display = "none";
+        jbApp.classList.remove("hidden");
+        // Ensure we're on home when starting
+        go("home").then(() => {});
+      }, 520);
+    }
+
+    jbStartBtn.addEventListener("click", startApp);
+    document.addEventListener("keydown", (e) => {
+      if (jbWelcome && jbWelcome.classList.contains("active") && (e.key === "Enter" || e.key === " ")){
+        e.preventDefault();
+        startApp();
+      }
+    });
 
     function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, (m) => ({
@@ -929,7 +1043,7 @@
         case "journal": return renderJournal();
         case "done": return renderDone();
         case "blog": return renderBlog();
-        case "privacy": return renderPrivacy();   // ✅ NEW
+        case "privacy": return renderPrivacy();
         default: return renderHome();
       }
     }
@@ -1132,7 +1246,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       document.getElementById("btnGoMeditation").addEventListener("click", () => go("medList"));
       document.getElementById("btnDone").addEventListener("click", () => go("done"));
     }
-
+    
     async function renderGuidedStepper(){
       const step = state.guidedStep;
 
