@@ -439,6 +439,27 @@
       text-align: center;
     }
 
+    /* ✅ Prompt picker rows */
+    .pickRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      border: var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.02);
+    }
+    .pickRow label{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      cursor:pointer;
+      user-select:none;
+      width: 100%;
+    }
+    .pickRow input{ margin-top: 3px; }
+
     .footer-note{
       color: var(--muted2);
       font-size: 12.5px;
@@ -578,62 +599,143 @@
      * Journal Boo (V1)
      ***********************/
 
+    // ✅ Added 2 more tracks
     const TRACKS = [
       { id: "devi-song",       label: "Devi’s Song",      src: "assets/music/devi-song.mp3" },
       { id: "labour-of-love",  label: "Labour Of Love",   src: "assets/music/labour-of-love.mp3" },
       { id: "crying-out",      label: "Crying Out",       src: "assets/music/crying-out.mp3" },
+      { id: "warmer",          label: "Warmer",           src: "assets/music/warmer.mp3" },
+      { id: "concerto",        label: "Concerto",         src: "assets/music/concerto.mp3" },
     ];
 
-    const GUIDED_SETS = [
+    /***********************
+     * ✅ Prompt collections (fixed canonical sets)
+     * These power the guided journal picker.
+     ***********************/
+    const PROMPT_COLLECTIONS = [
       {
-        id: "values",
-        title: "What matters most",
-        questions: [
-          "What is something important in your life right now?",
-          "How do you feel about it?",
-          "What do you understand about this part of your life right now?"
+        id: "grounding-calm",
+        title: "Grounding & Calm",
+        prompts: [
+          "What can you feel supporting you right now — chair, bed, floor, air?",
+          "Name five small things you can see in the room. What do they remind you of?",
+          "What is one thing you can release for tonight (even temporarily)?",
+          "If your breath had a pace it wanted, what would it choose?",
+          "What would “safe enough” feel like in your body right now?",
+          "Write three gentle sentences to yourself, like you would to a friend."
         ]
       },
       {
-        id: "gratitude",
-        title: "Gentle gratitude",
-        questions: [
-          "What is one small thing that helped you today?",
-          "What did it feel like when you noticed it?",
-          "How could you make a little space for more of that this week?"
+        id: "gratitude-soft-joy",
+        title: "Gratitude & Soft Joy",
+        prompts: [
+          "What is one small thing that went okay today?",
+          "What did you enjoy, even briefly — a sound, a sip, a moment?",
+          "Who or what helped you carry something today (even a little)?",
+          "What is something ordinary that you’re glad exists?",
+          "What part of you kept going today — and how did it help?",
+          "If joy could be tiny, where did it peek through?"
         ]
       },
       {
-        id: "stress",
-        title: "Unpacking stress",
-        questions: [
-          "What has been weighing on you lately?",
-          "Where do you notice it in your body or day-to-day life?",
-          "What is one kind next step you could take (even a very small one)?"
+        id: "processing-thoughts",
+        title: "Processing Thoughts",
+        prompts: [
+          "What is the main thought looping right now — in one sentence?",
+          "What evidence supports it, and what evidence softens it?",
+          "If this thought belonged to someone you love, what would you say back?",
+          "What is the fear underneath the thought — if any?",
+          "What is one practical next step (small enough to do tomorrow)?",
+          "What can wait until later?"
         ]
       },
       {
-        id: "selftalk",
-        title: "Kind self-talk",
-        questions: [
-          "What have you been telling yourself lately?",
-          "How does that inner voice make you feel?",
-          "What would you rather hear from a kind and truthful voice?"
+        id: "emotions-feelings",
+        title: "Emotions & Feelings",
+        prompts: [
+          "What emotion is closest to the surface right now?",
+          "Where does it live in your body — chest, throat, belly, shoulders?",
+          "If the feeling had a color or texture, what would it be?",
+          "What does this feeling need from you tonight?",
+          "What would it be like to let the feeling be here without fixing it?",
+          "What is one kind boundary you can hold for yourself?"
         ]
       },
       {
-        id: "future",
-        title: "Looking ahead",
-        questions: [
-          "What are you hoping for right now?",
-          "What might be getting in the way?",
-          "What would support you most in the next 24 hours?"
+        id: "evening-wind-down",
+        title: "Evening Wind-Down",
+        prompts: [
+          "What can you put down for the night?",
+          "What did you do today that you can respect (even if it was small)?",
+          "What is one thing you want tomorrow-you to remember?",
+          "What would help you feel a little more settled before sleep?",
+          "What can you forgive yourself for, just for tonight?",
+          "Write a short “closing the day” note — gentle and simple."
+        ]
+      },
+      {
+        id: "self-understanding",
+        title: "Self-Understanding",
+        prompts: [
+          "What pattern have you noticed in yourself lately?",
+          "What do you think you’re protecting by holding on to it?",
+          "When do you feel most like yourself?",
+          "What do you need more of, and what do you need less of?",
+          "What are you learning about your boundaries?",
+          "What is one truth about you that deserves kindness?"
+        ]
+      },
+      {
+        id: "growth-gentle",
+        title: "Growth (Gentle)",
+        prompts: [
+          "What is one small way you’ve grown recently?",
+          "What has been hard — and how did you meet it?",
+          "What does “progress” look like when it’s soft and slow?",
+          "What support would help you right now?",
+          "What would you try if you trusted yourself 5% more?",
+          "Write a promise to yourself that you can actually keep."
         ]
       }
     ];
 
+    // ✅ Guided journal selection state (choose 3 prompts)
+    const GUIDED_PICK_MIN = 3;
+    const GUIDED_PICK_MAX = 3;
+
+    /***********************
+     * ✅ Meditations (loaded from JSON files)
+     * Paths: assets/meditations/[short title].json
+     * Each JSON can optionally include: { id, title, intro, body, audioSrc }
+     ***********************/
+    const MEDITATIONS_INDEX = [
+      { id: "giving-and-receiving-love", title: "Giving and Receiving Love", intro: "A gentle practice of offering and receiving warmth, even through difficulty.", path: "assets/meditations/giving-and-receiving-love.json" },
+      { id: "gentle-gratitude",          title: "A Gentle Practice of Gratitude", intro: "A small, unforced gratitude practice — calm and simple.", path: "assets/meditations/gentle-gratitude.json" },
+      { id: "making-space",             title: "Making Space for One Another", intro: "A reflection on warmth, space, and the healing nature of giving.", path: "assets/meditations/making-space.json" },
+    ];
+
+    // ✅ Poetry Corner (loaded from one combined JSON)
+    // Expected file: assets/poetry/poems.json
+    // Supported shapes:
+    // 1) { collections: [{ id, title, poems:[{ title, text|body }] }]}
+    // 2) [{ id, title, poems:[...]}]
+    // 3) { poems:[...], collections:[...] } (we'll try to normalize)
+    const POETRY_INDEX_PATH = "assets/poetry/poems.json";
+
     function pickGuidedSet(){
-      return GUIDED_SETS[Math.floor(Math.random() * GUIDED_SETS.length)];
+      // (kept for backwards compatibility; no longer the default path)
+      const fallback = [
+        {
+          id: "values",
+          title: "What matters most",
+          questions: [
+            "What is something important in your life right now?",
+            "How do you feel about it?",
+            "What do you understand about this part of your life right now?"
+          ]
+        },
+      ];
+      return fallback[Math.floor(Math.random() * fallback.length)];
     }
 
     const LS_KEY = "journal_boo_entries_v1";
@@ -653,7 +755,8 @@
 
       freeText: "",
 
-      guidedStep: 1,
+      // ✅ Guided journal now starts with a picker (step 0)
+      guidedStep: 0,
       guidedSetId: null,
       guidedSetTitle: "",
       guidedQs: [],
@@ -664,6 +767,10 @@
 
       meditationId: null,
       lastSavedEntryId: null,
+
+      // ✅ Caches
+      medCache: {},         // id -> loaded json
+      poetryCache: null,    // normalized object
     };
 
     const viewEl = document.getElementById("view");
@@ -728,7 +835,6 @@
     const jbApp = document.getElementById("jbApp");
 
     function runWelcomeAnimation(){
-      // Only do fades if JS is running (we are) — and elements exist
       if (!jbWelcomeTitle || !jbWelcomeSub || !jbStartBtn) return;
       setTimeout(() => jbWelcomeTitle.classList.add("show"), 160);
       setTimeout(() => jbWelcomeSub.classList.add("show"), 520);
@@ -740,7 +846,6 @@
       setTimeout(() => {
         jbWelcome.style.display = "none";
         jbApp.classList.remove("hidden");
-        // Ensure we're on home when starting
         go("home").then(() => {});
       }, 520);
     }
@@ -848,6 +953,95 @@
       }));
     }
 
+    /***********************
+     * ✅ JSON helpers (meditations + poetry)
+     ***********************/
+    async function fetchJsonWithCandidates(baseOrPath){
+      const candidates = [];
+      if (baseOrPath.endsWith(".json")) {
+        candidates.push(baseOrPath);
+      } else {
+        candidates.push(baseOrPath);
+        candidates.push(baseOrPath + ".json");
+      }
+
+      let lastErr = null;
+      for (const url of candidates){
+        try{
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return { url, data };
+        }catch(err){
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error("Unable to load JSON.");
+    }
+
+    async function loadMeditationById(id){
+      if (state.medCache[id]) return state.medCache[id];
+
+      const meta = MEDITATIONS_INDEX.find(m => m.id === id);
+      if (!meta) throw new Error("Meditation not found.");
+
+      const { data } = await fetchJsonWithCandidates(meta.path);
+      const med = {
+        id,
+        title: String(data.title ?? meta.title ?? "Meditation"),
+        intro: String(data.intro ?? meta.intro ?? ""),
+        body: String(data.body ?? data.text ?? ""),
+        audioSrc: data.audioSrc ? String(data.audioSrc) : "",
+      };
+
+      state.medCache[id] = med;
+      return med;
+    }
+
+    function normalizePoetryData(raw){
+      // Try common shapes
+      let collections = [];
+
+      if (Array.isArray(raw)) {
+        collections = raw;
+      } else if (raw && Array.isArray(raw.collections)) {
+        collections = raw.collections;
+      } else if (raw && Array.isArray(raw.poems) && Array.isArray(raw.collections)) {
+        collections = raw.collections;
+      } else if (raw && Array.isArray(raw.poems)) {
+        // single flat list: group into "Poems"
+        collections = [{ id: "poems", title: "Poems", poems: raw.poems }];
+      } else {
+        collections = [];
+      }
+
+      // Normalize each collection + poem shape
+      collections = collections.map((c, idx) => {
+        const poemsArr = Array.isArray(c.poems) ? c.poems : (Array.isArray(c.items) ? c.items : []);
+        const poems = poemsArr.map((p, jdx) => ({
+          id: String(p.id ?? jdx),
+          title: String(p.title ?? p.name ?? "Untitled"),
+          text: String(p.text ?? p.body ?? p.content ?? ""),
+        }));
+
+        return {
+          id: String(c.id ?? idx),
+          title: String(c.title ?? c.name ?? "Collection"),
+          poems,
+        };
+      });
+
+      return { collections };
+    }
+
+    async function loadPoetryIndex(){
+      if (state.poetryCache) return state.poetryCache;
+      const { data } = await fetchJsonWithCandidates(POETRY_INDEX_PATH);
+      const normalized = normalizePoetryData(data);
+      state.poetryCache = normalized;
+      return normalized;
+    }
+
     // --- Music engine (gentle fade) ---
     let fadeTimer = null;
 
@@ -864,6 +1058,11 @@
     }
 
     function toggleMeditationAudio(src, btn){
+      if (!src) {
+        toast("Audio not available yet.");
+        return;
+      }
+
       if (!medPlayer.src || !medPlayer.src.endsWith(src)){
         medPlayer.src = src;
       }
@@ -1019,15 +1218,19 @@
       stopMeditationAudio();
       state.route = route;
 
-      if (route === "guided" && !state.guidedQs.length){
-        const set = pickGuidedSet();
-        state.guidedSetId = set.id;
-        state.guidedSetTitle = set.title;
-        state.guidedQs = [...set.questions];
+      if (route === "guided"){
+        // ✅ Always start guided with picker unless a session is already in progress
+        if (!state.guidedQs.length || state.guidedStep === 0){
+          state.guidedStep = 0;
+        }
       }
 
       if (route === "meditation" && payload.meditationId){
         state.meditationId = payload.meditationId;
+      }
+
+      if (route === "poetryCollection" && payload.collectionId){
+        state.poetryCollectionId = payload.collectionId;
       }
 
       await render();
@@ -1044,6 +1247,8 @@
         case "medList": return renderMeditationList();
         case "meditation": return renderMeditation(state.meditationId);
         case "completeMeditation": return renderCompleteMeditation();
+        case "poetry": return renderPoetryHome();
+        case "poetryCollection": return renderPoetryCollection(state.poetryCollectionId);
         case "journal": return renderJournal();
         case "done": return renderDone();
         case "blog": return renderBlog();
@@ -1099,12 +1304,17 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
 
           <div class="option" data-route="guided">
             <h3>Guided journal</h3>
-            <p>Gentle prompts, one step at a time.</p>
+            <p>Choose your prompts — gentle, one step at a time.</p>
           </div>
 
           <div class="option" data-route="medList">
             <h3>Unwinding meditation</h3>
             <p>Choose a calm written meditation to read at your own pace.</p>
+          </div>
+
+          <div class="option" data-route="poetry">
+            <h3>Poetry Corner</h3>
+            <p>Gentle poems — calm, kind, and comforting.</p>
           </div>
         </div>
 
@@ -1251,10 +1461,144 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       document.getElementById("btnDone").addEventListener("click", () => go("done"));
     }
 
-    /* ✅ The rest of your original code is unchanged from this point onward. */
-    /* (I’m keeping it as-is to avoid introducing regressions.) */
-
+    /***********************
+     * ✅ Guided journal now includes:
+     * - Choose a collection
+     * - Select exactly 3 prompts OR "Surprise me"
+     ***********************/
     async function renderGuidedStepper(){
+      // Step 0 = prompt picker
+      if (state.guidedStep === 0){
+        const options = PROMPT_COLLECTIONS.map(c =>
+          `<option value="${escapeHtml(c.id)}">${escapeHtml(c.title)}</option>`
+        ).join("");
+
+        await setViewHtml(`
+          <p class="kicker">Guided journal</p>
+          <h2 class="title">Choose your prompts.</h2>
+          <p class="subtitle">Pick a collection, then choose <strong>three</strong> prompts for tonight.</p>
+
+          <p class="kicker">Prompt collection</p>
+          <select id="collectionSelect">
+            ${options}
+          </select>
+
+          <div style="height:12px;"></div>
+
+          <div class="fade" id="pickFade">
+            <p class="kicker">Pick exactly three</p>
+            <div class="list" id="promptList"></div>
+
+            <div class="row" style="margin-top:14px;">
+              <button class="btn primary" id="startGuided" disabled>Start guided journal</button>
+              <button class="btn" id="surprise">Surprise me</button>
+              <button class="btn ghost" id="backHome">Back</button>
+            </div>
+
+            <p class="hint" id="pickHint">Selected: 0 / ${GUIDED_PICK_MAX}</p>
+          </div>
+        `);
+
+        requestAnimationFrame(() => document.getElementById("pickFade").classList.add("show"));
+
+        const sel = document.getElementById("collectionSelect");
+        const list = document.getElementById("promptList");
+        const hint = document.getElementById("pickHint");
+        const startBtn = document.getElementById("startGuided");
+
+        function renderPromptsForCollection(id){
+          const col = PROMPT_COLLECTIONS.find(c => c.id === id) || PROMPT_COLLECTIONS[0];
+          list.innerHTML = "";
+
+          const chosen = new Set();
+
+          col.prompts.forEach((p, idx) => {
+            const row = document.createElement("div");
+            row.className = "pickRow";
+            row.innerHTML = `
+              <label>
+                <input type="checkbox" data-i="${idx}" />
+                <div>
+                  <div style="font-weight:600; margin-bottom:3px;">Prompt ${idx + 1}</div>
+                  <div style="color:var(--muted); line-height:1.55;">${escapeHtml(p)}</div>
+                </div>
+              </label>
+            `;
+            list.appendChild(row);
+          });
+
+          function sync(){
+            const checks = [...list.querySelectorAll("input[type='checkbox']")];
+            chosen.clear();
+            checks.forEach(ch => { if (ch.checked) chosen.add(Number(ch.dataset.i)); });
+
+            // Enforce max
+            if (chosen.size > GUIDED_PICK_MAX){
+              // uncheck the latest toggle
+              // (simple: uncheck the last checked box in DOM order)
+              const last = checks.findLast ? checks.findLast(c => c.checked) : checks.slice().reverse().find(c => c.checked);
+              if (last) last.checked = false;
+              // rebuild
+              chosen.clear();
+              checks.forEach(ch => { if (ch.checked) chosen.add(Number(ch.dataset.i)); });
+            }
+
+            const count = chosen.size;
+            hint.textContent = `Selected: ${count} / ${GUIDED_PICK_MAX}`;
+            startBtn.disabled = (count !== GUIDED_PICK_MAX);
+
+            // Disable unchecked boxes if at max
+            const atMax = (count === GUIDED_PICK_MAX);
+            checks.forEach(ch => {
+              if (!ch.checked) ch.disabled = atMax;
+              else ch.disabled = false;
+            });
+          }
+
+          list.querySelectorAll("input[type='checkbox']").forEach(ch => {
+            ch.addEventListener("change", sync);
+          });
+
+          // Start / Surprise
+          document.getElementById("startGuided").onclick = () => {
+            const picked = [...chosen].map(i => col.prompts[i]);
+            state.guidedSetId = col.id;
+            state.guidedSetTitle = col.title;
+            state.guidedQs = picked.slice(0, 3);
+            state.guidedStep = 1;
+            state.guidedA1 = "";
+            state.guidedA2 = "";
+            state.guidedA3 = "";
+            state.guidedMood = null;
+            go("guided");
+          };
+
+          document.getElementById("surprise").onclick = () => {
+            const shuffled = [...col.prompts].sort(() => Math.random() - 0.5);
+            state.guidedSetId = col.id;
+            state.guidedSetTitle = col.title;
+            state.guidedQs = shuffled.slice(0, 3);
+            state.guidedStep = 1;
+            state.guidedA1 = "";
+            state.guidedA2 = "";
+            state.guidedA3 = "";
+            state.guidedMood = null;
+            go("guided");
+          };
+
+          document.getElementById("backHome").onclick = () => go("home");
+
+          // initial sync
+          sync();
+        }
+
+        // initial
+        renderPromptsForCollection(sel.value);
+
+        sel.addEventListener("change", () => renderPromptsForCollection(sel.value));
+        return;
+      }
+
       const step = state.guidedStep;
 
       const intro = `
@@ -1266,7 +1610,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       `;
 
       const setLabel = state.guidedSetTitle
-        ? `<p class="small" style="margin:-6px 0 14px;">Theme: ${escapeHtml(state.guidedSetTitle)}</p>`
+        ? `<p class="small" style="margin:-6px 0 14px;">Collection: ${escapeHtml(state.guidedSetTitle)}</p>`
         : "";
 
       const stepbar = `
@@ -1295,7 +1639,8 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
 
           <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="next">Next</button>
-            <button class="btn ghost" id="back">Back</button>
+            <button class="btn" id="changePrompts">Change prompts</button>
+            <button class="btn ghost" id="back">Home</button>
           </div>
         `);
         requestAnimationFrame(() => document.getElementById("qfade").classList.add("show"));
@@ -1305,6 +1650,11 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
 
         document.getElementById("next").addEventListener("click", () => { state.guidedStep = 2; go("guided"); });
         document.getElementById("back").addEventListener("click", () => go("home"));
+        document.getElementById("changePrompts").addEventListener("click", () => {
+          state.guidedStep = 0;
+          state.guidedQs = [];
+          go("guided");
+        });
         return;
       }
 
@@ -1322,6 +1672,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
           <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="next">Next</button>
             <button class="btn" id="prev">Previous</button>
+            <button class="btn" id="changePrompts">Change prompts</button>
             <button class="btn ghost" id="home">Home</button>
           </div>
         `);
@@ -1333,6 +1684,11 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
         document.getElementById("next").addEventListener("click", () => { state.guidedStep = 3; go("guided"); });
         document.getElementById("prev").addEventListener("click", () => { state.guidedStep = 1; go("guided"); });
         document.getElementById("home").addEventListener("click", () => go("home"));
+        document.getElementById("changePrompts").addEventListener("click", () => {
+          state.guidedStep = 0;
+          state.guidedQs = [];
+          go("guided");
+        });
         return;
       }
 
@@ -1357,6 +1713,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
           <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="finish">Finish</button>
             <button class="btn" id="prev">Previous</button>
+            <button class="btn" id="changePrompts">Change prompts</button>
             <button class="btn ghost" id="home">Home</button>
           </div>
         `);
@@ -1389,6 +1746,11 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
 
         document.getElementById("prev").addEventListener("click", () => { state.guidedStep = 2; go("guided"); });
         document.getElementById("home").addEventListener("click", () => go("home"));
+        document.getElementById("changePrompts").addEventListener("click", () => {
+          state.guidedStep = 0;
+          state.guidedQs = [];
+          go("guided");
+        });
 
         document.getElementById("finish").addEventListener("click", async () => {
           const A1 = (state.guidedA1 || "").trim();
@@ -1403,7 +1765,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
               type: "Guided journal",
               mood: state.guidedMood,
               content:
-`Theme: ${state.guidedSetTitle || "—"}
+`Collection: ${state.guidedSetTitle || "—"}
 
 1) ${q1}
 ${A1}
@@ -1419,7 +1781,7 @@ ${A3}`.trim()
             toast("Nothing to save — that’s okay.");
           }
 
-          state.guidedStep = 1;
+          state.guidedStep = 0;
           state.guidedSetId = null;
           state.guidedSetTitle = "";
           state.guidedQs = [];
@@ -1434,7 +1796,7 @@ ${A3}`.trim()
         return;
       }
 
-      state.guidedStep = 1;
+      state.guidedStep = 0;
       return go("guided");
     }
 
@@ -1455,7 +1817,17 @@ ${A3}`.trim()
       document.getElementById("done").addEventListener("click", () => go("done"));
     }
 
+    /***********************
+     * ✅ Meditations list + detail now from JSON
+     ***********************/
     async function renderMeditationList(){
+      const cards = MEDITATIONS_INDEX.map(m => `
+        <div class="option" data-med="${escapeHtml(m.id)}">
+          <h3>${escapeHtml(m.title)}</h3>
+          <p>${escapeHtml(m.intro || "A calm meditation to read at your own pace.")}</p>
+        </div>
+      `).join("");
+
       await setViewHtml(`
         <p class="kicker">Unwinding meditation</p>
         <h2 class="title">Welcome.</h2>
@@ -1465,20 +1837,7 @@ ${A3}`.trim()
         </p>
 
         <div class="option-grid">
-          <div class="option" data-med="light">
-            <h3>Following the Light</h3>
-            <p>Imagine a soft, steady light guiding you into a peaceful place where you can rest and feel safe.</p>
-          </div>
-
-          <div class="option" data-med="river">
-            <h3>Leaves on the River</h3>
-            <p>Place each thought onto a leaf and let the river carry it along.</p>
-          </div>
-
-          <div class="option" data-med="sleep">
-            <h3>Drifting Into Rest</h3>
-            <p>A sleep meditation to help your body soften, with no pressure to fall asleep.</p>
-          </div>
+          ${cards}
         </div>
 
         <div class="divider"></div>
@@ -1494,46 +1853,61 @@ ${A3}`.trim()
     }
 
     async function renderMeditation(medId){
-      const med = getMeditation(medId);
-      await setViewHtml(`
-        <p class="kicker">Meditation</p>
-        <h2 class="title">${escapeHtml(med.title)}</h2>
-        <p class="subtitle">${escapeHtml(med.intro)}</p>
+      try{
+        const med = await loadMeditationById(medId);
 
-        <div class="fade" id="medfade">
-          ${medId === "light" ? `
-            <div class="audio-player">
-              <div class="label">Following The Light</div>
-              <button class="btn" id="toggleMedAudio">Play</button>
-            </div>
-          ` : ""}
+        const audioBlock = med.audioSrc ? `
+          <div class="audio-player">
+            <div class="label">${escapeHtml(med.title)}</div>
+            <button class="btn" id="toggleMedAudio">Play</button>
+          </div>
+        ` : "";
 
-          <div class="med-box">${escapeHtml(med.body)}</div>
-        </div>
+        await setViewHtml(`
+          <p class="kicker">Meditation</p>
+          <h2 class="title">${escapeHtml(med.title)}</h2>
+          <p class="subtitle">${escapeHtml(med.intro || "Take your time reading. Move at your own pace.")}</p>
 
-        <div class="row" style="margin-top:14px;">
-          <button class="btn primary" id="finished">I’m finished</button>
-          <button class="btn" id="choose">Choose another</button>
-          <button class="btn ghost" id="quit">I’m done for now</button>
-        </div>
-      `);
+          <div class="fade" id="medfade">
+            ${audioBlock}
+            <div class="med-box">${escapeHtml(med.body || "")}</div>
+          </div>
 
-      requestAnimationFrame(() => document.getElementById("medfade").classList.add("show"));
+          <div class="row" style="margin-top:14px;">
+            <button class="btn primary" id="finished">I’m finished</button>
+            <button class="btn" id="choose">Choose another</button>
+            <button class="btn ghost" id="quit">I’m done for now</button>
+          </div>
+        `);
 
-      if (medId === "light"){
-        const btn = document.getElementById("toggleMedAudio");
-        btn.addEventListener("click", () => {
-          toggleMeditationAudio("assets/meditation/following-the-light.mp3", btn);
-        });
+        requestAnimationFrame(() => document.getElementById("medfade").classList.add("show"));
 
-        medPlayer.onended = () => { btn.textContent = "Play"; };
-      } else {
-        medPlayer.onended = null;
+        if (med.audioSrc){
+          const btn = document.getElementById("toggleMedAudio");
+          btn.addEventListener("click", () => toggleMeditationAudio(med.audioSrc, btn));
+          medPlayer.onended = () => { btn.textContent = "Play"; };
+        } else {
+          medPlayer.onended = null;
+        }
+
+        document.getElementById("finished").addEventListener("click", () => go("completeMeditation"));
+        document.getElementById("choose").addEventListener("click", () => go("medList"));
+        document.getElementById("quit").addEventListener("click", () => go("done"));
+      }catch(err){
+        await setViewHtml(`
+          <p class="kicker">Meditation</p>
+          <h2 class="title">Couldn’t load meditation</h2>
+          <p class="subtitle">${escapeHtml(err?.message || "Unknown error")}</p>
+
+          <div class="row" style="margin-top:14px;">
+            <button class="btn primary" id="backList">Back to list</button>
+            <button class="btn ghost" id="home">Home</button>
+          </div>
+        `);
+
+        document.getElementById("backList").addEventListener("click", () => go("medList"));
+        document.getElementById("home").addEventListener("click", () => go("home"));
       }
-
-      document.getElementById("finished").addEventListener("click", () => go("completeMeditation"));
-      document.getElementById("choose").addEventListener("click", () => go("medList"));
-      document.getElementById("quit").addEventListener("click", () => go("done"));
     }
 
     async function renderCompleteMeditation(){
@@ -1549,8 +1923,143 @@ ${A3}`.trim()
       `);
 
       document.getElementById("toFree").addEventListener("click", () => go("free"));
-      document.getElementById("toGuided").addEventListener("click", () => { state.guidedQs = []; state.guidedStep = 1; go("guided"); });
+      document.getElementById("toGuided").addEventListener("click", () => {
+        state.guidedStep = 0;
+        state.guidedQs = [];
+        go("guided");
+      });
       document.getElementById("done").addEventListener("click", () => go("done"));
+    }
+
+    /***********************
+     * ✅ Poetry Corner (from JSON)
+     ***********************/
+    async function renderPoetryHome(){
+      await setViewHtml(`
+        <p class="kicker">Poetry Corner</p>
+        <h2 class="title">A small place to soften.</h2>
+        <p class="subtitle">Choose a collection. Read slowly. Take what you need.</p>
+
+        <div class="list" id="poetryCollections">
+          <div class="entry">
+            <div class="meta"><span>Loading…</span><span></span></div>
+            <p class="preview">Fetching poems…</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="row">
+          <button class="btn primary" id="backHome">Home</button>
+        </div>
+      `);
+
+      document.getElementById("backHome").addEventListener("click", () => go("home"));
+
+      const listEl = document.getElementById("poetryCollections");
+
+      try{
+        const { collections } = await loadPoetryIndex();
+
+        if (!collections.length){
+          listEl.innerHTML = `
+            <div class="entry">
+              <div class="meta"><span>No collections found</span><span></span></div>
+              <p class="preview">Your poems JSON loaded, but it didn’t contain any collections.</p>
+            </div>
+          `;
+          return;
+        }
+
+        listEl.innerHTML = "";
+        collections.forEach(c => {
+          const div = document.createElement("div");
+          div.className = "entry";
+          div.style.cursor = "pointer";
+          div.innerHTML = `
+            <div class="meta">
+              <span>${escapeHtml(c.title)}</span>
+              <span>${escapeHtml(String(c.poems?.length || 0))} poems</span>
+            </div>
+            <p class="preview">${escapeHtml((c.poems?.[0]?.title ? ("Includes: " + c.poems[0].title) : "A gentle collection."))}</p>
+          `;
+          div.addEventListener("click", () => go("poetryCollection", { collectionId: c.id }));
+          listEl.appendChild(div);
+        });
+      }catch(err){
+        listEl.innerHTML = `
+          <div class="entry">
+            <div class="meta"><span>Couldn’t load poems</span><span></span></div>
+            <p class="preview">${escapeHtml(err?.message || "Unknown error")}</p>
+          </div>
+        `;
+      }
+    }
+
+    async function renderPoetryCollection(collectionId){
+      await setViewHtml(`
+        <p class="kicker">Poetry Corner</p>
+        <h2 class="title">Loading…</h2>
+        <p class="subtitle">Just a moment.</p>
+
+        <div class="divider"></div>
+        <div class="row">
+          <button class="btn primary" id="backPoetry">Back</button>
+          <button class="btn ghost" id="home">Home</button>
+        </div>
+      `, { fade: true });
+
+      try{
+        const { collections } = await loadPoetryIndex();
+        const col = collections.find(c => c.id === collectionId) || collections[0];
+
+        const poemsHtml = (col.poems || []).map(p => `
+          <div class="entry">
+            <div class="meta">
+              <span>${escapeHtml(p.title || "Untitled")}</span>
+              <span></span>
+            </div>
+            <p class="preview">${escapeHtml(p.text || "")}</p>
+          </div>
+        `).join("");
+
+        await setViewHtml(`
+          <p class="kicker">Poetry Corner</p>
+          <h2 class="title">${escapeHtml(col.title)}</h2>
+          <p class="subtitle">Read slowly. Pause whenever you want.</p>
+
+          <div class="list">
+            ${poemsHtml || `
+              <div class="entry">
+                <div class="meta"><span>No poems</span><span></span></div>
+                <p class="preview">This collection doesn’t contain any poems yet.</p>
+              </div>
+            `}
+          </div>
+
+          <div class="divider"></div>
+          <div class="row">
+            <button class="btn primary" id="backPoetry">Back to collections</button>
+            <button class="btn ghost" id="home">Home</button>
+          </div>
+        `);
+
+        document.getElementById("backPoetry").addEventListener("click", () => go("poetry"));
+        document.getElementById("home").addEventListener("click", () => go("home"));
+      }catch(err){
+        await setViewHtml(`
+          <p class="kicker">Poetry Corner</p>
+          <h2 class="title">Couldn’t load collection</h2>
+          <p class="subtitle">${escapeHtml(err?.message || "Unknown error")}</p>
+
+          <div class="row" style="margin-top:14px;">
+            <button class="btn primary" id="backPoetry">Back</button>
+            <button class="btn ghost" id="home">Home</button>
+          </div>
+        `);
+
+        document.getElementById("backPoetry").addEventListener("click", () => go("poetry"));
+        document.getElementById("home").addEventListener("click", () => go("home"));
+      }
     }
 
     async function renderDone(){
@@ -1658,7 +2167,11 @@ ${e.content}
       `);
 
       document.getElementById("newFree").addEventListener("click", () => go("free"));
-      document.getElementById("newGuided").addEventListener("click", () => { state.guidedStep = 1; state.guidedQs = []; go("guided"); });
+      document.getElementById("newGuided").addEventListener("click", () => {
+        state.guidedStep = 0;
+        state.guidedQs = [];
+        go("guided");
+      });
       document.getElementById("toDone").addEventListener("click", () => go("done"));
 
       document.getElementById("clearAll").addEventListener("click", () => {
@@ -1750,151 +2263,6 @@ ${e.content}
         toast("Deleted.");
         go("journal");
       }
-    }
-
-    function getMeditation(id){
-      const meds = {
-        light: {
-          title: "Following the Light",
-          intro: "Take your time reading. You can move at your own pace — there’s nothing to rush.",
-          body:
-`Hi.
-You can take this moment just for yourself. There’s nothing you need to do perfectly. Just being here is enough.
-
-If it feels okay, let your body settle into a comfortable position.
-You might notice the place where you’re sitting or lying down. The support beneath you. The quiet weight of your body being held.
-
-Now, imagine there’s a soft light somewhere nearby.
-Not bright or overwhelming — just warm and steady.
-The kind of light that feels kind, like it’s been waiting for you.
-
-You don’t have to rush toward it.
-Just notice it.
-And when you’re ready, you can gently begin to follow it.
-
-With each slow breath, the light guides you forward.
-As you move closer, the world around you feels calmer.
-Quieter.
-Like things are slowly finding their place.
-
-The light leads you to a peaceful space.
-This place feels safe.
-Nothing is expected of you here.
-Everything feels… right.
-
-Take a moment to look around this place in your mind.
-Notice the colors.
-The stillness.
-The sense that you are welcome exactly as you are.
-
-If there’s anything heavy you’ve been carrying, you don’t need to hold it so tightly here.
-You can set it down — even just for a moment.
-
-Take your time here.
-Let the calm settle gently around you.
-Let yourself rest in it.
-
-And when you’re ready, you can begin to bring your attention back.
-Knowing this peaceful place is always something you can return to.
-
-Thank you for taking this time for yourself.
-You did beautifully.`
-        },
-        river: {
-          title: "Leaves on the River",
-          intro: "As thoughts come, you can place each one onto a leaf, and let the river carry it along.",
-          body:
-`Hi.
-This is a quiet moment just for you. There’s nowhere you need to be right now, and nothing you need to solve.
-
-If it feels comfortable, let your body settle.
-You might notice your breathing, just as it is — no need to change it.
-Simply noticing can be enough.
-
-Now, imagine you’re sitting beside a calm, slow-moving river.
-The water is steady and smooth, flowing at its own gentle pace.
-The air feels fresh. Peaceful.
-
-Floating along the surface of the river are soft leaves.
-Each leaf drifts by easily, carried by the water.
-
-As thoughts come to you — plans, worries, memories, or questions — you don’t have to push them away.
-Instead, imagine placing each thought gently onto a leaf.
-One by one, you can set them down.
-
-There’s no need to judge the thoughts.
-Nothing to fix.
-Just notice them, place them on a leaf, and watch as the river carries them along.
-
-Some leaves may move slowly.
-Some may drift quickly out of view.
-However they go is okay.
-
-You don’t have to follow them downstream.
-You can stay right here, resting on the riverbank, watching the water flow.
-
-If new thoughts appear, that’s okay too.
-There’s always another leaf ready to carry them.
-
-Take your time here.
-Feel the steadiness of the river.
-The sense that things can move along without your effort.
-
-When you feel ready, you can gently bring your awareness back.
-Bringing with you the feeling of space you’ve created.
-
-Thank you for spending this time with yourself.
-You can return to this river whenever you need.`
-        },
-        sleep: {
-          title: "Drifting Into Rest",
-          intro: "This is a gentle sleep meditation. There’s no pressure to fall asleep.",
-          body:
-`Hi.
-You’ve made it to the end of the day, and that’s something to honor.
-This moment is for rest. Nothing else is required of you.
-
-If you’re lying down, let your body settle into the surface beneath you.
-You might notice how you’re supported — how you don’t have to hold yourself up right now.
-The day can begin to soften.
-
-Imagine that night is slowly wrapping around you, like a warm, familiar blanket.
-Not heavy.
-Just comforting.
-A gentle signal that it’s safe to let go.
-
-With each breath out, you can allow your body to sink a little deeper.
-Your shoulders don’t need to stay lifted.
-Your jaw doesn’t need to stay tight.
-Even your thoughts can loosen their grip.
-
-If your mind wanders, that’s okay.
-You don’t need to follow every thought to the end.
-You can let them fade into the background, like distant sounds growing quieter.
-
-Imagine a slow, steady rhythm around you — like the hush of the night itself.
-Everything is moving at a calm, unhurried pace.
-There’s nothing you’re missing.
-Nothing you need to remember right now.
-
-If sleep comes, you don’t need to think about it.
-You don’t have to try.
-You can simply rest here, letting your body take over.
-
-And if you’re still awake, that’s okay too.
-Rest is still rest.
-Your body knows what it needs.
-
-Take your time here.
-Breathing.
-Softening.
-Letting the night hold you.
-
-Thank you for taking this moment to slow down.
-You can let this moment hold you while you drift.`
-        }
-      };
-      return meds[id] || meds.sleep;
     }
 
     (function init(){
