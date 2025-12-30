@@ -1,0 +1,128 @@
+{
+  "collections": [
+    {
+      "id": "soft-holding",
+      "title": "Soft Holding",
+      "description": "Poems for rest, presence, and letting go of effort.",
+      "poems": [
+        {
+          "id": "the-way-we-sit-with-things",
+          "title": "The Way We Sit With Things",
+          "author": "Journal Boo",
+          "body": "Sometimes healing is not movement\nbut learning how to stay.\nTo sit beside what aches\nwithout turning away,\nwithout asking it to hurry.\n\nYou do not have to solve the feeling\nto be worthy of rest.\nYou can let it sit on the floor with you,\nquiet as a folded coat,\nwaiting only to be seen.\n\nThis is how gentleness begins—\nnot with answers,\nbut with presence that does not leave."
+        },
+        {
+          "id": "when-you-are-tired",
+          "title": "When You Are Tired",
+          "author": "Journal Boo",
+          "body": "There are days your bones remember\nthings your mind cannot name.\nOn those days, effort is too loud,\nand even hope asks too much.\n\nLet tiredness be honest.\nLet it lean its weight against you.\nYou are allowed to be carried\nby stillness for a while.\n\nNothing important is lost in rest.\nEverything essential\nwaits patiently for your return."
+        },
+        {
+          "id": "a-place-to-lay-the-day",
+          "title": "A Place to Lay the Day",
+          "author": "Journal Boo",
+          "body": "Imagine a wide table made of light.\nEach moment you carried today\ncan be placed there gently—\nthe sharp ones, the quiet ones,\nthe things you didn’t say.\n\nYou don’t need to organize them.\nJust set them down.\nThe table holds without judgment.\n\nWhen the day is empty of your hands,\nyou are free again\nto breathe as yourself."
+        },
+        {
+          "id": "soft-holding",
+          "title": "Soft Holding",
+          "author": "Journal Boo",
+          "body": "You don’t have to be strong here.\nThis place was made for loosening.\nFor setting armor aside\nand letting your shoulders remember\nwhat gravity feels like.\n\nNothing will fall apart\nif you stop holding everything together.\nSomething kinder may step in instead."
+        }
+      ]
+    },
+    {
+      "id": "love-given-and-returned",
+      "title": "Love, Given and Returned",
+      "description": "Poems about care, exchange, and learning how to receive.",
+      "poems": [
+        {
+          "id": "the-quiet-work-of-love",
+          "title": "The Quiet Work of Love",
+          "author": "Journal Boo",
+          "body": "Love is rarely loud.\nMost of the time\nit looks like listening longer than planned,\nor staying when leaving would be easier.\n\nLove is the courage\nto offer warmth without guarantee.\nTo give without asking\nwhat it will become.\n\nAnd somehow,\neven when it seems to vanish,\nlove always finds a way\nto return changed,\nbut not lost."
+        },
+        {
+          "id": "learning-how-to-receive",
+          "title": "Learning How to Receive",
+          "author": "Journal Boo",
+          "body": "You are good at giving.\nThis much is clear.\nBut receiving—\nthat still feels unfamiliar.\n\nLet the kindness land.\nLet the help remain unearned.\nYou don’t need to repay\nwhat was never a debt.\n\nBeing held is not weakness.\nIt is part of the exchange\nthat keeps us human."
+        },
+        {
+          "id": "the-shape-of-care",
+          "title": "The Shape of Care",
+          "author": "Journal Boo",
+          "body": "Care does not demand perfection.\nIt asks only for honesty.\nFor showing up as you are,\nnot as you rehearse yourself to be.\n\nCare bends around sharp edges.\nIt learns the shape of your days\nand makes room for them.\n\nThis is love’s quiet skill—\nto fit without force."
+        },
+        {
+          "id": "munchkin-boos-love-of-you",
+          "title": "Munchkin Boo’s Love of You",
+          "author": "James Ritchie",
+          "body": "To you, all of you, our children of this Earth,\nFrom the the farthest fields of holy matrominy,\nIn words I find my way."
+        }
+      ]
+    },
+    {
+      "id": "gentle-becoming",
+      "title": "Gentle Becoming",
+      "description": "Poems about growth that happens quietly and without force.",
+      "poems": [
+        {
+          "id": "what-grows-slowly",
+          "title": "What Grows Slowly",
+          "author": "Journal Boo",
+          "body": "Nothing meaningful rushes.\nRoots take their time\nlearning the dark.\n\nIf you feel behind,\nconsider the trees.\nConsider how long\nthey stood as nothing visible\nat all.\n\nGrowth does not announce itself.\nIt happens quietly,\nuntil one day you realize\nyou are standing differently."
+        },
+        {
+          "id": "between-who-you-were-and-are",
+          "title": "Between Who You Were and Are",
+          "author": "Journal Boo",
+          "body": "There is a narrow bridge\nbetween the self you remember\nand the one you’re becoming.\n\nYou don’t need to name it yet.\nJust keep walking.\nEach step is enough\neven when the view is unclear.\n\nBe patient with the in-between.\nIt is doing more work\nthan you can see."
+        },
+        {
+          "id": "a-softer-measure-of-progress",
+          "title": "A Softer Measure of Progress",
+          "author": "Journal Boo",
+          "body": "Progress is not always forward.\nSometimes it is downward—\ninto rest, into truth, into pause.\n\nSometimes it looks like stopping\nbefore harm repeats itself.\n\nCount these moments, too.\nThey matter more than you think."
+        },
+        {
+          "id": "becoming-gently",
+          "title": "Becoming, Gently",
+          "author": "Journal Boo",
+          "body": "You are allowed to unfold\nwithout an audience.\nTo change quietly.\nTo arrive without announcement.\n\nGentleness is not delay.\nIt is precision.\n\nNothing blooms by force."
+        }
+      ]
+    },
+    {
+      "id": "kindness-as-shelter",
+      "title": "Kindness as Shelter",
+      "description": "Poems about warmth, care, and being a place others can rest.",
+      "poems": [
+        {
+          "id": "what-you-offer-others",
+          "title": "What You Offer Others",
+          "author": "Journal Boo",
+          "body": "Every time you make space\nfor another person to breathe,\nyou practice hope.\n\nKindness is not grand.\nIt is practical.\nIt sounds like, “Take your time,”\nand means it.\n\nThe world survives\non these small mercies."
+        },
+        {
+          "id": "a-place-to-be-human",
+          "title": "A Place to Be Human",
+          "author": "Journal Boo",
+          "body": "Let this be a place\nwhere you don’t have to explain yourself.\nWhere being human\nis reason enough to belong.\n\nYou are not too much here.\nYou never were."
+        },
+        {
+          "id": "the-way-kindness-moves",
+          "title": "The Way Kindness Moves",
+          "author": "Journal Boo",
+          "body": "Kindness moves like warmth—\nit spreads without instruction.\nPassed hand to hand,\nmoment to moment,\nuntil no one remembers\nwho started it.\n\nThis is how healing travels.\nNot alone.\nNever alone."
+        },
+        {
+          "id": "shelter",
+          "title": "Shelter",
+          "author": "Journal Boo",
+          "body": "If you do nothing else today,\nbe shelter.\nFor yourself, first.\n\nStand between your heart\nand what would harden it.\nThis, too, is an act of care.\n\nAnd it matters more\nthan you know."
+        }
+      ]
+    }
+  ]
+}
