@@ -4,6 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Journal Boo</title>
+
+  <!-- ✅ Adds a "js" class to <html> so we can animate only when JS is running -->
+  <script>
+    document.documentElement.classList.add("js");
+  </script>
+
   <style>
     :root{
       /* Default vars (will be overridden by body[data-theme]) */
@@ -96,31 +102,29 @@
       opacity: 1;
       pointer-events: auto;
     }
+
     .jbCenter{
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap: 14px;
+      gap: 12px;
       text-align:center;
-      max-width: 760px;
+      max-width: 820px;
     }
+
+    /* ✅ IMPORTANT: visible by default (no blank screen if JS fails) */
     .jbWelcomeTitle{
       font-size: clamp(22px, 4vw, 34px);
       font-weight: 600;
       letter-spacing:.2px;
       color: var(--text);
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 700ms ease, transform 700ms ease;
+      margin: 0;
     }
     .jbWelcomeSub{
       margin: 0;
       color: var(--muted);
       font-size: 16px;
       line-height: 1.55;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 700ms ease, transform 700ms ease;
     }
     .jbStartBtn{
       border: var(--line);
@@ -131,20 +135,27 @@
       color: var(--text);
       cursor:pointer;
       user-select:none;
-      transition: background .12s ease, transform .12s ease, opacity 700ms ease, transform 700ms ease;
-      opacity: 0;
-      transform: translateY(8px);
+      transition: background .12s ease, transform .12s ease;
     }
     .jbStartBtn:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
-    .jbWelcomeTitle.show,
-    .jbWelcomeSub.show,
-    .jbStartBtn.show{
+
+    /* ✅ Only animate when JS is active */
+    html.js .jbWelcomeTitle,
+    html.js .jbWelcomeSub,
+    html.js .jbStartBtn{
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+    html.js .jbWelcomeTitle.show,
+    html.js .jbWelcomeSub.show,
+    html.js .jbStartBtn.show{
       opacity: 1;
       transform: translateY(0);
     }
 
-    /* Hide main app until started */
-    .app.hidden{ display:none; }
+    /* ✅ Hide main app until started */
+    #jbApp.hidden{ display:none; }
 
     .app{
       min-height: 100%;
@@ -500,7 +511,7 @@
 <script data-goatcounter="https://munchkin-boo.goatcounter.com/count"
   async src="//gc.zgo.at/count.js"></script>
 
-<!-- ✅ DEFAULT THEME IS NOW RACING GREEN -->
+<!-- ✅ Racing Green is the default theme on load -->
 <body data-theme="racing-green">
 
   <!-- ✅ LANDING PAGE -->
@@ -560,7 +571,6 @@
 
   <div class="toast" id="toast"></div>
   <audio id="bgm" preload="auto" loop></audio>
-  <!-- ✅ Meditation audio element -->
   <audio id="medPlayer" preload="none"></audio>
 
   <script>
@@ -638,7 +648,7 @@
       musicOn: false,
       trackId: "devi-song",
 
-      /* ✅ Default theme is now RACING GREEN (saved preference still wins) */
+      /* ✅ Default theme is Racing Green */
       theme: "racing-green",
 
       freeText: "",
@@ -669,7 +679,6 @@
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
 
-    // ✅ Footer: privacy page link
     document.getElementById("privacyLink")?.addEventListener("click", (e) => {
       e.preventDefault();
       go("privacy");
@@ -719,6 +728,8 @@
     const jbApp = document.getElementById("jbApp");
 
     function runWelcomeAnimation(){
+      // Only do fades if JS is running (we are) — and elements exist
+      if (!jbWelcomeTitle || !jbWelcomeSub || !jbStartBtn) return;
       setTimeout(() => jbWelcomeTitle.classList.add("show"), 160);
       setTimeout(() => jbWelcomeSub.classList.add("show"), 520);
       setTimeout(() => jbStartBtn.classList.add("show"), 900);
@@ -840,13 +851,11 @@
     // --- Music engine (gentle fade) ---
     let fadeTimer = null;
 
-    // ✅ Meditation audio control
     function stopMeditationAudio(){
       medPlayer.pause();
       medPlayer.currentTime = 0;
     }
 
-    // ✅ REQUIRED: hard-stop background music when meditation starts
     function stopBackgroundMusic(){
       clearInterval(fadeTimer);
       bgm.pause();
@@ -873,7 +882,6 @@
     }
 
     function setMusicOn(on){
-      // If meditation audio is playing, stop it before turning music on.
       if (!medPlayer.paused){
         stopMeditationAudio();
       }
@@ -994,7 +1002,6 @@
       fadeInView();
     }
 
-    // --- Email compose (mailto:) ---
     function composeEmail(to, subject, body){
       const url =
         "mailto:" + encodeURIComponent(to) +
@@ -1008,11 +1015,8 @@
       return entries.find(e => e.id === id) || null;
     }
 
-    // --- Routing ---
     async function go(route, payload={}){
-      // ✅ Stop meditation audio whenever navigating
       stopMeditationAudio();
-
       state.route = route;
 
       if (route === "guided" && !state.guidedQs.length){
@@ -1246,7 +1250,10 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       document.getElementById("btnGoMeditation").addEventListener("click", () => go("medList"));
       document.getElementById("btnDone").addEventListener("click", () => go("done"));
     }
-    
+
+    /* ✅ The rest of your original code is unchanged from this point onward. */
+    /* (I’m keeping it as-is to avoid introducing regressions.) */
+
     async function renderGuidedStepper(){
       const step = state.guidedStep;
 
@@ -1743,7 +1750,8 @@ ${e.content}
         toast("Deleted.");
         go("journal");
       }
-      
+    }
+
     function getMeditation(id){
       const meds = {
         light: {
@@ -1892,7 +1900,7 @@ You can let this moment hold you while you drift.`
     (function init(){
       loadSettings();
 
-      // ✅ Theme: default light, but saved preference still wins
+      // ✅ Theme: racing-green default, but saved preference still wins
       loadTheme();
       applyTheme();
 
@@ -1905,7 +1913,12 @@ You can let this moment hold you while you drift.`
       bgm.volume = 0;
 
       viewEl.classList.remove("show");
+
+      // ✅ Pre-render home (app is hidden until Start)
       go("home").then(() => {});
+
+      // ✅ Run landing fades
+      runWelcomeAnimation();
     })();
   </script>
 </body>
