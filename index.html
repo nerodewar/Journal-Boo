@@ -1486,8 +1486,21 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
           <div style="height:12px;"></div>
 
           <div class="fade" id="pickFade">
-            <p class="kicker">Pick exactly three</p>
-            <div class="list" id="promptList"></div>
+           <p class="kicker">Pick exactly three</p>
+
+<div class="pickRow" style="margin-bottom:10px;">
+  <label style="width:100%;">
+    <input type="checkbox" id="anchorOk" />
+    <div>
+      <div style="font-weight:600; margin-bottom:3px;">I already have a specific “it” in mind</div>
+      <div style="color:var(--muted); line-height:1.55;">
+        This unlocks deeper prompts that refer to “it/this/that”.
+      </div>
+    </div>
+  </label>
+</div>
+
+<div class="list" id="promptList"></div>
 
             <div class="row" style="margin-top:14px;">
               <button class="btn primary" id="startGuided" disabled>Start guided journal</button>
@@ -1506,21 +1519,140 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
         const hint = document.getElementById("pickHint");
         const startBtn = document.getElementById("startGuided");
 
-        function renderPromptsForCollection(id){
-          const col = PROMPT_COLLECTIONS.find(c => c.id === id) || PROMPT_COLLECTIONS[0];
-          list.innerHTML = "";
+       function renderPromptsForCollection(id){
+  const col = PROMPT_COLLECTIONS.find(c => c.id === id) || PROMPT_COLLECTIONS[0];
+  list.innerHTML = "";
 
-          const chosen = new Set();
+  const chosen = new Set();
 
-          col.prompts.forEach((p, idx) => {
-            const row = document.createElement("div");
-            row.className = "pickRow";
-            row.innerHTML = `
-              <label>
-                <input type="checkbox" data-i="${idx}" />
-                <div>
-                  <div style="font-weight:600; margin-bottom:3px;">Prompt ${idx + 1}</div>
-                  <div style="color:var(--muted); line-height:1.55;">${escapeHtml(p)}</div>
+  const anchorToggle = document.getElementById("anchorOk");
+
+  // Normalize prompts (support old string format + new object format)
+  const prompts = (col.prompts || []).map(p => {
+    if (typeof p === "string") return { text: p, requiresAnchor: false };
+    return { text: String(p.text ?? ""), requiresAnchor: !!p.requiresAnchor };
+  });
+
+  function isAnchorAllowed(){
+    return !!anchorToggle?.checked;
+  }
+
+  prompts.forEach((p, idx) => {
+    const needs = p.requiresAnchor === true;
+
+    const row = document.createElement("div");
+    row.className = "pickRow";
+
+    row.innerHTML = `
+      <label>
+        <input type="checkbox" data-i="${idx}" />
+        <div>
+          <div style="font-weight:600; margin-bottom:3px; display:flex; gap:8px; align-items:center;">
+            <span>Prompt ${idx + 1}</span>
+            ${needs ? `<span style="font-size:12px; color:var(--muted2); border:var(--line); padding:2px 8px; border-radius:999px;">needs context</span>` : ``}
+          </div>
+          <div style="color:var(--muted); line-height:1.55;">${escapeHtml(p.text)}</div>
+        </div>
+      </label>
+    `;
+
+    list.appendChild(row);
+  });
+
+  function sync(){
+    const checks = [...list.querySelectorAll("input[type='checkbox']")];
+    chosen.clear();
+    checks.forEach(ch => { if (ch.checked) chosen.add(Number(ch.dataset.i)); });
+
+    // If any selected prompt needs anchor but toggle is off, undo selection
+    if (!isAnchorAllowed()){
+      for (const i of [...chosen]){
+        if (prompts[i]?.requiresAnchor){
+          // uncheck it
+          const box = checks.find(c => Number(c.dataset.i) === i);
+          if (box) box.checked = false;
+          chosen.delete(i);
+          toast("That prompt needs context. Toggle “I already have a specific ‘it’ in mind” to use it.");
+        }
+      }
+    }
+
+    // Enforce max
+    if (chosen.size > GUIDED_PICK_MAX){
+      const last = checks.findLast ? checks.findLast(c => c.checked) : checks.slice().reverse().find(c => c.checked);
+      if (last) last.checked = false;
+
+      chosen.clear();
+      checks.forEach(ch => { if (ch.checked) chosen.add(Number(ch.dataset.i)); });
+    }
+
+    const count = chosen.size;
+    hint.textContent = `Selected: ${count} / ${GUIDED_PICK_MAX}`;
+    startBtn.disabled = (count !== GUIDED_PICK_MAX);
+
+    // Disable unchecked boxes if at max
+    const atMax = (count === GUIDED_PICK_MAX);
+    checks.forEach(ch => {
+      if (!ch.checked) ch.disabled = atMax;
+      else ch.disabled = false;
+    });
+
+    // Also disable "needs context" prompts if anchor toggle is off (unless already checked)
+    checks.forEach(ch => {
+      const i = Number(ch.dataset.i);
+      const needs = !!prompts[i]?.requiresAnchor;
+      if (needs && !isAnchorAllowed() && !ch.checked) ch.disabled = true;
+    });
+  }
+
+  list.querySelectorAll("input[type='checkbox']").forEach(ch => {
+    ch.addEventListener("change", sync);
+  });
+
+  anchorToggle?.addEventListener("change", () => {
+    // If user turns anchor off, clear any selected context prompts
+    sync();
+  });
+
+  // Start
+  document.getElementById("startGuided").onclick = () => {
+    const picked = [...chosen].map(i => prompts[i].text);
+    state.guidedSetId = col.id;
+    state.guidedSetTitle = col.title;
+    state.guidedQs = picked.slice(0, 3);
+    state.guidedStep = 1;
+    state.guidedA1 = "";
+    state.guidedA2 = "";
+    state.guidedA3 = "";
+    state.guidedMood = null;
+    go("guided");
+  };
+
+  // Surprise me: ✅ only choose prompts that don't require anchor
+  document.getElementById("surprise").onclick = () => {
+    const safe = prompts.filter(p => !p.requiresAnchor).map(p => p.text);
+
+    // If for some reason a collection has < 3 safe prompts, fallback to all
+    const pool = (safe.length >= 3) ? safe : prompts.map(p => p.text);
+
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+    state.guidedSetId = col.id;
+    state.guidedSetTitle = col.title;
+    state.guidedQs = shuffled.slice(0, 3);
+    state.guidedStep = 1;
+    state.guidedA1 = "";
+    state.guidedA2 = "";
+    state.guidedA3 = "";
+    state.guidedMood = null;
+    go("guided");
+  };
+
+  document.getElementById("backHome").onclick = () => go("home");
+
+  sync();
+}
+</div>
                 </div>
               </label>
             `;
