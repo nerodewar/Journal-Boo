@@ -19,10 +19,24 @@
       --muted2:#6a6862;
       --accent:#8a6a2b;
 
+      /* NEW: refined surface system */
+      --surface: rgba(255,255,255,.62);
+      --surface2: rgba(255,255,255,.40);
+      --input-bg: rgba(255,255,255,.70);
+      --toast-bg: rgba(255,255,255,.76);
+      --focus: rgba(138,106,43,.26);
+
+      /* NEW: hero overlay (theme-aware) */
+      --hero-overlay-top: rgba(0,0,0,.22);
+      --hero-overlay-bot: rgba(0,0,0,.56);
+
       --radius: 20px;
       --line: 1px solid rgba(0,0,0,.10);
       --shadow: 0 14px 38px rgba(0,0,0,.10);
-      --font: ui-serif, Georgia, "Times New Roman", Times, serif;
+
+      /* NEW: split typography */
+      --font-display: ui-serif, Georgia, "Times New Roman", Times, serif;
+      --font-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
 
     /* ✅ Theme palettes */
@@ -34,6 +48,15 @@
       --accent:#c9a76a;
       --line: 1px solid rgba(255,255,255,.07);
       --shadow: 0 14px 38px rgba(0,0,0,.35);
+
+      --surface: rgba(255,255,255,.06);
+      --surface2: rgba(255,255,255,.04);
+      --input-bg: rgba(255,255,255,.05);
+      --toast-bg: rgba(0,0,0,.55);
+      --focus: rgba(201,167,106,.22);
+
+      --hero-overlay-top: rgba(0,0,0,.30);
+      --hero-overlay-bot: rgba(0,0,0,.62);
     }
 
     body[data-theme="light"]{
@@ -44,6 +67,15 @@
       --accent:#8a6a2b;
       --line: 1px solid rgba(0,0,0,.10);
       --shadow: 0 14px 38px rgba(0,0,0,.10);
+
+      --surface: rgba(255,255,255,.70);
+      --surface2: rgba(255,255,255,.50);
+      --input-bg: rgba(255,255,255,.78);
+      --toast-bg: rgba(255,255,255,.78);
+      --focus: rgba(138,106,43,.22);
+
+      --hero-overlay-top: rgba(255,255,255,.18);
+      --hero-overlay-bot: rgba(255,255,255,.55);
     }
 
     /* ✅ Brighter green */
@@ -55,6 +87,15 @@
       --accent:#31c981;
       --line: 1px solid rgba(255,255,255,.09);
       --shadow: 0 14px 38px rgba(0,0,0,.38);
+
+      --surface: rgba(255,255,255,.06);
+      --surface2: rgba(255,255,255,.04);
+      --input-bg: rgba(255,255,255,.05);
+      --toast-bg: rgba(0,0,0,.55);
+      --focus: rgba(49,201,129,.22);
+
+      --hero-overlay-top: rgba(0,0,0,.28);
+      --hero-overlay-bot: rgba(0,0,0,.62);
     }
 
     /* ✅ Lighter rose pink */
@@ -66,19 +107,40 @@
       --accent:#ff97ba;
       --line: 1px solid rgba(255,255,255,.10);
       --shadow: 0 14px 38px rgba(0,0,0,.40);
+
+      --surface: rgba(255,255,255,.065);
+      --surface2: rgba(255,255,255,.045);
+      --input-bg: rgba(255,255,255,.055);
+      --toast-bg: rgba(0,0,0,.55);
+      --focus: rgba(255,151,186,.20);
+
+      --hero-overlay-top: rgba(0,0,0,.30);
+      --hero-overlay-bot: rgba(0,0,0,.64);
     }
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
+
     body{
       margin: 0;
-      font-family: var(--font);
+      font-family: var(--font-ui);
       background:
         radial-gradient(1100px 800px at 18% 0%, rgba(201,167,106,.10), transparent 58%),
         radial-gradient(900px 600px at 88% 12%, rgba(201,167,106,.07), transparent 60%),
         var(--bg);
       color: var(--text);
       letter-spacing: .1px;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* NEW: headings use display font for warmth */
+    h1,h2,h3,.title,.home-question,.jbWelcomeTitle{
+      font-family: var(--font-display);
+    }
+    .subtitle,.kicker,.hint,.small,.brand p,.hero-sub,.entry .preview{
+      font-family: var(--font-ui);
     }
 
     /* ✅ Landing / Welcome screen */
@@ -115,7 +177,7 @@
     /* ✅ IMPORTANT: visible by default (no blank screen if JS fails) */
     .jbWelcomeTitle{
       font-size: clamp(22px, 4vw, 34px);
-      font-weight: 600;
+      font-weight: 650;
       letter-spacing:.2px;
       color: var(--text);
       margin: 0;
@@ -128,16 +190,23 @@
     }
     .jbStartBtn{
       border: var(--line);
-      background: rgba(255,255,255,.03);
+      background: var(--surface2);
       padding: 16px 20px;
       border-radius: 999px;
       font-size: 14px;
       color: var(--text);
       cursor:pointer;
       user-select:none;
-      transition: background .12s ease, transform .12s ease;
+      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    .jbStartBtn:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .jbStartBtn:hover{ background: var(--surface); transform: translateY(-1px); }
+    .jbStartBtn:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
 
     /* ✅ Only animate when JS is active */
     html.js .jbWelcomeTitle,
@@ -180,7 +249,7 @@
     }
 
     .brand{ display:flex; flex-direction:column; gap: 2px; }
-    .brand h1{ margin:0; font-size:22px; font-weight:600; letter-spacing:.2px; }
+    .brand h1{ margin:0; font-size:22px; font-weight:650; letter-spacing:.2px; }
     .brand p{ margin:0; color:var(--muted2); font-size:13px; line-height:1.35; }
 
     .top-actions{
@@ -193,7 +262,7 @@
 
     .pill{
       border: var(--line);
-      background: rgba(255,255,255,.03);
+      background: var(--surface2);
       padding: 10px 12px;
       border-radius: 999px;
       font-size: 13px;
@@ -203,14 +272,21 @@
       gap: 8px;
       cursor:pointer;
       user-select:none;
-      transition: background .12s ease, transform .12s ease;
+      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    .pill:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .pill:hover{ background: var(--surface); transform: translateY(-1px); }
+    .pill:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
 
     /* ✅ Pill-style dropdown */
     .pill-select{
       border: var(--line);
-      background: rgba(255,255,255,.03);
+      background: var(--surface2);
       padding: 10px 12px;
       border-radius: 999px;
       font-size: 13px;
@@ -218,9 +294,15 @@
       display:inline-flex;
       align-items:center;
       gap: 8px;
-      transition: background .12s ease, transform .12s ease;
+      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    .pill-select:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .pill-select:hover{ background: var(--surface); transform: translateY(-1px); }
+    .pill-select:focus-within{
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
     .pill-select label{
       color: var(--text);
       font-size: 13px;
@@ -235,7 +317,7 @@
       outline: none;
       background: transparent;
       color: var(--text);
-      font-family: var(--font);
+      font-family: var(--font-ui);
       font-size: 13px;
       line-height: 1;
       cursor: pointer;
@@ -248,12 +330,10 @@
       width: 0; height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
-      border-top: 6px solid rgba(255,255,255,.55);
+      border-top: 6px solid currentColor;
+      opacity: .55;
       margin-left: 2px;
       transform: translateY(1px);
-    }
-    body[data-theme="light"] .pill-select .chev{
-      border-top-color: rgba(0,0,0,.45);
     }
     /* Dropdown menu colors */
     .pill-select select option{
@@ -262,11 +342,13 @@
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, var(--surface), var(--surface2));
       border: var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .card-inner{ padding: 22px; }
@@ -274,7 +356,7 @@
     .title{
       font-size: 26px;
       margin: 0 0 10px;
-      font-weight: 600;
+      font-weight: 650;
       letter-spacing: .15px;
     }
     .subtitle{
@@ -292,14 +374,21 @@
     }
     .option{
       border: var(--line);
-      background: rgba(255,255,255,.03);
+      background: var(--surface2);
       border-radius: 18px;
       padding: 16px 16px;
       cursor:pointer;
-      transition: transform .12s ease, background .12s ease;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    .option:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
-    .option h3{ margin: 0; font-size: 18px; font-weight: 600; }
+    .option:hover{ background: var(--surface); transform: translateY(-1px); }
+    .option:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
+    .option h3{ margin: 0; font-size: 18px; font-weight: 650; font-family: var(--font-display); }
     .option p{ margin: 6px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
     .row{
@@ -311,21 +400,31 @@
 
     .btn{
       border: var(--line);
-      background: rgba(255,255,255,.03);
+      background: var(--surface2);
       padding: 12px 14px;
       border-radius: 14px;
       font-size: 14px;
       cursor:pointer;
       color: var(--text);
       user-select:none;
-      transition: background .12s ease, transform .12s ease;
+      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-family: var(--font-ui);
     }
-    .btn:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px); }
+    .btn:hover{ background: var(--surface); transform: translateY(-1px); }
+    .btn:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
     .btn.primary{
-      background: rgba(201,167,106,.16);
-      border: 1px solid rgba(201,167,106,.35);
+      background: color-mix(in srgb, var(--accent) 18%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
     }
-    .btn.primary:hover{ background: rgba(201,167,106,.22); }
+    .btn.primary:hover{
+      background: color-mix(in srgb, var(--accent) 24%, transparent);
+    }
     .btn.ghost{ background: transparent; }
     .btn.danger{
       border: 1px solid rgba(214,125,125,.35);
@@ -334,29 +433,30 @@
 
     .divider{
       height: 1px;
-      background: rgba(255,255,255,.07);
+      background: color-mix(in srgb, var(--text) 10%, transparent);
       margin: 18px 0;
-    }
-    body[data-theme="light"] .divider{
-      background: rgba(0,0,0,.10);
+      opacity: .7;
     }
 
     textarea, input[type="email"], select{
       width: 100%;
       border: var(--line);
-      background: rgba(0,0,0,.16);
+      background: var(--input-bg);
       border-radius: 16px;
       color: var(--text);
       padding: 12px 14px;
-      font-family: var(--font);
+      font-family: var(--font-ui);
       font-size: 16px;
       line-height: 1.6;
       outline: none;
-      transition: box-shadow .15s ease, border-color .15s ease;
+      transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
+    textarea{ resize: vertical; }
     textarea:focus, input:focus, select:focus{
-      border-color: rgba(201,167,106,.45);
-      box-shadow: 0 0 0 3px rgba(201,167,106,.10);
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      box-shadow: 0 0 0 3px var(--focus);
     }
     select { font-size: 15px; }
 
@@ -364,6 +464,7 @@
       font-size: 14px;
       color: var(--muted);
       margin: 0 0 8px;
+      letter-spacing: .1px;
     }
     .hint{
       margin-top: 10px;
@@ -384,13 +485,16 @@
     }
 
     .med-box{
-      background: rgba(255,255,255,.02);
+      background: var(--surface2);
       border: var(--line);
       border-radius: 18px;
       padding: 18px;
       white-space: pre-wrap;
       line-height: 1.75;
       font-size: 16px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-family: var(--font-ui);
     }
 
     /* ✅ Meditation audio player */
@@ -404,6 +508,7 @@
     .audio-player .label{
       font-size: 14px;
       color: var(--muted);
+      font-family: var(--font-ui);
     }
     .audio-player .btn{
       min-width: 140px;
@@ -415,6 +520,7 @@
       font-size: 12.5px;
       line-height: 1.45;
       padding: 0 4px;
+      font-family: var(--font-ui);
     }
 
     .footer-note a{
@@ -426,9 +532,11 @@
     .list{ display:grid; gap: 10px; margin-top: 8px; }
     .entry{
       border: var(--line);
-      background: rgba(255,255,255,.02);
+      background: var(--surface2);
       border-radius: 16px;
       padding: 14px 14px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .entry .meta{
       display:flex;
@@ -437,14 +545,23 @@
       color: var(--muted2);
       font-size: 12.5px;
       margin-bottom: 8px;
+      font-family: var(--font-ui);
     }
-  .meta-center{
-  justify-content: center;
-  text-align: center;
-}
-.meta-center span:last-child{
-  display: none;
-}
+
+    /* ✅ Force true center on the blog tile meta line */
+    .entry .meta.meta-center{
+      display: block;         /* override the flex row */
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .entry .meta.meta-center span{
+      display: block;
+      width: 100%;
+    }
+    .entry .meta.meta-center span:last-child{
+      display: none;          /* keep hiding the empty right span */
+    }
+
     .entry .preview{
       margin: 0;
       color: var(--text);
@@ -458,8 +575,8 @@
       left: 50%;
       bottom: 18px;
       transform: translateX(-50%);
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.10);
+      background: var(--toast-bg);
+      border: var(--line);
       color: var(--text);
       padding: 10px 14px;
       border-radius: 999px;
@@ -467,14 +584,12 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity .2s ease, transform .2s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,.35);
+      box-shadow: 0 10px 25px rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-family: var(--font-ui);
     }
     .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
-    body[data-theme="light"] .toast{
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(0,0,0,.10);
-      box-shadow: 0 10px 25px rgba(0,0,0,.12);
-    }
 
     @media (max-width: 520px){
       .title{ font-size: 23px; }
@@ -485,7 +600,7 @@
     }
 
     /***********************
-     * ✅ NEW: Home hero tiles (shimmer + pop)
+     * ✅ Home hero tiles (shimmer + pop)
      ***********************/
     .home-hero{
       display:grid;
@@ -507,46 +622,42 @@
       position: relative;
       border: var(--line);
       border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, var(--surface), var(--surface2));
       box-shadow: var(--shadow);
       overflow: hidden;
       cursor: pointer;
       user-select:none;
       transform: translateZ(0);
-      transition: transform 220ms ease, background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+      transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, filter 220ms ease;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
-    
+
     .hero-big{
-  background-image: url("assets/art/free-writing.png");
-  background-size: cover;
-  background-position: center;
+      background-image: url("assets/art/free-writing.png");
+      background-size: cover;
+      background-position: center;
     }
+
     .hero-big::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(0,0,0,.25),
-      rgba(0,0,0,.55)
-    );
-  z-index:1;
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
+      z-index:1;
     }
+
     .hero-tile:hover{
-  transform: translateY(-3px) scale(1.01);
-  border-color: rgba(255,255,255,.18);
-  /* DO NOT set background: here */
+      transform: translateY(-3px) scale(1.01);
+      border-color: color-mix(in srgb, var(--text) 22%, transparent);
     }
     .hero-tile:active{
       transform: translateY(-1px) scale(0.995);
     }
     .hero-tile:focus-visible{
       outline:none;
-      box-shadow:
-        0 0 0 3px rgba(49,201,129,.18),
-        var(--shadow);
-      border-color: rgba(49,201,129,.35);
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
     }
 
     .hero-glow{
@@ -584,27 +695,14 @@
       box-shadow: 0 10px 22px rgba(0,0,0,.20);
       flex: 0 0 auto;
     }
-    body[data-theme="light"] .hero-big::after{
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(255,255,255,.20),
-      rgba(255,255,255,.50)
-    );
-  opacity: .85;
-    }
-    body[data-theme="light"] .hero-tile{
-  filter: saturate(1.05) contrast(1.05);
-    }
-    .hero-tile:hover::after{
-  opacity: 1;
-    }
+
     .hero-text{ display:flex; flex-direction:column; gap: 6px; }
     .hero-title{
       margin:0;
-      font-weight: 650;
+      font-weight: 700;
       font-size: 18px;
-      letter-spacing: .15px;
+      letter-spacing: .12px;
+      font-family: var(--font-display);
     }
     .hero-sub{
       margin:0;
@@ -636,13 +734,13 @@
       background: rgba(255,255,255,.60);
     }
     .hero-big .hero-title{ font-size: 22px; }
-    .hero-big .hero-sub{ max-width: 46ch; }
+    .hero-big .hero-sub{ max-width: 46ch; color: color-mix(in srgb, var(--text) 78%, transparent); }
 
     /* ✅ Fade-in question on Home */
     .home-question{
       margin: 0 0 4px;
       font-size: clamp(22px, 3.3vw, 34px);
-      font-weight: 600;
+      font-weight: 650;
       letter-spacing: .15px;
       line-height: 1.15;
     }
@@ -658,7 +756,6 @@
 
     /* Reduce motion */
     @media (prefers-reduced-motion: reduce){
-      .hero-tile::before{ animation: none; }
       .hero-tile{ transition: none; }
       .home-qfade{ transition: none; opacity: 1; transform:none; }
     }
@@ -1286,9 +1383,6 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
 
     /***********************
      * ✅ UPDATED HOME
-     * - removes "Hi, I'm Journal Boo..." title/subtitle
-     * - adds fade-in question + large left tile + stacked right tiles
-     * - all shimmer/pop handled in CSS above
      ***********************/
     async function renderHome(){
       await setViewHtml(`
@@ -1301,9 +1395,9 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
           <div class="hero-tile hero-big" data-route="free" tabindex="0" role="button" aria-label="Free writing">
             <div class="hero-glow" aria-hidden="true"></div>
             <div class="hero-body">
-              <div class="hero-icon" aria-hidden="true"></div>
+              <div class="hero-icon" aria-hidden="true">✍️</div>
               <div class="hero-text">
-                <h3 class="hero-title"></h3>
+                <h3 class="hero-title">Free writing</h3>
                 <p class="hero-sub">Open your journal and let it flow — no prompts, no pressure.</p>
               </div>
             </div>
@@ -1340,9 +1434,9 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
         <div class="list">
           <div class="entry" id="blogLink" style="cursor:pointer;">
             <div class="meta meta-center">
-  <span>Munchkin Boo’s private journal… Keep out!</span>
-  <span></span>
-</div>
+              <span>Munchkin Boo’s private journal… Keep out!</span>
+              <span></span>
+            </div>
             <p class="preview"></p>
           </div>
         </div>
