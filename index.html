@@ -523,28 +523,6 @@
       border-color: rgba(49,201,129,.35);
     }
 
-    .hero-tile::before{
-      content:"";
-      position:absolute;
-      inset:-45%;
-      background: linear-gradient(
-        110deg,
-        transparent 35%,
-        rgba(255,255,255,.08) 45%,
-        rgba(255,255,255,.18) 50%,
-        rgba(255,255,255,.08) 55%,
-        transparent 65%
-      );
-      transform: translateX(-35%) rotate(6deg);
-      animation: heroShimmer 3.8s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes heroShimmer{
-      0%   { transform: translateX(-35%) rotate(6deg); opacity: .65; }
-      50%  { transform: translateX(35%) rotate(6deg);  opacity: 1; }
-      100% { transform: translateX(-35%) rotate(6deg); opacity: .65; }
-    }
-
     .hero-glow{
       position:absolute;
       inset:-70px;
@@ -1288,7 +1266,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
           <div class="hero-tile hero-big" data-route="free" tabindex="0" role="button" aria-label="Free writing">
             <div class="hero-glow" aria-hidden="true"></div>
             <div class="hero-body">
-              <div class="hero-icon" aria-hidden="true">✍️</div>
+              <div class="hero-icon" aria-hidden="true"></div>
               <div class="hero-text">
                 <h3 class="hero-title">Free writing</h3>
                 <p class="hero-sub">Open your journal and let it flow — no prompts, no pressure.</p>
