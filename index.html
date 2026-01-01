@@ -26,7 +26,7 @@
       --toast-bg: rgba(255,255,255,.76);
       --focus: rgba(138,106,43,.26);
 
-      /* NEW: hero overlay (theme-aware) */
+      /* NEW: hero overlay (-aware) */
       --hero-overlay-top: rgba(0,0,0,.22);
       --hero-overlay-bot: rgba(0,0,0,.56);
 
@@ -921,7 +921,7 @@
 <script data-goatcounter="https://munchkin-boo.goatcounter.com/count"
   async src="//gc.zgo.at/count.js"></script>
 
-<!-- ✅ Racing Green is the default theme on load -->
+<!-- ✅ Charcoal is the default theme on load -->
 <body data-theme="charcoal">
 
   <!-- ✅ LANDING PAGE -->
@@ -945,18 +945,6 @@
         <div class="top-actions">
           <button class="pill" id="btnHome" title="Home">Home</button>
           <button class="pill" id="btnJournal" title="My Journal">My Journal</button>
-
-          <!-- ✅ Theme dropdown (pill-style) -->
-          <div class="pill-select" title="Theme">
-            <label for="themeSelect">Theme:</label>
-            <select id="themeSelect" aria-label="Theme">
-              <option value="charcoal">Charcoal Grey</option>
-              <option value="light">Light</option>
-              <option value="racing-green">Racing Green</option>
-              <option value="rose-pink">Rose Pink</option>
-            </select>
-            <span class="chev" aria-hidden="true"></span>
-          </div>
 
           <button class="pill" id="btnMusicToggle" title="Toggle music">
             Music: <span id="musicState">Off</span>
