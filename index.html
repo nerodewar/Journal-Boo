@@ -476,6 +476,179 @@
       .pill-select{ padding: 9px 10px; }
       .card-inner{ padding: 18px; }
     }
+
+    /***********************
+     * ✅ NEW: Home hero tiles (shimmer + pop)
+     ***********************/
+    .home-hero{
+      display:grid;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 14px;
+      margin-top: 8px;
+      align-items:stretch;
+    }
+    @media (max-width: 860px){
+      .home-hero{ grid-template-columns: 1fr; }
+    }
+    .home-stack{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .hero-tile{
+      position: relative;
+      border: var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      user-select:none;
+      transform: translateZ(0);
+      transition: transform 220ms ease, background 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+    }
+    .hero-tile:hover{
+      transform: translateY(-3px) scale(1.01);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    }
+    .hero-tile:active{
+      transform: translateY(-1px) scale(0.995);
+    }
+    .hero-tile:focus-visible{
+      outline:none;
+      box-shadow:
+        0 0 0 3px rgba(49,201,129,.18),
+        var(--shadow);
+      border-color: rgba(49,201,129,.35);
+    }
+
+    .hero-tile::before{
+      content:"";
+      position:absolute;
+      inset:-45%;
+      background: linear-gradient(
+        110deg,
+        transparent 35%,
+        rgba(255,255,255,.08) 45%,
+        rgba(255,255,255,.18) 50%,
+        rgba(255,255,255,.08) 55%,
+        transparent 65%
+      );
+      transform: translateX(-35%) rotate(6deg);
+      animation: heroShimmer 3.8s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes heroShimmer{
+      0%   { transform: translateX(-35%) rotate(6deg); opacity: .65; }
+      50%  { transform: translateX(35%) rotate(6deg);  opacity: 1; }
+      100% { transform: translateX(-35%) rotate(6deg); opacity: .65; }
+    }
+
+    .hero-glow{
+      position:absolute;
+      inset:-70px;
+      background:
+        radial-gradient(260px 180px at 18% 25%, rgba(49,201,129,.20), transparent 70%),
+        radial-gradient(260px 180px at 86% 22%, rgba(201,167,106,.18), transparent 70%),
+        radial-gradient(260px 220px at 55% 88%, rgba(255,151,186,.12), transparent 70%);
+      filter: blur(10px);
+      opacity: .9;
+      pointer-events:none;
+      transition: opacity 220ms ease;
+    }
+    .hero-tile:hover .hero-glow{ opacity: 1; }
+
+    .hero-body{
+      position:relative;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      padding: 16px 16px;
+    }
+
+    .hero-icon{
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      font-size: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      box-shadow: 0 10px 22px rgba(0,0,0,.20);
+      flex: 0 0 auto;
+    }
+    body[data-theme="light"] .hero-icon{
+      background: rgba(255,255,255,.55);
+      box-shadow: 0 10px 22px rgba(0,0,0,.08);
+      border: 1px solid rgba(0,0,0,.10);
+    }
+
+    .hero-text{ display:flex; flex-direction:column; gap: 6px; }
+    .hero-title{
+      margin:0;
+      font-weight: 650;
+      font-size: 18px;
+      letter-spacing: .15px;
+    }
+    .hero-sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .hero-big{
+      min-height: 250px;
+      display:flex;
+      align-items:flex-end;
+    }
+    .hero-big .hero-body{
+      padding: 20px 20px;
+      align-items:flex-end;
+    }
+    .hero-big .hero-icon{
+      position:absolute;
+      top: 16px;
+      left: 16px;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      font-size: 30px;
+      background: rgba(0,0,0,.10);
+    }
+    body[data-theme="light"] .hero-big .hero-icon{
+      background: rgba(255,255,255,.60);
+    }
+    .hero-big .hero-title{ font-size: 22px; }
+    .hero-big .hero-sub{ max-width: 46ch; }
+
+    /* ✅ Fade-in question on Home */
+    .home-question{
+      margin: 0 0 4px;
+      font-size: clamp(22px, 3.3vw, 34px);
+      font-weight: 600;
+      letter-spacing: .15px;
+      line-height: 1.15;
+    }
+    .home-qfade{
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+    .home-qfade.show{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .hero-tile::before{ animation: none; }
+      .hero-tile{ transition: none; }
+      .home-qfade{ transition: none; opacity: 1; transform:none; }
+    }
   </style>
 </head>
 
@@ -1098,25 +1271,54 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       document.getElementById("backJournal").addEventListener("click", () => go("journal"));
     }
 
+    /***********************
+     * ✅ UPDATED HOME
+     * - removes "Hi, I'm Journal Boo..." title/subtitle
+     * - adds fade-in question + large left tile + stacked right tiles
+     * - all shimmer/pop handled in CSS above
+     ***********************/
     async function renderHome(){
       await setViewHtml(`
-        <h2 class="title">Hi, I’m Journal Boo.</h2>
-        <p class="subtitle">I’m your personal journal companion. What would you like to do today?</p>
+        <div class="home-qfade" id="homeQuestion">
+          <h2 class="home-question">What would you like to do today?</h2>
+        </div>
 
-        <div class="option-grid">
-          <div class="option" data-route="free">
-            <h3>Free writing</h3>
-            <p>Write freely about whatever’s on your mind.</p>
+        <div class="home-hero" role="navigation" aria-label="Home actions">
+          <!-- Left: Big tile -->
+          <div class="hero-tile hero-big" data-route="free" tabindex="0" role="button" aria-label="Free writing">
+            <div class="hero-glow" aria-hidden="true"></div>
+            <div class="hero-body">
+              <div class="hero-icon" aria-hidden="true">✍️</div>
+              <div class="hero-text">
+                <h3 class="hero-title">Free writing</h3>
+                <p class="hero-sub">Open your journal and let it flow — no prompts, no pressure.</p>
+              </div>
+            </div>
           </div>
 
-          <div class="option" data-route="medList">
-            <h3>Unwinding meditation</h3>
-            <p>Choose a calm written meditation to read at your own pace.</p>
-          </div>
+          <!-- Right: stacked small tiles -->
+          <div class="home-stack">
+            <div class="hero-tile" data-route="medList" tabindex="0" role="button" aria-label="Meditations">
+              <div class="hero-glow" aria-hidden="true"></div>
+              <div class="hero-body">
+                <div class="hero-icon" aria-hidden="true">🫧</div>
+                <div class="hero-text">
+                  <h3 class="hero-title">Meditations</h3>
+                  <p class="hero-sub">Choose a calm written meditation to read at your own pace.</p>
+                </div>
+              </div>
+            </div>
 
-          <div class="option" data-route="poetry">
-            <h3>Poetry Corner</h3>
-            <p>Gentle poems — calm, kind, and comforting.</p>
+            <div class="hero-tile" data-route="poetry" tabindex="0" role="button" aria-label="Poetry Corner">
+              <div class="hero-glow" aria-hidden="true"></div>
+              <div class="hero-body">
+                <div class="hero-icon" aria-hidden="true">🪶</div>
+                <div class="hero-text">
+                  <h3 class="hero-title">Poetry Corner</h3>
+                  <p class="hero-sub">Gentle poems — calm, kind, and comforting.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1133,8 +1335,20 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
         </div>
       `);
 
-      viewEl.querySelectorAll(".option").forEach(el => {
-        el.addEventListener("click", () => go(el.dataset.route));
+      // fade-in question
+      const q = document.getElementById("homeQuestion");
+      requestAnimationFrame(() => q?.classList.add("show"));
+
+      // click wiring
+      viewEl.querySelectorAll(".hero-tile").forEach(el => {
+        const route = el.getAttribute("data-route");
+        el.addEventListener("click", () => go(route));
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            go(route);
+          }
+        });
       });
 
       const blogLink = document.getElementById("blogLink");
@@ -1275,7 +1489,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       `).join("");
 
       await setViewHtml(`
-        <p class="kicker">Unwinding meditation</p>
+        <p class="kicker">Meditations</p>
         <h2 class="title">Welcome.</h2>
         <p class="subtitle">
           You can choose a meditation that feels right for you right now.
