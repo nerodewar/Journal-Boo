@@ -430,6 +430,11 @@
       border: 1px solid rgba(214,125,125,.35);
       background: rgba(214,125,125,.10);
     }
+    .btn:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none !important;
+    }
 
     .divider{
       height: 1px;
@@ -438,7 +443,7 @@
       opacity: .7;
     }
 
-    textarea, input[type="email"], select{
+    textarea, input[type="email"], input[type="text"], select{
       width: 100%;
       border: var(--line);
       background: var(--input-bg);
@@ -808,11 +813,42 @@
       line-height: 1.55;
       font-family: var(--font-ui);
     }
+
+    /* ✅ NEW: custom mood field */
+    .mood-custom{
+      margin-top: 10px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px dashed color-mix(in srgb, var(--text) 18%, transparent);
+      background: color-mix(in srgb, var(--surface2) 70%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .mood-custom .label{
+      font-size: 13px;
+      color: var(--muted2);
+      margin: 0;
+    }
+    .mood-custom input[type="text"]{
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-size: 15px;
+    }
+    .mood-custom .tiny{
+      font-size: 12.5px;
+      color: var(--muted2);
+      margin: 0;
+      line-height: 1.35;
+    }
+
     .mood-grid{
       display:grid;
       grid-template-columns: 1fr;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
     @media (min-width: 520px){
       .mood-grid{ grid-template-columns: 1fr 1fr; }
@@ -823,13 +859,15 @@
       border-radius: 16px;
       padding: 12px 12px;
       cursor:pointer;
-      transition: transform 3.0s ease, background 3.0s ease, border-color 3.0s ease, box-shadow .12s ease;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       text-align:left;
       font-family: var(--font-ui);
       color: var(--text);
       font-size: 14px;
+      position: relative;
+      overflow: hidden;
     }
     .mood-btn:hover{ background: var(--surface); transform: translateY(-1px); }
     .mood-btn:focus-visible{
@@ -837,6 +875,23 @@
       box-shadow: 0 0 0 3px var(--focus), var(--shadow);
       border-color: rgba(255,255,255,.18);
     }
+    /* ✅ Selected state (aesthetic + clear) */
+    .mood-btn.selected{
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      background: color-mix(in srgb, var(--accent) 14%, var(--surface2));
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+    .mood-btn.selected::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(240px 180px at 18% 15%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 68%),
+        radial-gradient(260px 190px at 88% 86%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%);
+      opacity: .6;
+      pointer-events:none;
+    }
+
     .modal-footer{
       display:flex;
       align-items:center;
@@ -935,13 +990,21 @@
         <h3 class="modal-title" id="moodModalTitle">Just checking in with you.</h3>
         <p class="modal-sub" id="moodModalSub">How are you feeling right now?</p>
 
+        <!-- ✅ NEW: custom mood input -->
+        <div class="mood-custom">
+          <p class="label">If none of these fit, you can type your own.</p>
+          <input id="moodCustomInput" type="text" placeholder="e.g. hopeful, worn out, proud, fragile…" autocomplete="off" />
+          <p class="tiny">Tip: you can still tap a button below — whichever feels closest.</p>
+        </div>
+
         <div class="mood-grid" id="moodGrid"></div>
       </div>
 
       <div class="modal-footer">
         <p class="modal-reply" id="moodReply" aria-live="polite"></p>
         <div class="modal-actions">
-          <button class="btn ghost" id="moodCancel" type="button">Cancel</button>
+          <button class="btn ghost" id="moodCancel" type="button">Skip</button>
+          <button class="btn primary" id="moodContinue" type="button" disabled>Continue</button>
         </div>
       </div>
     </div>
@@ -997,8 +1060,8 @@
       theme: "racing-green",
 
       freeText: "",
-      freeMoodBefore: null,   // ✅ NEW
-      freeMoodAfter: null,    // ✅ NEW
+      freeMoodBefore: null,   // ✅ can be mood id OR custom string
+      freeMoodAfter: null,    // ✅ can be mood id OR custom string
 
       meditationId: null,
       lastSavedEntryId: null,
@@ -1024,6 +1087,8 @@
     const moodGridEl = document.getElementById("moodGrid");
     const moodReplyEl = document.getElementById("moodReply");
     const moodCancelBtn = document.getElementById("moodCancel");
+    const moodContinueBtn = document.getElementById("moodContinue");
+    const moodCustomInput = document.getElementById("moodCustomInput");
 
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
@@ -1201,32 +1266,33 @@
     function moodById(id){
       return MOODS.find(m => m.id === id) || null;
     }
-    function moodLabel(id){
-      const m = moodById(id);
-      return m ? m.label : "";
+
+    // ✅ Supports either a mood id OR a custom string
+    function moodDisplay(val){
+      if (!val) return "";
+      const m = moodById(val);
+      return m ? m.label : String(val);
     }
 
-    function getMoodReply(phase, moodId){
-      // phase: "before" | "after"
-      const m = moodById(moodId);
+    function getMoodReply(phase, moodValue){
+      // moodValue may be an id OR custom string
+      const m = moodById(moodValue);
       const tone = m?.tone || "mid";
 
       if (phase === "before"){
-        if (tone === "up") return "Glad to hear that! Let’s get started…";
-        if (tone === "down") return "I’m sorry you’re feeling that way… Let’s make a start.";
-        return "Okay. Let’s get started…";
+        if (tone === "up") return "Glad to hear that! When you’re ready, we can begin.";
+        if (tone === "down") return "I’m sorry you’re feeling that way… When you’re ready, we’ll begin gently.";
+        return "Okay. When you’re ready, we can begin.";
       } else {
-        // after
-        if (tone === "up") return "Glad to hear that. Take a gentle breath.";
-        if (tone === "down") return "I’m sorry you’re feeling that way. Thank you for showing up.";
+        if (tone === "up") return "Glad to hear that. Take a gentle breath — you did well showing up.";
+        if (tone === "down") return "I’m sorry you’re feeling that way. Thank you for showing up anyway.";
         return "Thank you for checking in.";
       }
     }
 
     function openMoodModal({ phase }) {
-      // Returns Promise<string|null> moodId (or null if cancelled)
+      // Returns Promise<string|null> mood value (id OR custom string) (or null if skipped)
       return new Promise((resolve) => {
-        // Title/sub copy per phase
         if (phase === "before"){
           moodTitleEl.textContent = "Just checking in with you.";
           moodSubEl.textContent = "How are you feeling right now?";
@@ -1235,10 +1301,30 @@
           moodSubEl.textContent = "How are you feeling after writing?";
         }
 
-        // Build buttons
         moodGridEl.innerHTML = "";
         moodReplyEl.textContent = "";
+        moodContinueBtn.disabled = true;
+        moodCustomInput.value = "";
+        let selected = null;
         let done = false;
+
+        function setSelected(val){
+          selected = val;
+          moodContinueBtn.disabled = !selected;
+
+          // Highlight selected button if it’s one of the presets
+          moodGridEl.querySelectorAll(".mood-btn").forEach(b => {
+            b.classList.toggle("selected", b.dataset.mood === val);
+          });
+
+          // If selection came from a preset, clear the text box (to reduce ambiguity)
+          const preset = !!moodById(val);
+          if (preset){
+            moodCustomInput.value = "";
+          }
+
+          moodReplyEl.textContent = selected ? getMoodReply(phase, selected) : "";
+        }
 
         function cleanupAndClose(val){
           if (done) return;
@@ -1251,6 +1337,9 @@
           document.removeEventListener("keydown", onKeydown);
           moodBackdrop.removeEventListener("click", onBackdropClick);
           moodCancelBtn.removeEventListener("click", onCancel);
+          moodContinueBtn.removeEventListener("click", onContinue);
+          moodCustomInput.removeEventListener("input", onCustomInput);
+          moodCustomInput.removeEventListener("keydown", onCustomKeydown);
 
           // detach button handlers by clearing
           moodGridEl.querySelectorAll("button").forEach(b => b.replaceWith(b.cloneNode(true)));
@@ -1260,6 +1349,11 @@
 
         function onCancel(){
           cleanupAndClose(null);
+        }
+
+        function onContinue(){
+          if (!selected) return;
+          cleanupAndClose(selected);
         }
 
         function onKeydown(e){
@@ -1275,17 +1369,43 @@
           }
         }
 
+        function onCustomInput(){
+          const v = (moodCustomInput.value || "").trim();
+          if (v){
+            // clear any preset highlight
+            moodGridEl.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("selected"));
+            setSelected(v);
+          } else {
+            // if user erases, keep selection only if they had a preset selected
+            if (selected && !moodById(selected)){
+              setSelected(null);
+            } else {
+              moodContinueBtn.disabled = !selected;
+              moodReplyEl.textContent = selected ? getMoodReply(phase, selected) : "";
+            }
+          }
+        }
+
+        function onCustomKeydown(e){
+          if (e.key === "Enter"){
+            const v = (moodCustomInput.value || "").trim();
+            if (v){
+              e.preventDefault();
+              setSelected(v);
+              onContinue();
+            }
+          }
+        }
+
         MOODS.forEach(m => {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "mood-btn";
           btn.textContent = m.label;
+          btn.dataset.mood = m.id;
 
-          btn.addEventListener("click", async () => {
-            moodReplyEl.textContent = getMoodReply(phase, m.id);
-            // small pause so the reply feels like it lands
-            await wait(520);
-            cleanupAndClose(m.id);
+          btn.addEventListener("click", () => {
+            setSelected(m.id);
           });
 
           moodGridEl.appendChild(btn);
@@ -1297,25 +1417,30 @@
         document.body.style.overflow = "hidden";
 
         moodCancelBtn.addEventListener("click", onCancel);
+        moodContinueBtn.addEventListener("click", onContinue);
         moodBackdrop.addEventListener("click", onBackdropClick);
         document.addEventListener("keydown", onKeydown);
 
-        // Focus first mood button for keyboard users
+        moodCustomInput.addEventListener("input", onCustomInput);
+        moodCustomInput.addEventListener("keydown", onCustomKeydown);
+
+        // Focus the custom input first (soft + inviting)
         setTimeout(() => {
-          const first = moodGridEl.querySelector("button");
-          first?.focus();
-        }, 1000);
+          moodCustomInput?.focus();
+        }, 900);
       });
     }
 
     function formatMoodPair(entry){
-      // prefer new fields moodBefore/moodAfter; fall back to old entry.mood
       const before = entry.moodBefore || null;
       const after = entry.moodAfter || null;
 
-      if (before && after) return `${moodLabel(before)} → ${moodLabel(after)}`;
-      if (after) return moodLabel(after);
-      if (before) return moodLabel(before);
+      const b = before ? moodDisplay(before) : "";
+      const a = after ? moodDisplay(after) : "";
+
+      if (b && a) return `${b} → ${a}`;
+      if (a) return a;
+      if (b) return b;
       if (entry.mood) return String(entry.mood);
       return "";
     }
@@ -1817,16 +1942,15 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       const ta = document.getElementById("freeText");
       ta.addEventListener("input", () => { state.freeText = ta.value; });
 
-      // ✅ Mood check-in on entering free writing (cancellable)
+      // ✅ Mood check-in on entering free writing (skippable)
       const beforeMood = await openMoodModal({ phase: "before" });
       if (beforeMood){
         state.freeMoodBefore = beforeMood;
       }
-      // focus the textarea after modal (or cancel)
       ta.focus();
 
       document.getElementById("btnFinishFree").addEventListener("click", async () => {
-        // ✅ Mood check-in on leaving free writing (cancellable)
+        // ✅ Mood check-in on leaving free writing (skippable)
         const afterMood = await openMoodModal({ phase: "after" });
         if (afterMood){
           state.freeMoodAfter = afterMood;
@@ -1840,7 +1964,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
             type: "Free writing",
             // ✅ Keep backwards compatibility (older UI may read entry.mood)
             mood: null,
-            // ✅ New fields
+            // ✅ New fields (id OR custom string)
             moodBefore: state.freeMoodBefore,
             moodAfter: state.freeMoodAfter,
             content: text,
@@ -2120,7 +2244,8 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       const defaultId = state.lastSavedEntryId || (entries[0]?.id || "");
 
       const options = entries.slice(0, 30).map(e => {
-        const label = `${e.type} — ${prettyDate(e.createdAt)}${e.mood ? " • " + e.mood : ""}`;
+        const moodText = formatMoodPair(e);
+        const label = `${e.type} — ${prettyDate(e.createdAt)}${moodText ? " • " + moodText : ""}`;
         const selected = e.id === defaultId ? "selected" : "";
         return `<option value="${escapeHtml(e.id)}" ${selected}>${escapeHtml(label)}</option>`;
       }).join("");
@@ -2178,13 +2303,14 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
           return;
         }
 
+        const moodText = formatMoodPair(e);
         const subject = `Journal Boo — ${e.type} (${new Date(e.createdAt).toLocaleDateString()})`;
         const body =
 `Hi,
 
 Here’s a saved entry from Journal Boo.
 
-${e.type}${e.mood ? " • " + e.mood : ""}
+${e.type}${moodText ? " • " + moodText : ""}
 ${prettyDate(e.createdAt)}
 
 --------------------
@@ -2242,7 +2368,10 @@ ${e.content}
       entries.forEach(e => {
         const div = document.createElement("div");
         div.className = "entry";
-        const mood = e.mood ? ` • ${e.mood}` : "";
+
+        const moodText = formatMoodPair(e);
+        const mood = moodText ? ` • ${escapeHtml(moodText)}` : "";
+
         div.innerHTML = `
           <div class="meta">
             <span>${escapeHtml(e.type)}${mood}</span>
@@ -2275,10 +2404,12 @@ ${e.content}
         const e = entries.find(x => x.id === id);
         if (!e) return;
 
+        const moodText = formatMoodPair(e);
+
         await setViewHtml(`
           <p class="kicker">My Journal</p>
           <h2 class="title">${escapeHtml(e.type)}</h2>
-          <p class="subtitle">${prettyDate(e.createdAt)}${e.mood ? " • " + escapeHtml(e.mood) : ""}</p>
+          <p class="subtitle">${prettyDate(e.createdAt)}${moodText ? " • " + escapeHtml(moodText) : ""}</p>
 
           <div class="med-box">${escapeHtml(e.content)}</div>
 
