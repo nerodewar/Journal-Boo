@@ -169,6 +169,9 @@
       display:flex;
       flex-direction:column;
       gap: 14px;
+
+      /* ✅ NEW: needed so the possessed overlay can sit nicely on top */
+      position: relative;
     }
 
     header{
@@ -461,6 +464,7 @@
       pointer-events: none;
       transition: opacity .2s ease, transform .2s ease;
       box-shadow: 0 10px 25px rgba(0,0,0,.35);
+      z-index: 999999; /* ✅ stay above possessed overlay */
     }
     .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
     body[data-theme="light"] .toast{
@@ -621,11 +625,130 @@
       transform: translateY(0);
     }
 
+    /***********************
+     * ✅ NEW: "Page gets possessed" (Boo Writer icon click)
+     * - triggers only via JS (body.has-possessed)
+     * - short, skippable, respects reduced motion
+     ***********************/
+    .possess-layer{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 99999;
+      opacity: 0;
+      transition: opacity 140ms ease;
+    }
+    body.has-possessed .possess-layer{
+      opacity: 1;
+    }
+
+    /* soft vignette + shimmer */
+    .possess-layer::before{
+      content:"";
+      position:absolute;
+      inset: -20%;
+      background:
+        radial-gradient(900px 700px at 20% 8%, rgba(201,167,106,.18), transparent 55%),
+        radial-gradient(800px 600px at 88% 14%, rgba(201,167,106,.12), transparent 58%),
+        radial-gradient(700px 500px at 60% 88%, rgba(201,167,106,.10), transparent 60%);
+      filter: blur(10px);
+      opacity: .65;
+      transform: translateZ(0);
+      mix-blend-mode: screen;
+    }
+    body[data-theme="light"] .possess-layer::before{
+      mix-blend-mode: multiply;
+      opacity: .25;
+    }
+
+    /* the “ink streak” that zips across */
+    .possess-streak{
+      position:absolute;
+      left: -35%;
+      top: 18%;
+      width: 30%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(201,167,106,.8), transparent);
+      filter: blur(.2px);
+      opacity: 0;
+      transform: rotate(-6deg);
+      animation: none;
+    }
+    body.has-possessed .possess-streak{
+      animation: streakZip 760ms ease-in-out 110ms 1 both;
+    }
+    @keyframes streakZip{
+      0%{ transform: translateX(0) rotate(-6deg); opacity: 0; }
+      10%{ opacity: .8; }
+      45%{ opacity: .95; }
+      100%{ transform: translateX(220vw) rotate(-6deg); opacity: 0; }
+    }
+
+    /* page wobble/tilt lives on the app shell */
+    #jbApp{
+      transform-origin: 50% 20%;
+      will-change: transform, filter;
+    }
+    body.has-possessed #jbApp{
+      animation: possessedWobble 820ms cubic-bezier(.2,.9,.22,1) 0ms 1 both;
+      filter: blur(.75px) saturate(1.06) contrast(1.03);
+    }
+    @keyframes possessedWobble{
+      0%   { transform: rotate(0deg) translateY(0px); }
+      12%  { transform: rotate(-0.65deg) translateY(-1px); }
+      26%  { transform: rotate(0.85deg) translateY(0px); }
+      44%  { transform: rotate(-0.45deg) translateY(0px); }
+      62%  { transform: rotate(0.32deg) translateY(-1px); }
+      78%  { transform: rotate(-0.18deg) translateY(0px); }
+      100% { transform: rotate(0deg) translateY(0px); }
+    }
+
+    /* tiny “blink” */
+    body.has-possessed{
+      animation: possessedBlink 820ms ease 0ms 1 both;
+    }
+    @keyframes possessedBlink{
+      0%, 100%{ }
+      30%{ }
+      31%{ }
+    }
+
+    /* subtle glow outline while possessed */
+    body.has-possessed .card{
+      box-shadow:
+        0 0 0 2px rgba(201,167,106,.14),
+        var(--shadow);
+      transition: box-shadow 120ms ease;
+    }
+
+    /* ✅ BOO WRITER icon button styling */
+    #btnBooWriter{
+      position: relative;
+    }
+    #btnBooWriter::after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: 999px;
+      border: 1px solid rgba(201,167,106,.0);
+      transition: border-color 140ms ease;
+      pointer-events:none;
+    }
+    #btnBooWriter:hover::after{
+      border-color: rgba(201,167,106,.28);
+    }
+
     /* Reduce motion */
     @media (prefers-reduced-motion: reduce){
       .hero-tile::before{ animation: none; }
       .hero-tile{ transition: none; }
       .home-qfade{ transition: none; opacity: 1; transform:none; }
+
+      /* ✅ no possessed motion, only a quick toast */
+      body.has-possessed #jbApp{ animation: none; filter: none; }
+      body.has-possessed .possess-streak{ animation: none; }
+      .possess-layer{ display:none; }
     }
   </style>
 </head>
@@ -635,6 +758,11 @@
 
 <!-- ✅ Racing Green is the default theme on load -->
 <body data-theme="racing-green">
+
+  <!-- ✅ NEW: possession VFX layer (non-interactive) -->
+  <div class="possess-layer" aria-hidden="true">
+    <div class="possess-streak"></div>
+  </div>
 
   <!-- ✅ LANDING PAGE -->
   <section id="jbWelcome" class="jbScreen active" aria-label="Welcome">
@@ -657,6 +785,11 @@
         <div class="top-actions">
           <button class="pill" id="btnHome" title="Home">Home</button>
           <button class="pill" id="btnJournal" title="My Journal">My Journal</button>
+
+          <!-- ✅ NEW: Boo Writer button (top right) -->
+          <button class="pill" id="btnBooWriter" title="Boo Writer">
+            Boo Writer ✨
+          </button>
 
           <!-- ✅ Theme dropdown (pill-style) -->
           <div class="pill-select" title="Theme">
@@ -771,6 +904,73 @@
       if (state.musicOn) fadeToTrack(state.trackId);
       toast("Changed music.");
     });
+
+    /***********************
+     * ✅ NEW: Boo Writer "page possessed" wiring
+     * Only triggers when clicking the Boo Writer icon (top right)
+     ***********************/
+    const booBtn = document.getElementById("btnBooWriter");
+
+    let possessTimer = null;
+    let possessed = false;
+
+    function clearPossession(){
+      clearTimeout(possessTimer);
+      possessTimer = null;
+      possessed = false;
+      document.body.classList.remove("has-possessed");
+    }
+
+    function isReducedMotion(){
+      return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    function possessPage(){
+      if (!booBtn) return;
+
+      // Don't trigger while landing screen is active (optional safety)
+      const welcomeActive = document.getElementById("jbWelcome")?.classList.contains("active");
+      if (welcomeActive) return;
+
+      if (possessed) return;
+      possessed = true;
+
+      // Reduced-motion: no animation, just a little acknowledgement
+      if (isReducedMotion()){
+        toast("Boo Writer says hi.");
+        possessed = false;
+        return;
+      }
+
+      // Trigger CSS animations
+      document.body.classList.add("has-possessed");
+
+      // Auto-clear after the wobble completes
+      possessTimer = setTimeout(() => {
+        clearPossession();
+      }, 900);
+    }
+
+    // Click only
+    booBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      possessPage();
+    });
+
+    // If the user starts typing, cancel immediately (skippable)
+    document.addEventListener("keydown", () => {
+      if (!possessed) return;
+      clearPossession();
+    }, { capture: true });
+
+    // If focus goes into an input/textarea, also cancel
+    document.addEventListener("focusin", (e) => {
+      if (!possessed) return;
+      const t = e.target;
+      if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT" || t.isContentEditable)){
+        clearPossession();
+      }
+    }, { capture: true });
 
     function loadTheme(){
       try{
