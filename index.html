@@ -19,14 +19,14 @@
       --muted2:#6a6862;
       --accent:#8a6a2b;
 
-      /* NEW: refined surface system */
+      /* refined surface system */
       --surface: rgba(255,255,255,.62);
       --surface2: rgba(255,255,255,.40);
       --input-bg: rgba(255,255,255,.70);
       --toast-bg: rgba(255,255,255,.76);
       --focus: rgba(138,106,43,.26);
 
-      /* NEW: hero overlay (-aware) */
+      /* hero overlay (-aware) */
       --hero-overlay-top: rgba(0,0,0,.22);
       --hero-overlay-bot: rgba(0,0,0,.56);
 
@@ -34,7 +34,7 @@
       --line: 1px solid rgba(0,0,0,.10);
       --shadow: 0 14px 38px rgba(0,0,0,.10);
 
-      /* NEW: split typography */
+      /* split typography */
       --font-display: ui-serif, Georgia, "Times New Roman", Times, serif;
       --font-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
@@ -49,9 +49,10 @@
       --line: 1px solid rgba(255,255,255,.07);
       --shadow: 0 14px 38px rgba(0,0,0,.35);
 
-      --surface: rgba(255,255,255,.06);
-      --surface2: rgba(255,255,255,.04);
-      --input-bg: rgba(255,255,255,.05);
+      /* slightly darker + more consistent surfaces */
+      --surface: rgba(255,255,255,.055);
+      --surface2: rgba(255,255,255,.032);
+      --input-bg: rgba(255,255,255,.045);
       --toast-bg: rgba(0,0,0,.55);
       --focus: rgba(201,167,106,.22);
 
@@ -135,7 +136,7 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* NEW: headings use display font for warmth */
+    /* headings use display font for warmth */
     h1,h2,h3,.title,.home-question,.jbWelcomeTitle{
       font-family: var(--font-display);
     }
@@ -174,7 +175,6 @@
       max-width: 820px;
     }
 
-    /* ✅ IMPORTANT: visible by default (no blank screen if JS fails) */
     .jbWelcomeTitle{
       font-size: clamp(22px, 4vw, 34px);
       font-weight: 650;
@@ -325,7 +325,6 @@
       -webkit-appearance: none;
       -moz-appearance: none;
     }
-    /* Simple chevron */
     .pill-select .chev{
       width: 0; height: 0;
       border-left: 5px solid transparent;
@@ -335,7 +334,6 @@
       margin-left: 2px;
       transform: translateY(1px);
     }
-    /* Dropdown menu colors */
     .pill-select select option{
       background: var(--bg);
       color: var(--text);
@@ -555,7 +553,7 @@
 
     /* ✅ Force true center on the blog tile meta line */
     .entry .meta.meta-center{
-      display: block;         /* override the flex row */
+      display: block;
       text-align: center;
       margin-bottom: 8px;
     }
@@ -564,7 +562,7 @@
       width: 100%;
     }
     .entry .meta.meta-center span:last-child{
-      display: none;          /* keep hiding the empty right span */
+      display: none;
     }
 
     .entry .preview{
@@ -606,7 +604,7 @@
     }
 
     /***********************
-     * ✅ Home hero tiles (shimmer + pop)
+     * ✅ Home hero tiles (consistent charcoal-forward tiles)
      ***********************/
     .home-hero{
       display:grid;
@@ -628,7 +626,14 @@
       position: relative;
       border: var(--line);
       border-radius: 22px;
-      background: linear-gradient(180deg, var(--surface), var(--surface2));
+
+      /* consistent tile surface for all tiles */
+      background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 92%, transparent),
+        color-mix(in srgb, var(--surface2) 98%, transparent)
+      );
+
       box-shadow: var(--shadow);
       overflow: hidden;
       cursor: pointer;
@@ -639,18 +644,23 @@
       -webkit-backdrop-filter: blur(12px);
     }
 
+    /* ✅ Make the big tile "big" without changing its color scheme */
     .hero-big{
-      background-image: url("assets/art/free-writing.png");
-      background-size: cover;
-      background-position: center;
+      min-height: 250px;
+      display:flex;
+      align-items:flex-end;
     }
 
+    /* subtle top sheen for the big tile (still same palette) */
     .hero-big::after{
       content:"";
       position:absolute;
       inset:0;
-      background: linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
+      background:
+        radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
+        linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.22));
       z-index:1;
+      pointer-events:none;
     }
 
     .hero-tile:hover{
@@ -666,19 +676,20 @@
       border-color: color-mix(in srgb, var(--accent) 45%, transparent);
     }
 
+    /* ✅ Accent-tinted glow (consistent across tiles + themes) */
     .hero-glow{
       position:absolute;
       inset:-70px;
       background:
-        radial-gradient(400px 400px at 18% 25%, rgba(225, 225, 225, 0.28), transparent 0%),
-        radial-gradient(400px 400px at 86% 22%, rgba(225, 225, 225, 0.20), transparent 0%),
-        radial-gradient(400px 400px at 55% 88%, rgba(225, 225, 225, 0.17), transparent 0%);
-      filter: blur(10px);
-      opacity: .22;
+        radial-gradient(420px 380px at 18% 25%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 65%),
+        radial-gradient(420px 380px at 86% 22%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+        radial-gradient(420px 380px at 55% 88%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 72%);
+      filter: blur(12px);
+      opacity: .18;
       pointer-events:none;
       transition: opacity 220ms ease;
     }
-    .hero-tile:hover .hero-glow{ opacity: 1; }
+    .hero-tile:hover .hero-glow{ opacity: .85; }
 
     .hero-body{
       position:relative;
@@ -696,8 +707,8 @@
       display:grid;
       place-items:center;
       font-size: 22px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.10);
+      border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+      background: color-mix(in srgb, var(--surface2) 70%, transparent);
       box-shadow: 0 10px 22px rgba(0,0,0,.20);
       flex: 0 0 auto;
     }
@@ -717,11 +728,6 @@
       line-height: 1.45;
     }
 
-    .hero-big{
-      min-height: 250px;
-      display:flex;
-      align-items:flex-end;
-    }
     .hero-big .hero-body{
       padding: 20px 20px;
       align-items:flex-end;
@@ -734,10 +740,6 @@
       height: 64px;
       border-radius: 18px;
       font-size: 30px;
-      background: rgba(0,0,0,.10);
-    }
-    body[data-theme="light"] .hero-big .hero-icon{
-      background: rgba(255,255,255,.60);
     }
     .hero-big .hero-title{ font-size: 22px; }
     .hero-big .hero-sub{ max-width: 46ch; color: color-mix(in srgb, var(--text) 78%, transparent); }
@@ -760,7 +762,6 @@
       transform: translateY(0);
     }
 
-    /* Reduce motion */
     @media (prefers-reduced-motion: reduce){
       .hero-tile{ transition: none; }
       .home-qfade{ transition: none; opacity: 1; transform:none; }
@@ -814,7 +815,7 @@
       font-family: var(--font-ui);
     }
 
-    /* ✅ NEW: custom mood field */
+    /* ✅ UPDATED: custom mood field (remove dotted/dashed outline) */
     .mood-custom{
       margin-top: 10px;
       display:flex;
@@ -822,8 +823,11 @@
       gap: 8px;
       padding: 12px 12px;
       border-radius: 16px;
-      border: 1px dashed color-mix(in srgb, var(--text) 18%, transparent);
-      background: color-mix(in srgb, var(--surface2) 70%, transparent);
+
+      /* was: 1px dashed ... */
+      border: var(--line);
+
+      background: color-mix(in srgb, var(--surface2) 80%, transparent);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
@@ -875,7 +879,6 @@
       box-shadow: 0 0 0 3px var(--focus), var(--shadow);
       border-color: rgba(255,255,255,.18);
     }
-    /* ✅ Selected state (aesthetic + clear) */
     .mood-btn.selected{
       border-color: color-mix(in srgb, var(--accent) 55%, transparent);
       background: color-mix(in srgb, var(--accent) 14%, var(--surface2));
@@ -1045,11 +1048,13 @@
       route: "home",
       musicOn: false,
       trackId: "devi-song",
-      theme: "racing-green",
+
+      // ✅ DEFAULT THEME: charcoal (darker by default)
+      theme: "charcoal",
 
       freeText: "",
-      freeMoodBefore: null,   // ✅ can be mood id OR custom string
-      freeMoodAfter: null,    // ✅ can be mood id OR custom string
+      freeMoodBefore: null,
+      freeMoodAfter: null,
 
       meditationId: null,
       lastSavedEntryId: null,
@@ -1107,7 +1112,8 @@
       try{ localStorage.setItem(LS_THEME, state.theme); }catch{}
     }
     function applyTheme(){
-      const t = state.theme || "racing-green";
+      // ✅ fallback stays charcoal to match your default
+      const t = state.theme || "charcoal";
       document.body.setAttribute("data-theme", t);
       if (themeSelectEl) themeSelectEl.value = t;
     }
@@ -1255,7 +1261,6 @@
       return MOODS.find(m => m.id === id) || null;
     }
 
-    // ✅ Supports either a mood id OR a custom string
     function moodDisplay(val){
       if (!val) return "";
       const m = moodById(val);
@@ -1263,7 +1268,6 @@
     }
 
     function getMoodReply(phase, moodValue){
-      // moodValue may be an id OR custom string
       const m = moodById(moodValue);
       const tone = m?.tone || "mid";
 
@@ -1279,7 +1283,6 @@
     }
 
     function openMoodModal({ phase }) {
-      // Returns Promise<string|null> mood value (id OR custom string) (or null if skipped)
       return new Promise((resolve) => {
         if (phase === "before"){
           moodTitleEl.textContent = "Just checking in with you.";
@@ -1300,12 +1303,10 @@
           selected = val;
           moodContinueBtn.disabled = !selected;
 
-          // Highlight selected button if it’s one of the presets
           moodGridEl.querySelectorAll(".mood-btn").forEach(b => {
             b.classList.toggle("selected", b.dataset.mood === val);
           });
 
-          // If selection came from a preset, clear the text box (to reduce ambiguity)
           const preset = !!moodById(val);
           if (preset){
             moodCustomInput.value = "";
@@ -1329,16 +1330,12 @@
           moodCustomInput.removeEventListener("input", onCustomInput);
           moodCustomInput.removeEventListener("keydown", onCustomKeydown);
 
-          // detach button handlers by clearing
           moodGridEl.querySelectorAll("button").forEach(b => b.replaceWith(b.cloneNode(true)));
 
           resolve(val);
         }
 
-        function onCancel(){
-          cleanupAndClose(null);
-        }
-
+        function onCancel(){ cleanupAndClose(null); }
         function onContinue(){
           if (!selected) return;
           cleanupAndClose(selected);
@@ -1360,11 +1357,9 @@
         function onCustomInput(){
           const v = (moodCustomInput.value || "").trim();
           if (v){
-            // clear any preset highlight
             moodGridEl.querySelectorAll(".mood-btn").forEach(b => b.classList.remove("selected"));
             setSelected(v);
           } else {
-            // if user erases, keep selection only if they had a preset selected
             if (selected && !moodById(selected)){
               setSelected(null);
             } else {
@@ -1391,15 +1386,10 @@
           btn.className = "mood-btn";
           btn.textContent = m.label;
           btn.dataset.mood = m.id;
-
-          btn.addEventListener("click", () => {
-            setSelected(m.id);
-          });
-
+          btn.addEventListener("click", () => setSelected(m.id));
           moodGridEl.appendChild(btn);
         });
 
-        // Show
         moodBackdrop.classList.add("active");
         moodBackdrop.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
@@ -1412,10 +1402,7 @@
         moodCustomInput.addEventListener("input", onCustomInput);
         moodCustomInput.addEventListener("keydown", onCustomKeydown);
 
-        // Focus the custom input first (soft + inviting)
-        setTimeout(() => {
-          moodCustomInput?.focus();
-        }, 900);
+        setTimeout(() => { moodCustomInput?.focus(); }, 900);
       });
     }
 
@@ -1820,11 +1807,9 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
         </div>
       `);
 
-      // fade-in question
       const q = document.getElementById("homeQuestion");
       requestAnimationFrame(() => q?.classList.add("show"));
 
-      // click wiring
       viewEl.querySelectorAll(".hero-tile").forEach(el => {
         const route = el.getAttribute("data-route");
         el.addEventListener("click", () => go(route));
@@ -1910,7 +1895,6 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
     }
 
     async function renderFree(){
-      // reset mood state for a new free writing session
       state.freeMoodBefore = null;
       state.freeMoodAfter = null;
 
@@ -1930,7 +1914,6 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       const ta = document.getElementById("freeText");
       ta.addEventListener("input", () => { state.freeText = ta.value; });
 
-      // ✅ Mood check-in on entering free writing (skippable)
       const beforeMood = await openMoodModal({ phase: "before" });
       if (beforeMood){
         state.freeMoodBefore = beforeMood;
@@ -1938,7 +1921,6 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       ta.focus();
 
       document.getElementById("btnFinishFree").addEventListener("click", async () => {
-        // ✅ Mood check-in on leaving free writing (skippable)
         const afterMood = await openMoodModal({ phase: "after" });
         if (afterMood){
           state.freeMoodAfter = afterMood;
@@ -1950,9 +1932,7 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
             id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
             createdAt: nowIso(),
             type: "Free writing",
-            // ✅ Keep backwards compatibility (older UI may read entry.mood)
             mood: null,
-            // ✅ New fields (id OR custom string)
             moodBefore: state.freeMoodBefore,
             moodAfter: state.freeMoodAfter,
             content: text,
@@ -1987,9 +1967,6 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       document.getElementById("btnDone").addEventListener("click", () => go("done"));
     }
 
-    /***********************
-     * ✅ Meditations list + detail now from JSON
-     ***********************/
     async function renderMeditationList(){
       const cards = MEDITATIONS_INDEX.map(m => `
         <div class="option" data-med="${escapeHtml(m.id)}">
@@ -2095,9 +2072,6 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       document.getElementById("done").addEventListener("click", () => go("done"));
     }
 
-    /***********************
-     * ✅ Poetry Corner (from JSON)
-     ***********************/
     async function renderPoetryHome(){
       await setViewHtml(`
         <p class="kicker">Poetry Corner</p>
@@ -2433,7 +2407,7 @@ ${e.content}
     (function init(){
       loadSettings();
 
-      // ✅ Theme: racing-green default, but saved preference still wins
+      // ✅ Theme: charcoal default, but saved preference still wins
       loadTheme();
       applyTheme();
 
@@ -2447,10 +2421,8 @@ ${e.content}
 
       viewEl.classList.remove("show");
 
-      // ✅ Pre-render home (app is hidden until Start)
       go("home").then(() => {});
 
-      // ✅ Run landing fades
       runWelcomeAnimation();
     })();
   </script>
