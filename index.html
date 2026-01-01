@@ -644,12 +644,34 @@
       -webkit-backdrop-filter: blur(12px);
     }
 
-    /* ✅ Make the big tile "big" without changing its color scheme */
-    .hero-big{
-      min-height: 250px;
-      display:flex;
-      align-items:flex-end;
-    }
+    /* ✅ Big tile keeps your artwork, but still matches the charcoal vibe */
+.hero-big{
+  min-height: 250px;
+  display:flex;
+  align-items:flex-end;
+
+  /* RESTORED artwork */
+  background-image: url("assets/art/free-writing.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* fallback if image fails */
+  background-color: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+/* Keep the overlay so it stays readable + charcoal-consistent */
+.hero-big::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
+    linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
+  z-index:1;
+  pointer-events:none;
+}
+
 
     /* subtle top sheen for the big tile (still same palette) */
     .hero-big::after{
