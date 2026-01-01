@@ -588,6 +588,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       font-family: var(--font-ui);
+      z-index: 20000;
     }
     .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
 
@@ -759,6 +760,106 @@
       .hero-tile{ transition: none; }
       .home-qfade{ transition: none; opacity: 1; transform:none; }
     }
+
+    /***********************
+     * ✅ Mood check-in modal
+     ***********************/
+    .modal-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.46);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 15000;
+    }
+    .modal-backdrop.active{ display:flex; }
+
+    .modal{
+      width: min(560px, 100%);
+      border: var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, var(--surface), var(--surface2));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow:hidden;
+      transform: translateY(8px);
+      opacity: 0;
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .modal-backdrop.active .modal{
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .modal-inner{ padding: 18px 18px 16px; }
+    .modal-title{
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 650;
+      letter-spacing: .12px;
+      font-family: var(--font-display);
+    }
+    .modal-sub{
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14.5px;
+      line-height: 1.55;
+      font-family: var(--font-ui);
+    }
+    .mood-grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (min-width: 520px){
+      .mood-grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .mood-btn{
+      border: var(--line);
+      background: var(--surface2);
+      border-radius: 16px;
+      padding: 12px 12px;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-align:left;
+      font-family: var(--font-ui);
+      color: var(--text);
+      font-size: 14px;
+    }
+    .mood-btn:hover{ background: var(--surface); transform: translateY(-1px); }
+    .mood-btn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
+    .modal-footer{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 14px 14px;
+      border-top: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+      background: color-mix(in srgb, var(--surface2) 65%, transparent);
+    }
+    .modal-reply{
+      color: var(--muted2);
+      font-size: 13px;
+      line-height: 1.45;
+      margin: 0;
+      min-height: 1.45em;
+      flex: 1 1 auto;
+      font-family: var(--font-ui);
+    }
+    .modal-actions{
+      display:flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
   </style>
 </head>
 
@@ -827,6 +928,25 @@
   <audio id="bgm" preload="auto" loop></audio>
   <audio id="medPlayer" preload="none"></audio>
 
+  <!-- ✅ Mood check-in modal (hidden by default) -->
+  <div id="moodModalBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="moodModalTitle">
+      <div class="modal-inner">
+        <h3 class="modal-title" id="moodModalTitle">Just checking in with you.</h3>
+        <p class="modal-sub" id="moodModalSub">How are you feeling right now?</p>
+
+        <div class="mood-grid" id="moodGrid"></div>
+      </div>
+
+      <div class="modal-footer">
+        <p class="modal-reply" id="moodReply" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button class="btn ghost" id="moodCancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /***********************
      * Journal Boo (V1)
@@ -860,6 +980,16 @@
     const LS_EMAIL = "journal_boo_email_v1";
     const LS_THEME = "journal_boo_theme_v1";
 
+    // ✅ Mood options (6 moods)
+    const MOODS = [
+      { id: "quite-happy", label: "Quite happy", tone: "up" },
+      { id: "content",     label: "Content",     tone: "up" },
+      { id: "okay",        label: "Okay",        tone: "mid" },
+      { id: "a-bit-low",   label: "A little low",tone: "down" },
+      { id: "anxious",     label: "Anxious",     tone: "down" },
+      { id: "heavy",       label: "Heavy",       tone: "down" },
+    ];
+
     const state = {
       route: "home",
       musicOn: false,
@@ -867,6 +997,8 @@
       theme: "racing-green",
 
       freeText: "",
+      freeMoodBefore: null,   // ✅ NEW
+      freeMoodAfter: null,    // ✅ NEW
 
       meditationId: null,
       lastSavedEntryId: null,
@@ -884,6 +1016,14 @@
     const musicStateEl = document.getElementById("musicState");
     const musicTrackLabelEl = document.getElementById("musicTrackLabel");
     const themeSelectEl = document.getElementById("themeSelect");
+
+    // ✅ Mood modal nodes
+    const moodBackdrop = document.getElementById("moodModalBackdrop");
+    const moodTitleEl = document.getElementById("moodModalTitle");
+    const moodSubEl = document.getElementById("moodModalSub");
+    const moodGridEl = document.getElementById("moodGrid");
+    const moodReplyEl = document.getElementById("moodReply");
+    const moodCancelBtn = document.getElementById("moodCancel");
 
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
@@ -1053,6 +1193,131 @@
         date: p.date ? String(p.date) : (p.createdAt ? String(p.createdAt) : ""),
         body: String(p.body ?? p.content ?? p.text ?? ""),
       }));
+    }
+
+    /***********************
+     * ✅ Mood helpers + modal
+     ***********************/
+    function moodById(id){
+      return MOODS.find(m => m.id === id) || null;
+    }
+    function moodLabel(id){
+      const m = moodById(id);
+      return m ? m.label : "";
+    }
+
+    function getMoodReply(phase, moodId){
+      // phase: "before" | "after"
+      const m = moodById(moodId);
+      const tone = m?.tone || "mid";
+
+      if (phase === "before"){
+        if (tone === "up") return "Glad to hear that! Let’s get started…";
+        if (tone === "down") return "I’m sorry you’re feeling that way… Let’s make a start.";
+        return "Okay. Let’s get started…";
+      } else {
+        // after
+        if (tone === "up") return "Glad to hear that. Take a gentle breath.";
+        if (tone === "down") return "I’m sorry you’re feeling that way. Thank you for showing up.";
+        return "Thank you for checking in.";
+      }
+    }
+
+    function openMoodModal({ phase }) {
+      // Returns Promise<string|null> moodId (or null if cancelled)
+      return new Promise((resolve) => {
+        // Title/sub copy per phase
+        if (phase === "before"){
+          moodTitleEl.textContent = "Just checking in with you.";
+          moodSubEl.textContent = "How are you feeling right now?";
+        } else {
+          moodTitleEl.textContent = "Thanks for checking in.";
+          moodSubEl.textContent = "How are you feeling after writing?";
+        }
+
+        // Build buttons
+        moodGridEl.innerHTML = "";
+        moodReplyEl.textContent = "";
+        let done = false;
+
+        function cleanupAndClose(val){
+          if (done) return;
+          done = true;
+
+          moodBackdrop.classList.remove("active");
+          moodBackdrop.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+
+          document.removeEventListener("keydown", onKeydown);
+          moodBackdrop.removeEventListener("click", onBackdropClick);
+          moodCancelBtn.removeEventListener("click", onCancel);
+
+          // detach button handlers by clearing
+          moodGridEl.querySelectorAll("button").forEach(b => b.replaceWith(b.cloneNode(true)));
+
+          resolve(val);
+        }
+
+        function onCancel(){
+          cleanupAndClose(null);
+        }
+
+        function onKeydown(e){
+          if (e.key === "Escape"){
+            e.preventDefault();
+            cleanupAndClose(null);
+          }
+        }
+
+        function onBackdropClick(e){
+          if (e.target === moodBackdrop){
+            cleanupAndClose(null);
+          }
+        }
+
+        MOODS.forEach(m => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "mood-btn";
+          btn.textContent = m.label;
+
+          btn.addEventListener("click", async () => {
+            moodReplyEl.textContent = getMoodReply(phase, m.id);
+            // small pause so the reply feels like it lands
+            await wait(520);
+            cleanupAndClose(m.id);
+          });
+
+          moodGridEl.appendChild(btn);
+        });
+
+        // Show
+        moodBackdrop.classList.add("active");
+        moodBackdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        moodCancelBtn.addEventListener("click", onCancel);
+        moodBackdrop.addEventListener("click", onBackdropClick);
+        document.addEventListener("keydown", onKeydown);
+
+        // Focus first mood button for keyboard users
+        setTimeout(() => {
+          const first = moodGridEl.querySelector("button");
+          first?.focus();
+        }, 50);
+      });
+    }
+
+    function formatMoodPair(entry){
+      // prefer new fields moodBefore/moodAfter; fall back to old entry.mood
+      const before = entry.moodBefore || null;
+      const after = entry.moodAfter || null;
+
+      if (before && after) return `${moodLabel(before)} → ${moodLabel(after)}`;
+      if (after) return moodLabel(after);
+      if (before) return moodLabel(before);
+      if (entry.mood) return String(entry.mood);
+      return "";
     }
 
     /***********************
@@ -1532,6 +1797,10 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
     }
 
     async function renderFree(){
+      // reset mood state for a new free writing session
+      state.freeMoodBefore = null;
+      state.freeMoodAfter = null;
+
       await setViewHtml(`
         <p class="kicker">Free writing</p>
         <h2 class="title">Take your time.</h2>
@@ -1548,21 +1817,43 @@ Journal Boo is designed to be a quiet, private space for reflection — not a pl
       const ta = document.getElementById("freeText");
       ta.addEventListener("input", () => { state.freeText = ta.value; });
 
+      // ✅ Mood check-in on entering free writing (cancellable)
+      const beforeMood = await openMoodModal({ phase: "before" });
+      if (beforeMood){
+        state.freeMoodBefore = beforeMood;
+      }
+      // focus the textarea after modal (or cancel)
+      ta.focus();
+
       document.getElementById("btnFinishFree").addEventListener("click", async () => {
+        // ✅ Mood check-in on leaving free writing (cancellable)
+        const afterMood = await openMoodModal({ phase: "after" });
+        if (afterMood){
+          state.freeMoodAfter = afterMood;
+        }
+
         const text = (state.freeText || "").trim();
         if (text.length){
           addEntry({
             id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2),
             createdAt: nowIso(),
             type: "Free writing",
+            // ✅ Keep backwards compatibility (older UI may read entry.mood)
             mood: null,
+            // ✅ New fields
+            moodBefore: state.freeMoodBefore,
+            moodAfter: state.freeMoodAfter,
             content: text,
           });
           toast("Saved.");
         } else {
           toast("Nothing to save — that’s okay.");
         }
+
         state.freeText = "";
+        state.freeMoodBefore = null;
+        state.freeMoodAfter = null;
+
         await go("completeFree");
       });
 
