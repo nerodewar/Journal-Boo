@@ -1034,6 +1034,20 @@
     0 0 5px rgba(201,167,106,.32),
     0 0 12px rgba(201,167,106,.18);
 }
+    /* ✅ Bring back the pop (lift) without the gold fill-glow */
+.hero-tile:hover{
+  transform: translateY(-3px) scale(1.01);
+}
+
+.hero-tile:active{
+  transform: translateY(-1px) scale(0.995);
+}
+
+/* Optional: subtle border warm-up (keeps it premium) */
+.hero-tile:hover,
+.hero-tile:focus-visible{
+  border-color: rgba(201,167,106,.30);
+}
   </style>
 </head>
 
