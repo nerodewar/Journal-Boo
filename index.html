@@ -230,6 +230,7 @@
       display:flex;
       justify-content:center;
       padding: 28px 14px 40px;
+      position: relative;
     }
 
     .shell{
@@ -549,27 +550,26 @@
       margin-bottom: 8px;
       font-family: var(--font-ui);
     }
-/* 🔥 Red glow on hover for Munchkin Boo's private journal */
-#blogLink:hover .meta span{
-  text-shadow:
-    0 0 6px rgba(255,80,80,.6),
-    0 0 14px rgba(255,40,40,.45);
-}
-    
-#blogLink:hover .meta,
-#blogLink:hover .preview{
-  color: rgba(255,180,180,.95);
-}
+    /* 🔥 Red glow on hover for Munchkin Boo's private journal */
+    #blogLink:hover .meta span{
+      text-shadow:
+        0 0 6px rgba(255,80,80,.6),
+        0 0 14px rgba(255,40,40,.45);
+    }
+
+    #blogLink:hover .meta,
+    #blogLink:hover .preview{
+      color: rgba(255,180,180,.95);
+    }
     @keyframes redPulse{
-  0%   { box-shadow: 0 0 0 1px rgba(255,80,80,.25), 0 0 14px rgba(255,60,60,.35); }
-  100% { box-shadow: 0 0 0 1px rgba(255,80,80,.45), 0 0 28px rgba(255,40,40,.55); }
-}
+      0%   { box-shadow: 0 0 0 1px rgba(255,80,80,.25), 0 0 14px rgba(255,60,60,.35); }
+      100% { box-shadow: 0 0 0 1px rgba(255,80,80,.45), 0 0 28px rgba(255,40,40,.55); }
+    }
 
-#blogLink:hover{
-  animation: redPulse 1.4s ease-in-out infinite alternate;
-}
+    #blogLink:hover{
+      animation: redPulse 1.4s ease-in-out infinite alternate;
+    }
 
-    
     /* ✅ Force true center on the blog tile meta line */
     .entry .meta.meta-center{
       display: block;
@@ -632,7 +632,7 @@
       margin-top: 8px;
       align-items:stretch;
     }
-    
+
     @media (max-width: 860px){
       .home-hero{ grid-template-columns: 1fr; }
     }
@@ -663,35 +663,34 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-    
+
     /* ✅ Big tile keeps your artwork, but still matches the charcoal vibe */
-.hero-big{
-  min-height: 250px;
-  display:flex;
-  align-items:flex-end;
+    .hero-big{
+      min-height: 250px;
+      display:flex;
+      align-items:flex-end;
 
-  /* RESTORED artwork */
-  background-image: url("assets/art/free-writing.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+      /* RESTORED artwork */
+      background-image: url("assets/art/free-writing.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
 
-  /* fallback if image fails */
-  background-color: color-mix(in srgb, var(--surface) 70%, transparent);
-}
+      /* fallback if image fails */
+      background-color: color-mix(in srgb, var(--surface) 70%, transparent);
+    }
 
-/* Keep the overlay so it stays readable + charcoal-consistent */
-.hero-big::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
-    linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
-  z-index:1;
-  pointer-events:none;
-}
-
+    /* Keep the overlay so it stays readable + charcoal-consistent */
+    .hero-big::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
+        linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
+      z-index:1;
+      pointer-events:none;
+    }
 
     /* subtle top sheen for the big tile (still same palette) */
     .hero-big::after{
@@ -713,46 +712,46 @@
       box-shadow: 0 0 0 3px var(--focus), var(--shadow);
       border-color: color-mix(in srgb, var(--accent) 45%, transparent);
     }
-    
-/* Base stacking context */
-.hero-tile{
-  position: relative;
-  isolation: isolate; /* important: keeps z-index layers contained */
-}
 
-/* Edge glow layer */
-.hero-tile::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius: inherit;
-  pointer-events:none;
+    /* Base stacking context */
+    .hero-tile{
+      position: relative;
+      isolation: isolate; /* important: keeps z-index layers contained */
+    }
 
-  opacity: 0;
-  transition: opacity 260ms ease;
+    /* Edge glow layer */
+    .hero-tile::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius: inherit;
+      pointer-events:none;
 
-  background:
-    radial-gradient(900px 240px at 25% 0%,
-      color-mix(in srgb, var(--accent) 42%, transparent),
-      transparent 62%),
-    radial-gradient(900px 240px at 75% 100%,
-      color-mix(in srgb, var(--accent) 30%, transparent),
-      transparent 66%);
+      opacity: 0;
+      transition: opacity 260ms ease;
 
-  filter: blur(10px);
+      background:
+        radial-gradient(900px 240px at 25% 0%,
+          color-mix(in srgb, var(--accent) 42%, transparent),
+          transparent 62%),
+        radial-gradient(900px 240px at 75% 100%,
+          color-mix(in srgb, var(--accent) 30%, transparent),
+          transparent 66%);
 
-  /* KEY: sits above artwork/overlay, below content */
-  z-index: 3;
-}
+      filter: blur(10px);
 
-/* Make sure overlay doesn't hide the glow */
-.hero-big::after{
-  z-index: 2; /* was 1 in some versions; ensure it's below ::before */
-}
+      /* KEY: sits above artwork/overlay, below content */
+      z-index: 3;
+    }
 
-/* Glow + content ordering */
-.hero-glow{ z-index: 1; }
-.hero-body{ position: relative; z-index: 4; }
+    /* Make sure overlay doesn't hide the glow */
+    .hero-big::after{
+      z-index: 2; /* was 1 in some versions; ensure it's below ::before */
+    }
+
+    /* Glow + content ordering */
+    .hero-glow{ z-index: 1; }
+    .hero-body{ position: relative; z-index: 4; }
 
     .hero-body{
       position:relative;
@@ -805,13 +804,13 @@
       font-size: 30px;
     }
     /* Darken text ONLY on the big Free Writing tile */
-.hero-big .hero-title{
-  color: #0f0f12; /* or any dark you want */
-}
+    .hero-big .hero-title{
+      color: #0f0f12; /* or any dark you want */
+    }
 
-.hero-big .hero-sub{
-  color: rgba(15,15,18,.75);
-}
+    .hero-big .hero-sub{
+      color: rgba(15,15,18,.75);
+    }
     .hero-big .hero-title{ font-size: 22px; }
     .hero-big .hero-sub{ max-width: 46ch; color: color-mix(in srgb, var((--accent)) 78%, transparent); }
 
@@ -989,65 +988,225 @@
       gap: 8px;
       flex: 0 0 auto;
     }
-    
-/* ========= Hover behavior: ONLY edge outline + gold text glow ========= */
 
-@keyframes goldOutlinePulse {
-  0%{
-    box-shadow:
-      inset 0 0 0 1px rgba(201,167,106,.28),
-      
-  }
-  100%{
-    box-shadow:
-      inset 0 0 0 1px rgba(201,167,106,.55),
-      
-  }
-}
+    /* ========= Hover behavior: ONLY edge outline + gold text glow ========= */
 
-/* Kill any previous "whole tile" glow on hover by hard-resetting shadow first */
-.hero-tile{
-  box-shadow: var(--shadow); /* normal state */
-}
+    @keyframes goldOutlinePulse {
+      0%{
+        box-shadow:
+          inset 0 0 0 1px rgba(201,167,106,.28),
+          ;
+      }
+      100%{
+        box-shadow:
+          inset 0 0 0 1px rgba(201,167,106,.55),
+          ;
+      }
+    }
 
-/* Hover/focus: keep base shadow + ONLY the thin outline pulse */
-.hero-tile:hover,
-.hero-tile:focus-visible{
-  /* base shadow stays (no extra bloom layers) */
-  box-shadow: var(--shadow) !important;
+    /* Kill any previous "whole tile" glow on hover by hard-resetting shadow first */
+    .hero-tile{
+      box-shadow: var(--shadow); /* normal state */
+    }
 
-  /* outline pulse */
-  animation: goldOutlinePulse 2.8s ease-in-out infinite alternate;
-}
+    /* Hover/focus: keep base shadow + ONLY the thin outline pulse */
+    .hero-tile:hover,
+    .hero-tile:focus-visible{
+      /* base shadow stays (no extra bloom layers) */
+      box-shadow: var(--shadow) !important;
 
-/* Gold text glow on hover/focus (title + subtitle) */
-.hero-tile:hover .hero-title,
-.hero-tile:focus-visible .hero-title{
-  text-shadow:
-    0 0 0px rgba(201,167,106,.45),
-    0 0 0px rgba(201,167,106,.22);
-}
+      /* outline pulse */
+      animation: goldOutlinePulse 2.8s ease-in-out infinite alternate;
+    }
 
-.hero-tile:hover .hero-sub,
-.hero-tile:focus-visible .hero-sub{
-  text-shadow:
-    0 0 1px rgba(201,167,106,.32),
-    0 0 1px rgba(201,167,106,.18);
-}
+    /* Gold text glow on hover/focus (title + subtitle) */
+    .hero-tile:hover .hero-title,
+    .hero-tile:focus-visible .hero-title{
+      text-shadow:
+        0 0 0px rgba(201,167,106,.45),
+        0 0 0px rgba(201,167,106,.22);
+    }
+
+    .hero-tile:hover .hero-sub,
+    .hero-tile:focus-visible .hero-sub{
+      text-shadow:
+        0 0 1px rgba(201,167,106,.32),
+        0 0 1px rgba(201,167,106,.18);
+    }
     /* ✅ Bring back the pop (lift) without the gold fill-glow */
-.hero-tile:hover{
-  transform: translateY(-1px) scale(1.012);
-}
+    .hero-tile:hover{
+      transform: translateY(-1px) scale(1.012);
+    }
 
-.hero-tile:active{
-  transform: translateY(-1px) scale(0.995);
-}
+    .hero-tile:active{
+      transform: translateY(-1px) scale(0.995);
+    }
 
-/* Optional: subtle border warm-up (keeps it premium) */
-.hero-tile:hover,
-.hero-tile:focus-visible{
-  border-color: rgba(201,167,106,.30);
-}
+    /* Optional: subtle border warm-up (keeps it premium) */
+    .hero-tile:hover,
+    .hero-tile:focus-visible{
+      border-color: rgba(201,167,106,.30);
+    }
+
+    /***********************
+     * ✅ Summon Boo (Journal Boo)
+     * - Icon in top-right corner of the SCREEN (outside the card)
+     * - JSON-driven scenes loaded from assets/boo/summonboo/scenes.json
+     ***********************/
+    .summonBooBtn{
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 12000; /* below mood modal (15000), above app UI */
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      border-radius: 16px;
+      display: none; /* shown only after app starts */
+    }
+    .summonBooBtn:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 4px var(--focus), var(--shadow);
+    }
+    .summonBooIcon{
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      display: block;
+      opacity: .95;
+      transition: transform 120ms ease, opacity 180ms ease;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.20));
+    }
+    .summonBooBtn:hover .summonBooIcon{
+      opacity: 1;
+      transform: scale(1.03);
+    }
+    @media (max-width: 520px){
+      .summonBooIcon{ width: 52px; height: 52px; }
+      .summonBooBtn{ top: 10px; right: 10px; }
+    }
+
+    .booOverlay{
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0,0,0,.46);
+      z-index: 16000; /* above mood modal */
+    }
+    .booOverlay.active{ display:flex; }
+
+    .booPanel{
+      width: min(560px, 100%);
+      border: var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, var(--surface), var(--surface2));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      overflow: hidden;
+      transform: translateY(8px);
+      opacity: 0;
+      transition: opacity 520ms ease, transform 520ms ease;
+    }
+    .booOverlay.active .booPanel{
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .booInner{ padding: 18px 18px 14px; }
+
+    .booTitle{
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: .12px;
+      font-family: var(--font-display);
+    }
+    .booLines{
+      margin: 0 0 12px;
+      color: var(--text);
+      font-size: 15.5px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      font-family: var(--font-ui);
+    }
+
+    .booInputWrap{
+      margin-top: 10px;
+      display:none;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .booInputWrap.show{ display:flex; }
+
+    .booHint{
+      margin: 0;
+      color: var(--muted2);
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+
+    .booActions{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px 14px 14px;
+      border-top: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+      background: color-mix(in srgb, var(--surface2) 65%, transparent);
+      justify-content: flex-end;
+    }
+
+    .booChoice{
+      border: var(--line);
+      background: var(--surface2);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text);
+      cursor:pointer;
+      user-select:none;
+      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-family: var(--font-ui);
+      white-space: nowrap;
+    }
+    .booChoice:hover{ background: var(--surface); transform: translateY(-1px); }
+    .booChoice:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .booCloseX{
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: var(--line);
+      background: var(--surface2);
+      cursor: pointer;
+      display:grid;
+      place-items:center;
+      color: var(--muted);
+      transition: background .12s ease, transform .12s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 2;
+    }
+    .booCloseX:hover{ background: var(--surface); transform: translateY(-1px); color: var(--text); }
+
+    @media (prefers-reduced-motion: reduce){
+      .booPanel{ transition:none; transform:none; opacity: 1; }
+      .summonBooIcon{ transition:none; }
+    }
   </style>
 </head>
 
@@ -1065,6 +1224,28 @@
       <button id="jbStartBtn" class="jbStartBtn" type="button">Let’s get started</button>
     </div>
   </section>
+
+  <!-- ✅ Summon Boo button (top-right of screen, outside card) -->
+  <button id="summonBooBtn" class="summonBooBtn" type="button" aria-label="Summon Boo" title="Summon Boo">
+    <img src="assets/icon/summon-boo.png" alt="" class="summonBooIcon" aria-hidden="true" />
+  </button>
+
+  <!-- ✅ Boo Overlay -->
+  <div id="booOverlay" class="booOverlay" aria-hidden="true">
+    <div class="booPanel" role="dialog" aria-modal="true" aria-labelledby="booTitle">
+      <button id="booCloseX" class="booCloseX" type="button" aria-label="Close">✕</button>
+      <div class="booInner">
+        <h3 id="booTitle" class="booTitle">Boo</h3>
+        <div id="booLines" class="booLines"></div>
+
+        <div id="booInputWrap" class="booInputWrap">
+          <input id="booInput" type="text" placeholder="" autocomplete="off" />
+          <p id="booHint" class="booHint"></p>
+        </div>
+      </div>
+      <div id="booActions" class="booActions" aria-label="Boo choices"></div>
+    </div>
+  </div>
 
   <!-- ✅ MAIN APP (hidden until start) -->
   <div id="jbApp" class="app hidden">
@@ -1163,6 +1344,20 @@
     const LS_SETTINGS = "journal_boo_settings_v1";
     const LS_EMAIL = "journal_boo_email_v1";
     const LS_THEME = "journal_boo_theme_v1";
+
+    // ✅ Summon Boo storage keys (local-only)
+    const LS_BOO_MUTED = "journal_boo_booMuted_v1";
+    const LS_BOO_NAME  = "journal_boo_name_v1";
+    const LS_BOO_NOTES = "journal_boo_booNotes_v1";
+    const LS_BOO_SEEN_INTRO = "journal_boo_booSeenIntro_v1";
+
+    // ✅ Boo assets
+    const BOO_ICON_PATH = "assets/icon/summon-boo.png";
+    // Robust: try both .json and .jason (in case the file is named that way)
+    const BOO_SCENES_CANDIDATES = [
+      "assets/boo/summonboo/scenes.json",
+      "assets/boo/summonboo/scenes.jason"
+    ];
 
     // ✅ Mood options (6 moods)
     const MOODS = [
@@ -1264,6 +1459,16 @@
     const jbStartBtn = document.getElementById("jbStartBtn");
     const jbApp = document.getElementById("jbApp");
 
+    // ✅ Summon Boo UI nodes
+    const summonBooBtn = document.getElementById("summonBooBtn");
+    const booOverlay = document.getElementById("booOverlay");
+    const booLinesEl = document.getElementById("booLines");
+    const booActionsEl = document.getElementById("booActions");
+    const booInputWrap = document.getElementById("booInputWrap");
+    const booInput = document.getElementById("booInput");
+    const booHint = document.getElementById("booHint");
+    const booCloseX = document.getElementById("booCloseX");
+
     function runWelcomeAnimation(){
       if (!jbWelcomeTitle || !jbWelcomeSub || !jbStartBtn) return;
       setTimeout(() => jbWelcomeTitle.classList.add("show"), 160);
@@ -1277,6 +1482,10 @@
       setTimeout(() => {
         jbWelcome.style.display = "none";
         jbApp.classList.remove("hidden");
+
+        // ✅ show Summon Boo icon once app is started
+        if (summonBooBtn) summonBooBtn.style.display = "inline-flex";
+
         go("home").then(() => {});
       }, 520);
     }
@@ -2534,6 +2743,321 @@ ${e.content}
       }
     }
 
+    /***********************
+     * ✅ Summon Boo Engine (JSON-driven)
+     ***********************/
+    let booScenes = null;
+    let booMeta = null;
+    let booCurrentSceneId = null;
+    let booPendingInputKey = null;
+    let booPendingInputValue = "";
+    let booLoaded = false;
+    let booLoading = false;
+
+    function getBooMuted(){
+      try{ return localStorage.getItem(LS_BOO_MUTED) === "true"; }catch{ return false; }
+    }
+    function setBooMuted(val){
+      try{ localStorage.setItem(LS_BOO_MUTED, val ? "true" : "false"); }catch{}
+    }
+    function getUserName(){
+      try{ return (localStorage.getItem(LS_BOO_NAME) || "").trim(); }catch{ return ""; }
+    }
+    function setUserName(name){
+      try{ localStorage.setItem(LS_BOO_NAME, (name || "").trim()); }catch{}
+    }
+    function loadBooNotes(){
+      try{
+        const raw = localStorage.getItem(LS_BOO_NOTES);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      }catch{
+        return [];
+      }
+    }
+    function saveBooNotes(notes){
+      try{ localStorage.setItem(LS_BOO_NOTES, JSON.stringify(notes)); }catch{}
+    }
+
+    function pickLine(lines){
+      const arr = Array.isArray(lines) ? lines.filter(Boolean) : [];
+      if (!arr.length) return "";
+      if (arr.length === 1) return arr[0];
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function buildRecallLine(name){
+      const notes = loadBooNotes();
+      const last = notes[0];
+      if (!last || !last.text){
+        return name
+          ? `Earlier, ${name}… you didn’t leave me anything to hold.\n\nThat’s okay.`
+          : `Earlier… you didn’t leave me anything to hold.\n\nThat’s okay.`;
+      }
+      const who = name ? `${name}` : "you";
+      return `Earlier, ${who} wrote:\n\n“${last.text}”\n\nHow is it now?`;
+    }
+
+    function template(str){
+      const name = getUserName();
+      const recallLine = buildRecallLine(name);
+
+      return String(str || "")
+        .replaceAll("{{name}}", name || "there")
+        .replaceAll("{{recallLine}}", recallLine);
+    }
+
+    async function fetchBooJson(){
+      let lastErr = null;
+      for (const url of BOO_SCENES_CANDIDATES){
+        try{
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          return data;
+        }catch(err){
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error("Unable to load Boo scenes.");
+    }
+
+    async function ensureBooLoaded(){
+      if (booLoaded || booLoading) return;
+      booLoading = true;
+      try{
+        const data = await fetchBooJson();
+        booMeta = data?.meta || {};
+        booScenes = data?.scenes || {};
+        booLoaded = true;
+      }catch(err){
+        booLoaded = false;
+        booMeta = null;
+        booScenes = null;
+        throw err;
+      }finally{
+        booLoading = false;
+      }
+    }
+
+    function booCanSummon(){
+      // prevent summon during welcome screen or before app starts
+      if (jbWelcome && jbWelcome.classList.contains("active")) return false;
+      if (jbApp && jbApp.classList.contains("hidden")) return false;
+
+      // prevent during mood modal
+      if (moodBackdrop && moodBackdrop.classList.contains("active")) return false;
+
+      return true;
+    }
+
+    function openBooOverlay(){
+      booOverlay.classList.add("active");
+      booOverlay.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+    function closeBooOverlay(){
+      booOverlay.classList.remove("active");
+      booOverlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      booPendingInputKey = null;
+      booPendingInputValue = "";
+      booInput.value = "";
+      booInputWrap.classList.remove("show");
+      booActionsEl.innerHTML = "";
+      booLinesEl.textContent = "";
+    }
+
+    function renderBooScene(sceneId){
+      const scene = booScenes?.[sceneId];
+      if (!scene){
+        // safety
+        closeBooOverlay();
+        toast("Boo can’t be summoned right now.");
+        return;
+      }
+
+      booCurrentSceneId = sceneId;
+
+      const line = template(pickLine(scene.lines));
+      booLinesEl.textContent = line || "";
+
+      // Input handling
+      booPendingInputKey = null;
+      booPendingInputValue = "";
+
+      if (scene.input && scene.input.storeAs){
+        booPendingInputKey = String(scene.input.storeAs);
+        booInput.placeholder = String(scene.input.placeholder || "");
+        booHint.textContent = String(scene.input.hint || "");
+        booInput.value = "";
+        booInputWrap.classList.add("show");
+
+        // gentle focus
+        setTimeout(() => booInput?.focus(), 380);
+
+        booInput.oninput = () => {
+          booPendingInputValue = (booInput.value || "").trim();
+        };
+      } else {
+        booInputWrap.classList.remove("show");
+        booInput.oninput = null;
+      }
+
+      // Choices
+      booActionsEl.innerHTML = "";
+      const choices = Array.isArray(scene.choices) ? scene.choices : [];
+
+      // If no choices: default close button
+      if (!choices.length){
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "booChoice";
+        btn.textContent = "Back to writing.";
+        btn.onclick = () => closeBooOverlay();
+        booActionsEl.appendChild(btn);
+        return;
+      }
+
+      for (const c of choices){
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "booChoice";
+        btn.textContent = String(c.label || "Continue");
+        btn.onclick = () => booChoose(c);
+        booActionsEl.appendChild(btn);
+      }
+    }
+
+    function applyBooEffects(effects){
+      const arr = Array.isArray(effects) ? effects : [];
+      for (const ef of arr){
+        if (!ef || typeof ef !== "object") continue;
+
+        if (ef.type === "set"){
+          const key = String(ef.key || "");
+          if (key === "booMuted"){
+            setBooMuted(!!ef.value);
+          }
+        }
+
+        if (ef.type === "appendNote"){
+          const text = (booPendingInputValue || "").trim();
+          if (!text) continue;
+          const notes = loadBooNotes();
+          notes.unshift({
+            id: (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)),
+            createdAt: nowIso(),
+            tag: ef.tag ? String(ef.tag) : "",
+            text
+          });
+          // cap size to keep it light
+          const capped = notes.slice(0, 40);
+          saveBooNotes(capped);
+        }
+      }
+    }
+
+    function booChoose(choice){
+      // require input if scene expects it and user hit "Save"
+      const scene = booScenes?.[booCurrentSceneId];
+      const expectsInput = !!(scene && scene.input && scene.input.storeAs);
+
+      // store input in name if storeAs === "name"
+      if (expectsInput && scene.input.storeAs === "name"){
+        const v = (booPendingInputValue || "").trim();
+        if (v) setUserName(v);
+      }
+
+      applyBooEffects(choice.effects);
+
+      const goto = String(choice.goto || "");
+      if (!goto || goto === "end"){
+        closeBooOverlay();
+        return;
+      }
+      renderBooScene(goto);
+    }
+
+    async function summonBoo(){
+      if (!booCanSummon()){
+        toast("Boo can’t be summoned right now.");
+        return;
+      }
+
+      try{
+        await ensureBooLoaded();
+      }catch(err){
+        toast("Boo can’t be summoned right now.");
+        return;
+      }
+
+      const allowWhenMuted = !!booMeta?.allowSummonWhenMuted;
+      const muted = getBooMuted();
+
+      if (muted && !allowWhenMuted){
+        toast("Boo can’t be summoned right now.");
+        return;
+      }
+
+      // Determine which scene to show:
+      // - first time ever: meta.firstScene
+      // - subsequent summons: meta.summonScene
+      const hasSeenIntro = (localStorage.getItem(LS_BOO_SEEN_INTRO) === "true");
+      let startScene = "";
+
+      if (!hasSeenIntro && booMeta?.firstScene){
+        startScene = String(booMeta.firstScene);
+        try{ localStorage.setItem(LS_BOO_SEEN_INTRO, "true"); }catch{}
+      } else if (booMeta?.summonScene){
+        startScene = String(booMeta.summonScene);
+      } else {
+        startScene = Object.keys(booScenes || {})[0] || "end";
+      }
+
+      // If we have {{name}} in scenes but no stored name yet,
+      // ask gently once (inside Boo overlay) before continuing.
+      if (!getUserName()){
+        // lightweight name capture scene (internal)
+        booScenes.__name_gate__ = {
+          lines: ["What is your name?"],
+          input: { placeholder: "Your name…", storeAs: "name", hint: "This stays on this device." },
+          choices: [
+            { label: "Save", goto: startScene },
+            { label: "Not now", goto: startScene }
+          ]
+        };
+        startScene = "__name_gate__";
+      }
+
+      openBooOverlay();
+      renderBooScene(startScene);
+    }
+
+    // Wire Summon Boo button
+    summonBooBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      summonBoo();
+    });
+
+    // Close overlay interactions
+    booCloseX?.addEventListener("click", () => closeBooOverlay());
+    booOverlay?.addEventListener("click", (e) => {
+      if (e.target === booOverlay) closeBooOverlay();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!booOverlay.classList.contains("active")) return;
+      if (e.key === "Escape"){
+        e.preventDefault();
+        closeBooOverlay();
+      }
+    });
+
+    /***********************
+     * ✅ App init
+     ***********************/
     (function init(){
       loadSettings();
 
