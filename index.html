@@ -754,34 +754,6 @@
 .hero-glow{ z-index: 1; }
 .hero-body{ position: relative; z-index: 4; }
 
-/* Hover/focus shows the edge glow */
-.hero-tile:hover::before,
-.hero-tile:focus-visible::before{
-  opacity: 1;
-  animation: edgeGoldLuxury 2.6s ease-in-out infinite alternate;
-}
-
-/* Subtle border warm-up */
-.hero-tile:hover,
-.hero-tile:focus-visible{
-  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
-}
-    
-    /* ✅ Accent-tinted glow (consistent across tiles + themes) */
-    .hero-glow{
-      position:absolute;
-      inset:-70px;
-      background:
-        radial-gradient(420px 380px at 18% 25%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 65%),
-        radial-gradient(420px 380px at 86% 22%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
-        radial-gradient(420px 380px at 55% 88%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 72%);
-      filter: blur(12px);
-      opacity: .18;
-      pointer-events:none;
-      transition: opacity 220ms ease;
-    }
-    .hero-tile:hover .hero-glow{ opacity: .85; }
-
     .hero-body{
       position:relative;
       z-index:2;
