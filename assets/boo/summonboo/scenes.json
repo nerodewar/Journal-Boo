@@ -8,7 +8,7 @@
   "scenes": {
     "intro_1": {
       "lines": [
-        "Hi… I’m Boo. I live in Boo Writer 👻"
+        "Hi… I’m Boo. I live in Journal Boo 👻"
       ],
       "choices": [
         { "label": "Who are you?", "goto": "who_1" },
