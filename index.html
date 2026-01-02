@@ -550,7 +550,27 @@
       margin-bottom: 8px;
       font-family: var(--font-ui);
     }
+/* 🔥 Red glow on hover for Munchkin Boo's private journal */
+#blogLink:hover .meta span{
+  text-shadow:
+    0 0 6px rgba(255,80,80,.6),
+    0 0 14px rgba(255,40,40,.45);
+}
+    
+#blogLink:hover .meta,
+#blogLink:hover .preview{
+  color: rgba(255,180,180,.95);
+}
+    @keyframes redPulse{
+  0%   { box-shadow: 0 0 0 1px rgba(255,80,80,.25), 0 0 14px rgba(255,60,60,.35); }
+  100% { box-shadow: 0 0 0 1px rgba(255,80,80,.45), 0 0 28px rgba(255,40,40,.55); }
+}
 
+#blogLink:hover{
+  animation: redPulse 1.4s ease-in-out infinite alternate;
+}
+
+    
     /* ✅ Force true center on the blog tile meta line */
     .entry .meta.meta-center{
       display: block;
