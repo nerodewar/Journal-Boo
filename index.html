@@ -1027,6 +1027,57 @@
       gap: 8px;
       flex: 0 0 auto;
     }
+    /* ========= Soft luxury gold edge pulse (hover only) ========= */
+
+/* Works whether you meant .hero-tile or .tile-hero */
+@keyframes luxuryEdgePulse {
+  0%   { opacity: .18; filter: blur(6px); }
+  100% { opacity: .38; filter: blur(10px); }
+}
+
+/* Ensure stacking is predictable */
+.hero-tile,
+.tile-hero{
+  position: relative;
+  isolation: isolate;
+}
+
+/* INNER edge glow (so overflow:hidden won't kill it) */
+.hero-tile::after,
+.tile-hero::after{
+  content:"";
+  position:absolute;
+  inset: 0;                 /* inside the tile */
+  border-radius: inherit;
+  pointer-events:none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+
+  /* the luxury "rim light" is an inset box-shadow */
+  box-shadow:
+    inset 0 0 0 1px rgba(201,167,106,.18),
+    inset 0 0 22px rgba(201,167,106,.10),
+    inset 0 0 44px rgba(201,167,106,.06);
+
+  z-index: 3;               /* above background/art, below content */
+  filter: blur(0px);
+}
+
+/* Hover/focus = show + pulse */
+.hero-tile:hover::after,
+.hero-tile:focus-visible::after,
+.tile-hero:hover::after,
+.tile-hero:focus-visible::after{
+  opacity: 1;
+  animation: luxuryEdgePulse 2.8s ease-in-out infinite alternate;
+}
+
+/* Keep text/icons above */
+.hero-body{ position: relative; z-index: 4; }
+
+/* Keep the big tile overlay below the rim glow */
+.hero-big::after{ z-index: 2; }
+
   </style>
 </head>
 
