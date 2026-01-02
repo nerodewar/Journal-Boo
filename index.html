@@ -663,7 +663,55 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
+/* ✨ Soft luxury gold edge pulse (hover only) */
+@keyframes edgeGoldLuxury{
+  0%{
+    opacity: .22;
+    filter: blur(8px);
+  }
+  100%{
+    opacity: .45;
+    filter: blur(12px);
+  }
+}
 
+/* Subtle gold halo layer */
+.hero-tile::before{
+  content:"";
+  position:absolute;
+  inset:-1.5px;
+  border-radius: inherit;
+  pointer-events:none;
+  opacity: 0;
+  transition: opacity 260ms ease;
+  background:
+    radial-gradient(900px 240px at 25% 0%,
+      color-mix(in srgb, var(--accent) 42%, transparent),
+      transparent 62%),
+    radial-gradient(900px 240px at 75% 100%,
+      color-mix(in srgb, var(--accent) 30%, transparent),
+      transparent 66%);
+  filter: blur(10px);
+  z-index: 0;
+}
+
+/* Ensure content stays above glow */
+.hero-body{ position: relative; z-index: 2; }
+.hero-glow{ z-index: 1; }
+
+/* Hover / keyboard focus */
+.hero-tile:hover::before,
+.hero-tile:focus-visible::before{
+  opacity: 1;
+  animation: edgeGoldLuxury 2.6s ease-in-out infinite alternate;
+}
+
+/* Slight warm border lift (very subtle) */
+.hero-tile:hover,
+.hero-tile:focus-visible{
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+}
+    
     /* ✅ Big tile keeps your artwork, but still matches the charcoal vibe */
 .hero-big{
   min-height: 250px;
