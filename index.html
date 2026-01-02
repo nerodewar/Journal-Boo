@@ -1022,26 +1022,23 @@
       flex: 0 0 auto;
     }
     
-   /* ========= FOOLPROOF: soft luxury gold pulse on hover (no pseudo-elements) ========= */
-@keyframes goldEdgePulse {
+   /* ========= Luxury gold edge outline (hover only) ========= */
+@keyframes goldOutlinePulse {
   0%{
     box-shadow:
-      0 0 0 1px rgba(201,167,106,.22),
-      0 0 14px rgba(201,167,106,.10),
-      0 0 28px rgba(201,167,106,.06);
+      inset 0 0 0 1px rgba(201,167,106,.28),
+      0 0 0 1px rgba(201,167,106,.18);
   }
   100%{
     box-shadow:
-      0 0 0 1px rgba(201,167,106,.38),
-      0 0 22px rgba(201,167,106,.16),
-      0 0 44px rgba(201,167,106,.10);
+      inset 0 0 0 1px rgba(201,167,106,.55),
+      0 0 0 1px rgba(201,167,106,.38);
   }
 }
 
 .hero-tile:hover,
 .hero-tile:focus-visible{
-  border-color: rgba(201,167,106,.45) !important;
-  animation: goldEdgePulse 2.6s ease-in-out infinite alternate;
+  animation: goldOutlinePulse 2.8s ease-in-out infinite alternate;
 }
   </style>
 </head>
