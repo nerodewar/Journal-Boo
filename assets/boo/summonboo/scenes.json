@@ -64,7 +64,7 @@
 
     "ask_mind_1": {
       "lines": [
-        "Press continue to write down your memory"
+        "Press continue to write down your memory..."
       ],
       "choices": [
         { "label": "Continue", "goto": "capture_note_1" },
