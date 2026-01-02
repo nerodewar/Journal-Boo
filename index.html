@@ -705,10 +705,6 @@
       pointer-events:none;
     }
 
-    .hero-tile:hover{
-      transform: translateY(-3px) scale(1.01);
-      border-color: color-mix(in srgb, var(--text) 22%, transparent);
-    }
     .hero-tile:active{
       transform: translateY(-1px) scale(0.995);
     }
@@ -1039,6 +1035,51 @@
 .hero-tile:hover,
 .hero-tile:focus-visible{
   animation: goldOutlinePulse 2.8s ease-in-out infinite alternate;
+}
+
+    /* ========= Hover behavior: ONLY edge outline + gold text glow ========= */
+
+@keyframes goldOutlinePulse {
+  0%{
+    box-shadow:
+      inset 0 0 0 1px rgba(201,167,106,.28),
+      0 0 0 1px rgba(201,167,106,.18);
+  }
+  100%{
+    box-shadow:
+      inset 0 0 0 1px rgba(201,167,106,.55),
+      0 0 0 1px rgba(201,167,106,.38);
+  }
+}
+
+/* Kill any previous "whole tile" glow on hover by hard-resetting shadow first */
+.hero-tile{
+  box-shadow: var(--shadow); /* normal state */
+}
+
+/* Hover/focus: keep base shadow + ONLY the thin outline pulse */
+.hero-tile:hover,
+.hero-tile:focus-visible{
+  /* base shadow stays (no extra bloom layers) */
+  box-shadow: var(--shadow) !important;
+
+  /* outline pulse */
+  animation: goldOutlinePulse 2.8s ease-in-out infinite alternate;
+}
+
+/* Gold text glow on hover/focus (title + subtitle) */
+.hero-tile:hover .hero-title,
+.hero-tile:focus-visible .hero-title{
+  text-shadow:
+    0 0 6px rgba(201,167,106,.45),
+    0 0 14px rgba(201,167,106,.22);
+}
+
+.hero-tile:hover .hero-sub,
+.hero-tile:focus-visible .hero-sub{
+  text-shadow:
+    0 0 5px rgba(201,167,106,.32),
+    0 0 12px rgba(201,167,106,.18);
 }
   </style>
 </head>
