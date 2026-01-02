@@ -632,57 +632,7 @@
       margin-top: 8px;
       align-items:stretch;
     }
-    /* ✅ Gold edge pulse for ALL hero tiles */
-@keyframes edgeGoldPulse{
-  0%{
-    opacity: .25;
-    filter: blur(10px);
-    transform: scale(0.995);
-  }
-  100%{
-    opacity: .75;
-    filter: blur(14px);
-    transform: scale(1.01);
-  }
-}
-
-/* Create an "edge glow" layer */
-.hero-tile::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius: inherit;
-  pointer-events:none;
-  opacity: 0;
-  transition: opacity 220ms ease;
-  /* soft gold ring */
-  background:
-    radial-gradient(1200px 300px at 20% 0%,
-      color-mix(in srgb, var(--accent) 55%, transparent),
-      transparent 55%),
-    radial-gradient(1200px 300px at 80% 100%,
-      color-mix(in srgb, var(--accent) 40%, transparent),
-      transparent 60%);
-  filter: blur(12px);
-  z-index: 0;
-}
-
-/* Make sure content stays above the glow */
-.hero-body{ position: relative; z-index: 2; }
-.hero-glow{ z-index: 1; }
-
-/* Hover/Focus = glow + pulse */
-.hero-tile:hover::before,
-.hero-tile:focus-visible::before{
-  opacity: 1;
-  animation: edgeGoldPulse 1.25s ease-in-out infinite alternate;
-}
-
-/* Slightly warmer border on hover to sell the edge effect */
-.hero-tile:hover,
-.hero-tile:focus-visible{
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-}
+    
     @media (max-width: 860px){
       .home-hero{ grid-template-columns: 1fr; }
     }
@@ -696,6 +646,54 @@
       position: relative;
       border: var(--line);
       border-radius: 22px;
+/* ✨ Soft luxury gold edge pulse (hover only) */
+@keyframes edgeGoldLuxury{
+  0%{
+    opacity: .22;
+    filter: blur(8px);
+  }
+  100%{
+    opacity: .45;
+    filter: blur(12px);
+  }
+}
+
+/* Subtle gold halo layer */
+.hero-tile::before{
+  content:"";
+  position:absolute;
+  inset:-1.5px;
+  border-radius: inherit;
+  pointer-events:none;
+  opacity: 0;
+  transition: opacity 260ms ease;
+  background:
+    radial-gradient(900px 240px at 25% 0%,
+      color-mix(in srgb, var(--accent) 42%, transparent),
+      transparent 62%),
+    radial-gradient(900px 240px at 75% 100%,
+      color-mix(in srgb, var(--accent) 30%, transparent),
+      transparent 66%);
+  filter: blur(10px);
+  z-index: 0;
+}
+
+/* Ensure content stays above glow */
+.hero-body{ position: relative; z-index: 2; }
+.hero-glow{ z-index: 1; }
+
+/* Hover / keyboard focus */
+.hero-tile:hover::before,
+.hero-tile:focus-visible::before{
+  opacity: 1;
+  animation: edgeGoldLuxury 2.6s ease-in-out infinite alternate;
+}
+
+/* Slight warm border lift (very subtle) */
+.hero-tile:hover,
+.hero-tile:focus-visible{
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+}
 
       /* consistent tile surface for all tiles */
       background: linear-gradient(
