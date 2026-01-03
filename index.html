@@ -643,7 +643,7 @@
     }
 
     /***********************
-     * ✅ Home hero tiles (consistent charcoal-forward tiles)
+     * ✅ Home hero tiles
      ***********************/
     .home-hero{
       display:grid;
@@ -682,15 +682,15 @@
       transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, filter 220ms ease;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      isolation: isolate; /* keeps z-index layers contained */
     }
 
-    /* ✅ Big tile keeps your artwork, but still matches the charcoal vibe */
+    /* ✅ Big tile keeps your artwork */
     .hero-big{
       min-height: 250px;
       display:flex;
       align-items:flex-end;
 
-      /* RESTORED artwork */
       background-image: url("assets/art/free-writing.png");
       background-size: cover;
       background-position: center;
@@ -700,7 +700,7 @@
       background-color: color-mix(in srgb, var(--surface) 70%, transparent);
     }
 
-    /* Keep the overlay so it stays readable + charcoal-consistent */
+    /* Overlay so it stays readable */
     .hero-big::after{
       content:"";
       position:absolute;
@@ -708,19 +708,7 @@
       background:
         radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
         linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
-      z-index:1;
-      pointer-events:none;
-    }
-
-    /* subtle top sheen for the big tile (still same palette) */
-    .hero-big::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
-        linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.22));
-      z-index:1;
+      z-index: 2;
       pointer-events:none;
     }
 
@@ -731,12 +719,6 @@
       outline:none;
       box-shadow: 0 0 0 3px var(--focus), var(--shadow);
       border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-    }
-
-    /* Base stacking context */
-    .hero-tile{
-      position: relative;
-      isolation: isolate; /* important: keeps z-index layers contained */
     }
 
     /* Edge glow layer */
@@ -760,22 +742,17 @@
 
       filter: blur(10px);
 
-      /* KEY: sits above artwork/overlay, below content */
+      /* sits above artwork/overlay, below content */
       z-index: 3;
     }
 
-    /* Make sure overlay doesn't hide the glow */
-    .hero-big::after{
-      z-index: 2; /* was 1 in some versions; ensure it's below ::before */
+    .hero-tile:hover::before{
+      opacity: .85;
     }
 
-    /* Glow + content ordering */
-    .hero-glow{ z-index: 1; }
-    .hero-body{ position: relative; z-index: 4; }
-
     .hero-body{
-      position:relative;
-      z-index:2;
+      position: relative;
+      z-index: 4;
       display:flex;
       align-items:center;
       gap: 14px;
@@ -823,16 +800,16 @@
       border-radius: 18px;
       font-size: 30px;
     }
+
     /* Darken text ONLY on the big Free Writing tile */
     .hero-big .hero-title{
-      color: #0f0f12; /* or any dark you want */
+      color: #0f0f12;
+      font-size: 22px;
     }
-
     .hero-big .hero-sub{
+      max-width: 46ch;
       color: rgba(15,15,18,.75);
     }
-    .hero-big .hero-title{ font-size: 22px; }
-    .hero-big .hero-sub{ max-width: 46ch; color: color-mix(in srgb, var((--accent)) 78%, transparent); }
 
     /* ✅ Fade-in question on Home */
     .home-question{
@@ -913,10 +890,7 @@
       gap: 8px;
       padding: 12px 12px;
       border-radius: 16px;
-
-      /* was: 1px dashed ... */
       border: var(--line);
-
       background: color-mix(in srgb, var(--surface2) 80%, transparent);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -1029,8 +1003,6 @@
 
     /***********************
      * ✅ Summon Boo (Journal Boo)
-     * - Icon in top-right corner of the SCREEN (outside the card)
-     * - JSON-driven scenes loaded from assets/boo/summonboo/scenes.json
      ***********************/
     .summonBooBtn{
       position: fixed;
@@ -1038,7 +1010,7 @@
       right: 14px;
       z-index: 12000; /* below mood modal (15000), above app UI */
       border: none;
-      background: surface;
+      background: transparent;
       padding: 0;
       margin: 0;
       cursor: pointer;
@@ -1590,6 +1562,7 @@
       clearDataReply.textContent = "";
       clearDataConfirmInput.value = "";
       clearDataDoIt.disabled = true;
+      clearDataCancel.disabled = false;
 
       clearDataBackdrop.classList.add("active");
       clearDataBackdrop.setAttribute("aria-hidden", "false");
@@ -1606,84 +1579,52 @@
       clearDataReply.textContent = "";
       clearDataConfirmInput.value = "";
       clearDataDoIt.disabled = true;
+      clearDataCancel.disabled = false;
     }
-    
-  async function clearAllSiteData(){
-    try{
-      // Stop any audio first
-      try { stopMeditationAudio(); } catch {}
-      try { stopBackgroundMusic(); } catch {}
 
-      // ✅ Explicitly remove Journal Boo + Summon Boo keys (My Journal included)
+    async function clearAllSiteData(){
       try{
-        const KEYS_TO_REMOVE = [
-          LS_KEY,           // My Journal entries
-          LS_SETTINGS,
-          LS_EMAIL,
-          LS_THEME,
+        // Stop any audio first
+        try { stopMeditationAudio(); } catch {}
+        try { stopBackgroundMusic(); } catch {}
 
-          LS_BOO_MUTED,
-          LS_BOO_NAME,
-          LS_BOO_NOTES,
-          LS_BOO_SEEN_INTRO,
-        ];
+        // ✅ Explicitly remove Journal Boo + Summon Boo keys (My Journal included)
+        try{
+          const KEYS_TO_REMOVE = [
+            LS_KEY,           // My Journal entries
+            LS_SETTINGS,
+            LS_EMAIL,
+            LS_THEME,
 
-        for (const k of KEYS_TO_REMOVE){
-          try { localStorage.removeItem(k); } catch {}
-        }
-      }catch{}
+            LS_BOO_MUTED,
+            LS_BOO_NAME,
+            LS_BOO_NOTES,
+            LS_BOO_SEEN_INTRO,
+          ];
 
-      // local/session storage (best-effort)
-      try { localStorage.clear(); } catch {}
-      try { sessionStorage.clear(); } catch {}
-
-      // IndexedDB (best-effort)
-      try{
-        if (indexedDB && typeof indexedDB.databases === "function"){
-          const dbs = await indexedDB.databases();
-          for (const db of (dbs || [])){
-            if (!db || !db.name) continue;
-            await new Promise((resolve) => {
-              const req = indexedDB.deleteDatabase(db.name);
-              req.onsuccess = () => resolve();
-              req.onerror = () => resolve();
-              req.onblocked = () => resolve();
-            });
+          for (const k of KEYS_TO_REMOVE){
+            try { localStorage.removeItem(k); } catch {}
           }
-        }
-      }catch{}
+        }catch{}
 
-      // Cache Storage (best-effort)
-      try{
-        if (window.caches && typeof caches.keys === "function"){
-          const keys = await caches.keys();
-          await Promise.all(keys.map(k => caches.delete(k)));
-        }
-      }catch{}
+        // local/session storage (best-effort)
+        try { localStorage.clear(); } catch {}
+        try { sessionStorage.clear(); } catch {}
 
-      // Service workers (best-effort)
-      try{
-        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations){
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map(r => r.unregister()));
-        }
-      }catch{}
-
-      // Cookies (best-effort, current domain/path)
-      try{
-        const cookies = document.cookie ? document.cookie.split(";") : [];
-        for (const c of cookies){
-          const eqPos = c.indexOf("=");
-          const name = (eqPos > -1 ? c.substr(0, eqPos) : c).trim();
-          if (!name) continue;
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        }
-      }catch{}
-    } finally {
-      // hard reset
-      window.location.reload();
-    }
-  }
+        // IndexedDB (best-effort)
+        try{
+          if (indexedDB && typeof indexedDB.databases === "function"){
+            const dbs = await indexedDB.databases();
+            for (const db of (dbs || [])){
+              if (!db || !db.name) continue;
+              await new Promise((resolve) => {
+                const req = indexedDB.deleteDatabase(db.name);
+                req.onsuccess = () => resolve();
+                req.onerror = () => resolve();
+                req.onblocked = () => resolve();
+              });
+            }
+          }
         }catch{}
 
         // Cache Storage (best-effort)
@@ -2257,7 +2198,8 @@ All journal entries you create are saved only in your own browser, using local s
 • Nothing is uploaded to a server
 • Nothing is shared with third parties
 
-If you clear your browser data, use private browsing, or switch devices, your saved journal entries will no longer be available — because they were never stored anywhere else.
+If you clear your browser data, use private browsing, or switch devices, your saved journal entries will no longer be available — because they were never
+ stored anywhere else.
 
 The optional background music and written meditations are delivered as static files only.
 
