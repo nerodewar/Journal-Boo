@@ -43,7 +43,7 @@
 
     "mute_1": {
       "lines": [
-        "Okay, {{name}}.\n\nI’ll go quiet. Tap the Boo icon if you want me back."
+        "Okay, {{name}}.\n\nI’ll go quiet. Tap Summon Boo if you want me back."
       ],
       "choices": [
         { "label": "Okay.", "goto": "end" }
