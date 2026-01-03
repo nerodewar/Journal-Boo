@@ -2198,10 +2198,9 @@ All journal entries you create are saved only in your own browser, using local s
 • Nothing is uploaded to a server
 • Nothing is shared with third parties
 
-If you clear your browser data, use private browsing, or switch devices, your saved journal entries will no longer be available — because they were never
- stored anywhere else.
+If you clear your browser data, use private browsing, or switch devices, your saved journal entries will no longer be available — because they were never stored anywhere else.
 
-The optional background music and written meditations are delivered as static files only.
+The optional background music, written meditations and poetry are delivered as static files only.
 
 If you choose to email an entry to yourself, Journal Boo simply opens your email app with the text filled in. The message is sent only by you, through your own email provider.
 
@@ -2994,10 +2993,11 @@ ${e.content}
       booOverlay.classList.remove("active");
       booOverlay.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
+      booCurrentSceneId = null;
       booPendingInputKey = null;
       booPendingInputValue = "";
-      booInput.value = "";
-      booInputWrap.classList.remove("show");
+      if (booInput) booInput.value = "";
+      booInputWrap?.classList.remove("show");
       booActionsEl.innerHTML = "";
       booLinesEl.textContent = "";
     }
@@ -3005,7 +3005,6 @@ ${e.content}
     function renderBooScene(sceneId){
       const scene = booScenes?.[sceneId];
       if (!scene){
-        // safety
         closeBooOverlay();
         toast("Boo can’t be summoned right now.");
         return;
@@ -3027,8 +3026,7 @@ ${e.content}
         booInput.value = "";
         booInputWrap.classList.add("show");
 
-        // gentle focus
-        setTimeout(() => booInput?.focus(), 380);
+        setTimeout(() => booInput?.focus(), 180);
 
         booInput.oninput = () => {
           booPendingInputValue = (booInput.value || "").trim();
@@ -3042,7 +3040,6 @@ ${e.content}
       booActionsEl.innerHTML = "";
       const choices = Array.isArray(scene.choices) ? scene.choices : [];
 
-      // If no choices: default close button
       if (!choices.length){
         const btn = document.createElement("button");
         btn.type = "button";
@@ -3064,44 +3061,17 @@ ${e.content}
     }
 
     function applyBooEffects(effects){
-  const arr = Array.isArray(effects) ? effects : [];
-  let halt = false;
+      const arr = Array.isArray(effects) ? effects : [];
+      let halt = false;
 
-  for (const ef of arr){
-    if (!ef || typeof ef !== "object") continue;
+      for (const ef of arr){
+        if (!ef || typeof ef !== "object") continue;
 
-    if (ef.type === "set"){
-      const key = String(ef.key || "");
-      if (key === "booMuted"){
-        setBooMuted(!!ef.value);
-      }
-    }
-
-    if (ef.type === "appendNote"){
-      const text = (booPendingInputValue || "").trim();
-      if (!text) continue;
-      const notes = loadBooNotes();
-      notes.unshift({
-        id: (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)),
-        createdAt: nowIso(),
-        tag: ef.tag ? String(ef.tag) : "",
-        text
-      });
-      const capped = notes.slice(0, 40);
-      saveBooNotes(capped);
-    }
-
-    // ✅ NEW: Clear all site data effect (Summon Boo)
-    if (ef.type === "clearAllSiteData"){
-      // Use your existing confirmation modal (requires typing CLEAR)
-      openClearDataModal();
-      halt = true; // important: don't continue scene navigation after this
-    }
-  }
-
-  return { halt };
-}
-
+        if (ef.type === "set"){
+          const key = String(ef.key || "");
+          if (key === "booMuted"){
+            setBooMuted(!!ef.value);
+          }
         }
 
         if (ef.type === "appendNote"){
@@ -3114,27 +3084,41 @@ ${e.content}
             tag: ef.tag ? String(ef.tag) : "",
             text
           });
-          // cap size to keep it light
-          const capped = notes.slice(0, 40);
-          saveBooNotes(capped);
+          saveBooNotes(notes.slice(0, 40));
+        }
+
+        // ✅ Clear all site data effect (Summon Boo)
+        if (ef.type === "clearAllSiteData"){
+          openClearDataModal();     // requires typing CLEAR
+          halt = true;              // don’t navigate scenes after opening modal
         }
       }
+
+      return { halt };
     }
 
     function booChoose(choice){
-      // require input if scene expects it and user hit "Save"
+      // if current scene expects input and stores name, persist it
       const scene = booScenes?.[booCurrentSceneId];
       const expectsInput = !!(scene && scene.input && scene.input.storeAs);
 
-      // store input in name if storeAs === "name"
       if (expectsInput && scene.input.storeAs === "name"){
         const v = (booPendingInputValue || "").trim();
         if (v) setUserName(v);
       }
 
-      // Determine which scene to show:
-      // - first time ever: meta.firstScene
-      // - subsequent summons: meta.summonScene
+      const { halt } = applyBooEffects(choice?.effects);
+      if (halt) return;
+
+      const next = choice?.goto ? String(choice.goto) : "";
+      if (next){
+        renderBooScene(next);
+      } else {
+        closeBooOverlay();
+      }
+    }
+
+    function computeBooStartScene(){
       const hasSeenIntro = (localStorage.getItem(LS_BOO_SEEN_INTRO) === "true");
       let startScene = "";
 
@@ -3144,13 +3128,35 @@ ${e.content}
       } else if (booMeta?.summonScene){
         startScene = String(booMeta.summonScene);
       } else {
-        startScene = Object.keys(booScenes || {})[0] || "end";
+        startScene = Object.keys(booScenes || {})[0] || "";
       }
 
-      // If we have {{name}} in scenes but no stored name yet,
-      // ask gently once (inside Boo overlay) before continuing.
+      if (!startScene) startScene = Object.keys(booScenes || {})[0] || "end";
+      return startScene;
+    }
+
+    async function summonBoo(){
+      if (!booCanSummon()){
+        toast("Not right now.");
+        return;
+      }
+
+      if (getBooMuted()){
+        toast("Boo is muted.");
+        return;
+      }
+
+      try{
+        await ensureBooLoaded();
+      }catch(err){
+        toast(err?.message || "Couldn’t load Boo.");
+        return;
+      }
+
+      // If we have {{name}} scenes but no name stored, name-gate once.
+      let startScene = computeBooStartScene();
+
       if (!getUserName()){
-        // lightweight name capture scene (internal)
         booScenes.__name_gate__ = {
           lines: ["Choose your username"],
           input: { placeholder: "Your name…", storeAs: "name", hint: "This stays on this device." },
