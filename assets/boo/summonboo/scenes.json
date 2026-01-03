@@ -59,9 +59,82 @@
         { "label": "Write a new memory...", "goto": "ask_mind_1" },
         { "label": "Earlier… what was I thinking about?", "goto": "recall_1" },
 
+        { "label": "Keep me company...", "goto": "keep_company_1" },
+
         { "label": "Clear all site data", "goto": "clear_data_1" },
 
         { "label": "Back to writing", "goto": "end" }
+      ]
+    },
+
+    "keep_company_1": {
+      "lines": [
+        "Let me tell ya, {{name}}... I've been around a loooong time... and I'm just getting started!"
+      ],
+      "choices": [
+        { "label": "A long time?", "goto": "keep_company_2" },
+        { "label": "Back to writing", "goto": "end" }
+      ]
+    },
+
+    "keep_company_2": {
+      "lines": [
+        "Yup... I sent my intern to get me crumpets some time ago... and I'm stiiiiillll waiting...!!"
+      ],
+      "choices": [
+        { "label": "Tell me more...", "goto": "keep_company_3" },
+        { "label": "Close", "goto": "end" }
+      ]
+    },
+
+    "keep_company_3": {
+      "lines": [
+        "Hey, {{name}}... Remember: If something scares you, float a little closer... Fear often looks different up close!"
+      ],
+      "choices": [
+        { "label": "I'm not afraid!", "goto": "keep_company_3_not_afraid_1" },
+        { "label": "Huh, I guess so...", "goto": "keep_company_3_guess_so_1" },
+        { "label": "Close", "goto": "end" }
+      ]
+    },
+
+    "keep_company_3_not_afraid_1": {
+      "lines": [
+        "Mmmhmm. That’s what all the bravest people say first 👻"
+      ],
+      "choices": [
+        { "label": "Continue", "goto": "keep_company_4" },
+        { "label": "Close", "goto": "end" }
+      ]
+    },
+
+    "keep_company_3_guess_so_1": {
+      "lines": [
+        "Exactly. Sometimes the shadowy part is just the distance."
+      ],
+      "choices": [
+        { "label": "Continue", "goto": "keep_company_4" },
+        { "label": "Close", "goto": "end" }
+      ]
+    },
+
+    "keep_company_4": {
+      "lines": [
+        "And remember: Just because something is invisible doesn't mean it isn't real -- like love, rest, or hope!"
+      ],
+      "choices": [
+        { "label": "Tell me more...", "goto": "keep_company_5" },
+        { "label": "Close", "goto": "end" }
+      ]
+    },
+
+    "keep_company_5": {
+      "lines": [
+        "You know? Like, just because *I'm* invisible doesn't mean I don't care...  Now... Where *are* those crumpets? Hmm..."
+      ],
+      "choices": [
+        { "label": "Write a new memory", "goto": "ask_mind_1" },
+        { "label": "Close", "goto": "end" }
       ]
     },
 
