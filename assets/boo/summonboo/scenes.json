@@ -139,13 +139,13 @@
 
     "end_soft_1": {
       "lines": [
-        "That’s okay, {{name}}.\n\nYou don’t have to name it to let it move."
+        "It's okay, {{name}}.\n\nYou can come back to this later."
       ],
       "choices": [
         { "label": "Back to writing.", "goto": "end" }
       ]
     },
 
-    "end": { "lines": [""] }
+    "end": { "lines": ["See ya, {{name}} 👻"] }
   }
 }
