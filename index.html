@@ -3354,48 +3354,86 @@ ${e.content}
       return startScene;
     }
 
-    async function summonBoo(){
-      if (!booCanSummon()){
-        toast("Not right now.");
-        return;
-      }
+    function allowSummonWhenMuted(){
+  return !!(booMeta && booMeta.allowSummonWhenMuted);
+}
 
-      if (getBooMuted()){
-        toast("Boo is muted.");
-        return;
-      }
+function toggleBooMuted(){
+  const next = !getBooMuted();
+  setBooMuted(next);
+  return next;
+}
 
-      try{
-        await ensureBooLoaded();
-      }catch(err){
-        toast(err?.message || "Couldn’t load Boo.");
-        return;
-      }
+  async function summonBoo(){
+  if (!booCanSummon()){
+    toast("Not right now.");
+    return;
+  }
 
-      // If we have {{name}} scenes but no name stored, name-gate once.
-      let startScene = computeBooStartScene();
+  // Always ensure Boo JSON is loaded before we decide behavior based on meta flags
+  try{
+    await ensureBooLoaded();
+  }catch(err){
+    toast(err?.message || "Couldn’t load Boo.");
+    return;
+  }
 
-      if (!getUserName()){
-        booScenes.__name_gate__ = {
-          lines: ["Choose your username"],
-          input: { placeholder: "Your name…", storeAs: "name", hint: "This stays on this device." },
-          choices: [
-            { label: "Save", goto: startScene },
-            { label: "Not now", goto: startScene }
-          ]
-        };
-        startScene = "__name_gate__";
-      }
+  const muted = getBooMuted();
 
-      openBooOverlay();
-      renderBooScene(startScene);
+  // If muted:
+  // - if allowSummonWhenMuted: unmute on click and continue opening
+  // - otherwise: keep old behavior (but you can still unmute via the icon logic below)
+  if (muted){
+    if (allowSummonWhenMuted()){
+      setBooMuted(false);
+      toast("Boo unmuted.");
+    } else {
+      toast("Boo is muted.");
+      return;
     }
+  }
+
+  // Start scene (includes your name gate)
+  let startScene = computeBooStartScene();
+
+  if (!getUserName()){
+    booScenes.__name_gate__ = {
+      lines: ["Choose your username"],
+      input: { placeholder: "Your name…", storeAs: "name", hint: "This stays on this device." },
+      choices: [
+        { label: "Save", goto: startScene },
+        { label: "Not now", goto: startScene }
+      ]
+    };
+    startScene = "__name_gate__";
+  }
+
+  openBooOverlay();
+  renderBooScene(startScene);
+}
 
     // Wire Summon Boo button
-    summonBooBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      summonBoo();
-    });
+   summonBooBtn?.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  // If Boo overlay is open, clicking the icon toggles mute/unmute.
+  if (booOverlay?.classList.contains("active")){
+    const nowMuted = toggleBooMuted();
+
+    if (nowMuted){
+      toast("Boo muted.");
+      closeBooOverlay(); // optional, but keeps it tidy
+    } else {
+      toast("Boo unmuted.");
+      // Re-open/start Boo flow immediately
+      await summonBoo();
+    }
+    return;
+  }
+
+  // If overlay is closed, normal summon (and if muted, it will unmute + open)
+  await summonBoo();
+});
 
     // Close overlay interactions
     booCloseX?.addEventListener("click", () => closeBooOverlay());
