@@ -91,7 +91,7 @@
 
     "ask_mind_1": {
       "lines": [
-        "What’s on your mind right now, {{name}}?"
+        "Press Continue to start a new memory..."
       ],
       "choices": [
         { "label": "Continue", "goto": "capture_note_1" },
