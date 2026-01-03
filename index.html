@@ -11,6 +11,19 @@
   </script>
 
   <style>
+   <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Journal Boo</title>
+
+  <!-- ✅ Adds a "js" class to <html> so we can animate only when JS is running -->
+  <script>
+    document.documentElement.classList.add("js");
+  </script>
+
+  <style>
     :root{
       /* Default vars (will be overridden by body[data-theme]) */
       --bg: #202020;
@@ -37,6 +50,15 @@
       /* split typography */
       --font-display: ui-serif, Georgia, "Times New Roman", Times, serif;
       --font-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+
+      /* --- Frost / Glass system (new) --- */
+      --frost-tint: rgba(255,255,255,.06);     /* cool haze */
+      --frost-tint-2: rgba(255,255,255,.03);   /* deeper haze */
+      --frost-border: rgba(255,255,255,.10);   /* hairline edge */
+      --frost-blur: 18px;                      /* main blur strength */
+      --frost-sat: 120%;                       /* subtle “icy” lift */
+      --frost-contrast: 108%;
+      --grain-opacity: .06;                    /* ✅ a bit more texture */
     }
 
     /* ✅ Theme palettes */
@@ -125,15 +147,57 @@
     body{
       margin: 0;
       font-family: var(--font-ui);
+
+      /* ✅ Frosty stage background (updated) */
       background:
-        radial-gradient(1100px 800px at 18% 0%, rgba(201,167,106,.10), transparent 58%),
-        radial-gradient(900px 600px at 88% 12%, rgba(201,167,106,.07), transparent 60%),
+        radial-gradient(1200px 900px at 18% 0%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 650px at 88% 12%, rgba(255,255,255,.045), transparent 62%),
+        radial-gradient(700px 520px at 50% 92%, rgba(255,255,255,.035), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.18)),
         var(--bg);
+
       color: var(--text);
       letter-spacing: .1px;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- Site-wide frost overlay (new) --- */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+
+      background:
+        radial-gradient(1000px 700px at 15% 10%, rgba(255,255,255,.07), transparent 58%),
+        radial-gradient(900px 700px at 90% 20%, rgba(255,255,255,.05), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.10));
+
+      backdrop-filter: blur(var(--frost-blur)) saturate(var(--frost-sat)) contrast(var(--frost-contrast));
+      -webkit-backdrop-filter: blur(var(--frost-blur)) saturate(var(--frost-sat)) contrast(var(--frost-contrast));
+    }
+
+    /* --- Subtle grain (new) --- */
+    body::after{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: var(--grain-opacity);
+      mix-blend-mode: overlay;
+
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      background-size: 220px 220px;
+    }
+
+    /* make sure your app sits above the overlays */
+    .app, .jbScreen, .toast, .modal-backdrop, .booOverlay, .summonBooBtn{
+      position: relative;
+      z-index: 2;
     }
 
     /* headings use display font for warmth */
@@ -155,10 +219,15 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 520ms ease;
+
+      /* ✅ Match the new frosty stage background */
       background:
-        radial-gradient(1100px 800px at 18% 0%, rgba(201,167,106,.10), transparent 58%),
-        radial-gradient(900px 600px at 88% 12%, rgba(201,167,106,.07), transparent 60%),
+        radial-gradient(1200px 900px at 18% 0%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 650px at 88% 12%, rgba(255,255,255,.045), transparent 62%),
+        radial-gradient(700px 520px at 50% 92%, rgba(255,255,255,.035), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.18)),
         var(--bg);
+
       z-index: 9999;
     }
     .jbScreen.active{
@@ -340,823 +409,50 @@
       color: var(--text);
     }
 
+    /* ✅ Frosty glass card (updated) */
     .card{
-      background: linear-gradient(180deg, var(--surface), var(--surface2));
-      border: var(--line);
+      background:
+        linear-gradient(180deg,
+          color-mix(in srgb, var(--surface) 70%, var(--frost-tint)),
+          color-mix(in srgb, var(--surface2) 75%, var(--frost-tint-2))
+        );
+      border: 1px solid color-mix(in srgb, var(--frost-border) 85%, transparent);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+
+      backdrop-filter: blur(calc(var(--frost-blur) + 2px)) saturate(var(--frost-sat));
+      -webkit-backdrop-filter: blur(calc(var(--frost-blur) + 2px)) saturate(var(--frost-sat));
     }
 
     .card-inner{ padding: 22px; }
 
-    .title{
-      font-size: 24px;
-      margin: 0 0 10px;
-      font-weight: 650;
-      letter-spacing: .15px;
-    }
-    .subtitle{
-      margin: 0 0 18px;
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 16px;
-    }
-
-    .option-grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .option{
-      border: var(--line);
-      background: var(--surface2);
-      border-radius: 18px;
-      padding: 16px 16px;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .option:hover{ background: var(--surface); transform: translateY(-1px); }
-    .option:focus-visible{
-      outline: none;
-      box-shadow: 0 0 0 1px var(--focus), var(--shadow);
-      border-color: rgba(255,255,255,.18);
-    }
-    .option h3{ margin: 0; font-size: 18px; font-weight: 650; font-family: var(--font-display); }
-    .option p{ margin: 6px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
-
-    .row{
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-
-    .btn{
-      border: var(--line);
-      background: var(--surface2);
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      cursor:pointer;
-      color: var(--text);
-      user-select:none;
-      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      font-family: var(--font-ui);
-    }
-    .btn:hover{ background: var(--surface); transform: translateY(-1px); }
-    .btn:focus-visible{
-      outline: none;
-      box-shadow: 0 0 0 1px var(--focus), var(--shadow);
-      border-color: rgba(255,255,255,.18);
-    }
-    .btn.primary{
-      background: color-mix(in srgb, var(--accent) 18%, transparent);
-      border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
-    }
-    .btn.primary:hover{
-      background: color-mix(in srgb, var(--accent) 24%, transparent);
-    }
-    .btn.ghost{ background: transparent; }
-    .btn.danger{
-      border: 1px solid rgba(214,125,125,.35);
-      background: rgba(214,125,125,.10);
-    }
-    .btn:disabled{
-      opacity: .55;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    .divider{
-      height: 1px;
-      background: color-mix(in srgb, var(--text) 10%, transparent);
-      margin: 18px 0;
-      opacity: .7;
-    }
-
-    textarea, input[type="email"], input[type="text"], select{
-      width: 100%;
-      border: var(--line);
-      background: var(--input-bg);
-      border-radius: 16px;
-      color: var(--text);
-      padding: 12px 14px;
-      font-family: var(--font-ui);
-      font-size: 16px;
-      line-height: 1.6;
-      outline: none;
-      transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    textarea{ resize: vertical; }
-    textarea:focus, input:focus, select:focus{
-      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-      box-shadow: 0 0 0 1px var(--focus);
-    }
-    select { font-size: 15px; }
-
-    .kicker{
-      font-size: 14px;
-      color: var(--muted);
-      margin: 0 0 8px;
-      letter-spacing: .1px;
-    }
-    .hint{
-      margin-top: 10px;
-      color: var(--muted2);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-    .small{ font-size: 12.5px; color: var(--muted2); }
-
-    .fade{
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity .28s ease, transform .28s ease;
-    }
-    .fade.show{
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .med-box{
-      background: var(--surface2);
-      border: var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      white-space: pre-wrap;
-      line-height: 1.75;
-      font-size: 16px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      font-family: var(--font-ui);
-    }
-
-    /* ✅ Meditation audio player */
-    .audio-player{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-    .audio-player .label{
-      font-size: 14px;
-      color: var(--muted);
-      font-family: var(--font-ui);
-    }
-    .audio-player .btn{
-      min-width: 140px;
-      text-align: center;
-    }
-
-    .footer-note{
-      color: var(--muted2);
-      font-size: 12.5px;
-      line-height: 1.45;
-      padding: 0 4px;
-      font-family: var(--font-ui);
-    }
-
-    .footer-note a{
-      color: inherit;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    .list{ display:grid; gap: 10px; margin-top: 8px; }
-    .entry{
-      border: var(--line);
-      background: var(--surface2);
-      border-radius: 16px;
-      padding: 14px 14px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .entry .meta{
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      color: var(--muted2);
-      font-size: 12.5px;
-      margin-bottom: 8px;
-      font-family: var(--font-ui);
-    }
-
-    /* 🔥 Red glow for Munchkin Boo's private journal (perpetual) */
-    #blogLink .meta span{
-      text-shadow:
-        0 0 6px rgba(255,80,80,.6),
-        0 0 14px rgba(255,40,40,.45);
-    }
-
-    #blogLink .meta,
-    #blogLink .preview{
-      color: rgba(255,180,180,.95);
-    }
-
-    @keyframes redPulse{
-      0%   { box-shadow: 0 0 0 1px rgba(255,80,80,.25), 0 0 14px rgba(255,60,60,.35); }
-      100% { box-shadow: 0 0 0 1px rgba(255,80,80,.45), 0 0 28px rgba(255,40,40,.55); }
-    }
-
-    /* ✅ Make the same existing pulse perpetual */
-    #blogLink{
-      animation: redPulse 1.4s ease-in-out infinite alternate;
-    }
-
-    /* Keep hover rules too (same style as before) */
-    #blogLink:hover .meta span{
-      text-shadow:
-        0 0 6px rgba(255,80,80,.6),
-        0 0 14px rgba(255,40,40,.45);
-    }
-
-    #blogLink:hover .meta,
-    #blogLink:hover .preview{
-      color: rgba(255,180,180,.95);
-    }
-
-    #blogLink:hover{
-      animation: redPulse 1.4s ease-in-out infinite alternate;
-    }
-
-    /* ✅ Force true center on the blog tile meta line */
-    .entry .meta.meta-center{
-      display: block;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .entry .meta.meta-center span{
-      display: block;
-      width: 100%;
-    }
-    .entry .meta.meta-center span:last-child{
-      display: none;
-    }
-
-    .entry .preview{
-      margin: 0;
-      color: var(--text);
-      font-size: 15px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-    }
-
-    .toast{
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: var(--toast-bg);
-      border: var(--line);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 13px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s ease, transform .2s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,.22);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      font-family: var(--font-ui);
-      z-index: 20000;
-    }
-    .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
-
-    @media (max-width: 520px){
-      .title{ font-size: 23px; }
-      .subtitle{ font-size: 15px; }
-      .pill{ padding: 9px 10px; }
-      .pill-select{ padding: 9px 10px; }
-      .card-inner{ padding: 18px; }
-    }
-
-    /***********************
-     * ✅ Home hero tiles
-     ***********************/
-    .home-hero{
-      display:grid;
-      grid-template-columns: 1.35fr 0.85fr;
-      gap: 14px;
-      margin-top: 8px;
-      align-items:stretch;
-    }
-
-    @media (max-width: 860px){
-      .home-hero{ grid-template-columns: 1fr; }
-    }
-    .home-stack{
-      display:flex;
-      flex-direction:column;
-      gap: 14px;
-    }
-
-    .hero-tile{
-      position: relative;
-      border: var(--line);
-      border-radius: 22px;
-
-      /* consistent tile surface for all tiles */
-      background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--surface) 92%, transparent),
-        color-mix(in srgb, var(--surface2) 98%, transparent)
-      );
-
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      cursor: pointer;
-      user-select:none;
-      transform: translateZ(0);
-      transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, filter 220ms ease;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      isolation: isolate; /* keeps z-index layers contained */
-    }
-
-    /* ✅ Big tile keeps your artwork */
-    .hero-big{
-      min-height: 250px;
-      display:flex;
-      align-items:flex-end;
-
-      background-image: url("assets/art/free-writing.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-
-      /* fallback if image fails */
-      background-color: color-mix(in srgb, var(--surface) 70%, transparent);
-    }
-
-    /* Overlay so it stays readable */
-    .hero-big::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(900px 520px at 30% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
-        linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
-      z-index: 2;
-      pointer-events:none;
-    }
-
-    .hero-tile:active{
-      transform: translateY(-1px) scale(0.995);
-    }
-    .hero-tile:focus-visible{
-      outline:none;
-      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
-      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-    }
-
-    /* Edge glow layer */
-    .hero-tile::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      border-radius: inherit;
-      pointer-events:none;
-
-      opacity: 0;
-      transition: opacity 260ms ease;
-
-      background:
-        radial-gradient(900px 240px at 25% 0%,
-          color-mix(in srgb, var(--accent) 42%, transparent),
-          transparent 62%),
-        radial-gradient(900px 240px at 75% 100%,
-          color-mix(in srgb, var(--accent) 30%, transparent),
-          transparent 66%);
-
-      filter: blur(10px);
-
-      /* sits above artwork/overlay, below content */
-      z-index: 3;
-    }
-
-    .hero-tile:hover::before{
-      opacity: .85;
-    }
-
-    .hero-body{
-      position: relative;
-      z-index: 4;
-      display:flex;
-      align-items:center;
-      gap: 14px;
-      padding: 16px 16px;
-    }
-
-    .hero-icon{
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      display:grid;
-      place-items:center;
-      font-size: 22px;
-      border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
-      background: color-mix(in srgb, var(--surface2) 70%, transparent);
-      box-shadow: 0 10px 22px rgba(0,0,0,.20);
-      flex: 0 0 auto;
-    }
-
-    .hero-text{ display:flex; flex-direction:column; gap: 6px; }
-    .hero-title{
-      margin:0;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: .12px;
-      font-family: var(--font-display);
-    }
-    .hero-sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .hero-big .hero-body{
-      padding: 20px 20px;
-      align-items:flex-end;
-    }
-    .hero-big .hero-icon{
-      position:absolute;
-      top: 16px;
-      left: 16px;
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      font-size: 30px;
-    }
-
-    /* Darken text ONLY on the big Free Writing tile */
-    .hero-big .hero-title{
-      color: #0f0f12;
-      font-size: 22px;
-    }
-    .hero-big .hero-sub{
-      max-width: 46ch;
-      color: rgba(15,15,18,.75);
-    }
-
-    /* ✅ Fade-in question on Home */
-    .home-question{
-      margin: 0 0 4px;
-      font-size: clamp(22px, 3.3vw, 34px);
-      font-weight: 650;
-      letter-spacing: .15px;
-      line-height: 1.15;
-    }
-    .home-qfade{
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 700ms ease, transform 700ms ease;
-    }
-    .home-qfade.show{
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .hero-tile{ transition: none; }
-      .home-qfade{ transition: none; opacity: 1; transform:none; }
-    }
-
-    /***********************
-     * ✅ Mood check-in modal
-     ***********************/
-    .modal-backdrop{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.46);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      z-index: 15000;
-    }
-    .modal-backdrop.active{ display:flex; }
-
-    .modal{
-      width: min(560px, 100%);
-      border: var(--line);
-      border-radius: 22px;
-      background: linear-gradient(180deg, var(--surface), var(--surface2));
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      overflow:hidden;
-      transform: translateY(8px);
-      opacity: 0;
-      transition: opacity 1000ms ease, transform 1000ms ease;
-    }
-    .modal-backdrop.active .modal{
-      transform: translateY(0);
-      opacity: 1;
-    }
-    .modal-inner{ padding: 18px 18px 16px; }
-    .modal-title{
-      margin: 0 0 8px;
-      font-size: 20px;
-      font-weight: 650;
-      letter-spacing: .12px;
-      font-family: var(--font-display);
-    }
-    .modal-sub{
-      margin: 0 0 14px;
-      color: var(--muted);
-      font-size: 14.5px;
-      line-height: 1.55;
-      font-family: var(--font-ui);
-    }
-
-    /* ✅ UPDATED: custom mood field (remove dotted/dashed outline) */
-    .mood-custom{
-      margin-top: 10px;
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-      padding: 12px 12px;
-      border-radius: 16px;
-      border: var(--line);
-      background: color-mix(in srgb, var(--surface2) 80%, transparent);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .mood-custom .label{
-      font-size: 13px;
-      color: var(--muted2);
-      margin: 0;
-    }
-    .mood-custom input[type="text"]{
-      border-radius: 14px;
-      padding: 11px 12px;
-      font-size: 15px;
-    }
-    .mood-custom .tiny{
-      font-size: 12.5px;
-      color: var(--muted2);
-      margin: 0;
-      line-height: 1.35;
-    }
-
-    .mood-grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    @media (min-width: 520px){
-      .mood-grid{ grid-template-columns: 1fr 1fr; }
-    }
-    .mood-btn{
-      border: var(--line);
-      background: var(--surface2);
-      border-radius: 16px;
-      padding: 12px 12px;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      text-align:left;
-      font-family: var(--font-ui);
-      color: var(--text);
-      font-size: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-    .mood-btn:hover{ background: var(--surface); transform: translateY(-1px); }
-    .mood-btn:focus-visible{
-      outline:none;
-      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
-      border-color: rgba(255,255,255,.18);
-    }
-    .mood-btn.selected{
-      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-      background: color-mix(in srgb, var(--accent) 14%, var(--surface2));
-      box-shadow: 0 0 0 3px var(--focus);
-    }
-    .mood-btn.selected::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(240px 180px at 18% 15%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 68%),
-        radial-gradient(260px 190px at 88% 86%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%);
-      opacity: .6;
-      pointer-events:none;
-    }
-
-    .modal-footer{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      padding: 12px 14px 14px;
-      border-top: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-      background: color-mix(in srgb, var(--surface2) 65%, transparent);
-    }
-    .modal-reply{
-      color: var(--muted2);
-      font-size: 13px;
-      line-height: 1.45;
-      margin: 0;
-      min-height: 1.45em;
-      flex: 1 1 auto;
-      font-family: var(--font-ui);
-    }
-    .modal-actions{
-      display:flex;
-      gap: 8px;
-      flex: 0 0 auto;
-    }
-
-    /***********************
-     * ✅ Clear all site data modal (used by Summon Boo)
-     ***********************/
-    #clearDataBackdrop{
-      z-index: 17000; /* above Boo overlay (16000) */
-    }
-    .danger-note{
-      margin: 10px 0 0;
-      color: color-mix(in srgb, var(--text) 84%, transparent);
-      font-size: 13px;
-      line-height: 1.45;
-      font-family: var(--font-ui);
-    }
-    .danger-note strong{
-      color: color-mix(in srgb, var(--text) 96%, transparent);
-      font-weight: 650;
-    }
-
-    /***********************
-     * ✅ Summon Boo (Journal Boo)
-     ***********************/
-    .summonBooBtn{
-      position: fixed;
-      top: 14px;
-      right: 14px;
-      z-index: 12000; /* below mood modal (15000), above app UI */
-      border: none;
-      background: transparent;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-      border-radius: 16px;
-      display: none; /* shown only after app starts */
-    }
-    .summonBooBtn:focus-visible{
-      outline: none;
-      box-shadow: 0 0 0 4px var(--focus), var(--shadow);
-    }
-    .summonBooIcon{
-      width: 64px;
-      height: 64px;
-      object-fit: contain;
-      display: block;
-      opacity: .95;
-      transition: transform 120ms ease, opacity 180ms ease;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,.20));
-    }
-    .summonBooBtn:hover .summonBooIcon{
-      opacity: 1;
-      transform: scale(1.03);
-    }
-    @media (max-width: 520px){
-      .summonBooIcon{ width: 75px; height: 75px; }
-      .summonBooBtn{ top: 10px; right: 10px; }
-    }
-
-    .booOverlay{
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(0,0,0,.46);
-      z-index: 16000; /* above mood modal */
-    }
-    .booOverlay.active{ display:flex; }
-
+    /* --- Frosty controls + surfaces (new, consolidated) --- */
+    .pill,
+    .pill-select,
+    .btn,
+    .option,
+    .entry,
+    .med-box,
+    .modal,
     .booPanel{
-      width: min(560px, 100%);
-      border: var(--line);
-      border-radius: 22px;
-      background: linear-gradient(180deg, var(--surface), var(--surface2));
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      overflow: hidden;
-      transform: translateY(8px);
-      opacity: 0;
-      transition: opacity 520ms ease, transform 520ms ease;
-    }
-    .booOverlay.active .booPanel{
-      transform: translateY(0);
-      opacity: 1;
+      border: 1px solid color-mix(in srgb, var(--frost-border) 80%, transparent);
+      background:
+        linear-gradient(180deg,
+          color-mix(in srgb, var(--surface2) 82%, var(--frost-tint)),
+          color-mix(in srgb, var(--surface2) 62%, transparent)
+        );
+      backdrop-filter: blur(var(--frost-blur)) saturate(var(--frost-sat));
+      -webkit-backdrop-filter: blur(var(--frost-blur)) saturate(var(--frost-sat));
     }
 
-    .booInner{ padding: 18px 18px 14px; }
-
-    .booTitle{
-      margin: 0 0 10px;
-      font-size: 18px;
-      font-weight: 650;
-      letter-spacing: .12px;
-      font-family: var(--font-display);
-    }
-    .booLines{
-      margin: 0 0 12px;
-      color: var(--text);
-      font-size: 15.5px;
-      line-height: 1.65;
-      white-space: pre-wrap;
-      font-family: var(--font-ui);
-    }
-
-    .booInputWrap{
-      margin-top: 10px;
-      display:none;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .booInputWrap.show{ display:flex; }
-
-    .booHint{
-      margin: 0;
-      color: var(--muted2);
-      font-size: 12.5px;
-      line-height: 1.35;
-    }
-
-    .booActions{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 12px 14px 14px;
-      border-top: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-      background: color-mix(in srgb, var(--surface2) 65%, transparent);
-      justify-content: flex-end;
-    }
-
-    .booChoice{
-      border: var(--line);
-      background: var(--surface2);
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      color: var(--text);
-      cursor:pointer;
-      user-select:none;
-      transition: background .12s ease, transform .12s ease, border-color .12s ease, box-shadow .12s ease;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      font-family: var(--font-ui);
-      white-space: nowrap;
-    }
-    .booChoice:hover{ background: var(--surface); transform: translateY(-1px); }
-    .booChoice:focus-visible{
-      outline: none;
-      box-shadow: 0 0 0 3px var(--focus), var(--shadow);
-      border-color: rgba(255,255,255,.18);
-    }
-
-    .booCloseX{
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      border: var(--line);
-      background: var(--surface2);
-      cursor: pointer;
-      display:grid;
-      place-items:center;
-      color: var(--muted);
-      transition: background .12s ease, transform .12s ease;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      z-index: 2;
-    }
-    .booCloseX:hover{ background: var(--surface); transform: translateY(-1px); color: var(--text); }
-
-    @media (prefers-reduced-motion: reduce){
-      .booPanel{ transition:none; transform:none; opacity: 1; }
-      .summonBooIcon{ transition:none; }
+    /* Optional fallback (recommended) */
+    @media (prefers-reduced-transparency: reduce){
+      body::before, body::after{ display:none; }
+      .card, .pill, .pill-select, .btn, .option, .entry, .med-box, .modal, .booPanel{
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
     }
   </style>
 </head>
