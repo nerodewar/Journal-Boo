@@ -1377,6 +1377,249 @@
       .booPanel{ transition:none; transform:none; opacity: 1; }
       .summonBooIcon{ transition:none; }
     }
+    /* =========================================================
+   ❄️ Journal Boo — Crystal Luxe Patch (append at end)
+   ========================================================= */
+
+/* Slightly cooler global tuning + richer depth */
+:root{
+  --glass-blur: 22px;         /* a touch more blur */
+  --glass-sat: 155%;          /* richer aurora color separation */
+  --noise-opacity: .045;
+
+  /* extra luxe tokens */
+  --prismA: rgba(143,243,255,.18);
+  --prismB: rgba(168,160,255,.16);
+  --prismW: rgba(255,255,255,.18);
+
+  --spec: rgba(255,255,255,.22);  /* specular highlight */
+  --shadowDeep: 0 26px 90px rgba(0,0,0,.38);
+}
+
+/* Make the whole world feel like “ice cave + aurora” */
+body{
+  background:
+    radial-gradient(1100px 720px at 15% -10%, rgba(143,243,255,0.18), rgba(0,0,0,0) 58%),
+    radial-gradient(900px 600px at 88% 10%, rgba(168,160,255,0.18), rgba(0,0,0,0) 62%),
+    radial-gradient(900px 650px at 55% 110%, rgba(90,210,255,0.10), rgba(0,0,0,0) 65%),
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.22)),
+    var(--bg);
+}
+
+/* Softer, classier “snow grain” */
+body::before{
+  opacity: var(--noise-opacity);
+  mix-blend-mode: overlay;
+  filter: blur(.2px);
+}
+
+/* Premium type: tiny lift in legibility */
+.brand h1,
+.title,
+.home-question,
+.jbWelcomeTitle{
+  text-shadow: 0 10px 32px rgba(0,0,0,.22);
+}
+.subtitle,
+.jbWelcomeSub{
+  color: color-mix(in srgb, var(--muted) 92%, rgba(235,245,255,.20));
+}
+
+/* ===== Crystal glass containers: rim + prism edge + sheen ===== */
+.card,
+.hero-tile,
+.modal,
+.booPanel{
+  box-shadow: var(--shadowDeep);
+  border-color: rgba(235,245,255,.14);
+  position: relative;
+}
+
+/* prismatic border ring (subtle) */
+.card::after,
+.hero-tile::after,
+.modal::after,
+.booPanel::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, var(--prismW), var(--prismA), var(--prismB), rgba(255,255,255,.10));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: .65;
+  pointer-events:none;
+}
+
+/* classy slow sheen sweep */
+.card > .card-inner,
+.modal .modal-inner,
+.booPanel .booInner,
+.hero-tile .hero-body{
+  position: relative;
+  z-index: 2;
+}
+
+.card::marker{ content:""; } /* harmless reset */
+
+/* Sheen layer */
+.card::before,
+.modal::before,
+.booPanel::before{
+  opacity: .50; /* keep your existing top highlight but slightly more controlled */
+}
+
+/* Add a slow sweep to main card + modals only */
+.card::after{
+  /* keep prism ring, plus allow sweep on a new layer via background animation */
+}
+.card{
+  overflow: hidden;
+}
+.card .card-inner::before{
+  content:"";
+  position:absolute;
+  top:-45%;
+  left:-65%;
+  width:70%;
+  height:190%;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0.10),
+    rgba(143,243,255,0.08),
+    rgba(255,255,255,0));
+  transform: rotate(18deg);
+  opacity:.0;
+  pointer-events:none;
+  mix-blend-mode: screen;
+  animation: jbSheen 8.5s ease-in-out infinite;
+}
+@keyframes jbSheen{
+  0%   { left:-80%; opacity:0; }
+  18%  { opacity:.55; }
+  52%  { left:125%; opacity:.25; }
+  100% { left:125%; opacity:0; }
+}
+
+/* ===== Buttons / Pills: acrylic + spec line ===== */
+.btn,
+.pill,
+.pill-select,
+.booChoice,
+.mood-btn{
+  border-color: rgba(235,245,255,.14);
+  box-shadow: 0 14px 40px rgba(0,0,0,.22);
+  position: relative;
+  overflow: hidden;
+}
+
+/* specular highlight streak */
+.btn::after,
+.pill::after,
+.booChoice::after,
+.mood-btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(120deg,
+    rgba(255,255,255,0) 0%,
+    var(--spec) 30%,
+    rgba(255,255,255,0) 60%);
+  transform: translateX(-120%);
+  opacity:.50;
+  transition: transform .55s ease, opacity .35s ease;
+  pointer-events:none;
+  mix-blend-mode: screen;
+}
+.btn:hover::after,
+.pill:hover::after,
+.booChoice:hover::after,
+.mood-btn:hover::after{
+  transform: translateX(120%);
+  opacity:.62;
+}
+
+/* primary: turn it into “icy gemstone” not beige */
+.btn.primary{
+  border: 1px solid rgba(235,245,255,.16);
+  background:
+    radial-gradient(240px 140px at 20% 0%, rgba(255,255,255,0.22), rgba(0,0,0,0) 70%),
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--accent) 35%, rgba(143,243,255,.92)),
+      rgba(168,160,255,.78));
+  color: color-mix(in srgb, var(--text) 85%, rgba(0,0,0,.35));
+}
+
+/* ===== Inputs: cleaner + more “frosted pane” ===== */
+textarea,
+input[type="email"],
+input[type="text"],
+select{
+  border-color: rgba(235,245,255,.14);
+  box-shadow: 0 12px 34px rgba(0,0,0,.18);
+}
+textarea:focus,
+input:focus,
+select:focus{
+  box-shadow: 0 0 0 4px var(--focus), 0 18px 54px rgba(0,0,0,.28);
+}
+
+/* ===== Hero tiles: extra glass depth and premium overlay ===== */
+.hero-tile{
+  box-shadow: var(--shadowDeep);
+}
+.hero-big::after{
+  background:
+    radial-gradient(900px 520px at 30% 0%, rgba(235,245,255,.16), transparent 62%),
+    radial-gradient(520px 380px at 90% 20%, rgba(168,160,255,.10), transparent 66%),
+    radial-gradient(700px 420px at 50% 100%, rgba(143,243,255,.08), transparent 70%),
+    linear-gradient(to bottom, var(--hero-overlay-top), var(--hero-overlay-bot));
+}
+
+/* ===== Overlay backdrops: more luxe, less flat ===== */
+.modal-backdrop,
+.booOverlay{
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0,0,0,.52);
+}
+
+/* ===== Summon button: give it a crystal housing instead of “naked icon” ===== */
+.summonBooBtn{
+  border-radius: 18px;
+}
+.summonBooBtn .summonBooIcon{
+  filter: drop-shadow(0 16px 30px rgba(0,0,0,.38));
+}
+.summonBooBtn::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: 18px;
+  background:
+    radial-gradient(120px 80px at 20% 0%, rgba(255,255,255,0.14), rgba(0,0,0,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)),
+    rgba(10,24,58,0.22);
+  border: 1px solid rgba(235,245,255,.14);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 0 18px 50px rgba(0,0,0,.35);
+  opacity: 0;
+  transition: opacity .18s ease, transform .12s ease;
+  pointer-events:none;
+}
+.summonBooBtn:hover::before{ opacity: 1; }
+.summonBooBtn:active::before{ transform: translateY(1px) scale(0.99); }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .card .card-inner::before{ animation: none !important; }
+  .btn::after, .pill::after, .booChoice::after, .mood-btn::after{ transition:none; }
+}
   </style>
 </head>
 
