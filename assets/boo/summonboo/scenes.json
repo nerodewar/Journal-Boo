@@ -61,7 +61,7 @@
 
         { "label": "Clear all site data", "goto": "clear_data_1" },
 
-        { "label": "Back to writing.", "goto": "end" }
+        { "label": "Back to writing", "goto": "end" }
       ]
     },
 
@@ -80,9 +80,9 @@
         "Last check, {{name}}.\n\nIf you continue, I’ll open a final confirmation where you’ll type CLEAR.\n\nDo you want to proceed?"
       ],
       "choices": [
-        { "label": "No — go back", "goto": "stay_1" },
+        { "label": "No, go back!", "goto": "stay_1" },
         {
-          "label": "Yes — clear all site data",
+          "label": "Yes, clear all site data",
           "goto": "stay_1",
           "effects": [{ "type": "clearAllSiteData" }]
         }
@@ -95,7 +95,7 @@
       ],
       "choices": [
         { "label": "Continue", "goto": "capture_note_1" },
-        { "label": "Back to writing.", "goto": "end" }
+        { "label": "Back to writing", "goto": "end" }
       ]
     },
 
@@ -123,7 +123,7 @@
         "Thank you, {{name}}.\n\nI’ll hold that gently."
       ],
       "choices": [
-        { "label": "Back to writing.", "goto": "end" }
+        { "label": "Close", "goto": "end" }
       ]
     },
 
@@ -133,7 +133,7 @@
       ],
       "choices": [
         { "label": "Write a new memory.", "goto": "ask_mind_1" },
-        { "label": "Back to writing.", "goto": "end" }
+        { "label": "Back to writing", "goto": "end" }
       ]
     },
 
@@ -142,7 +142,7 @@
         "It's okay, {{name}}.\n\nYou can come back to this later."
       ],
       "choices": [
-        { "label": "Back to writing.", "goto": "end" }
+        { "label": "Close", "goto": "end" }
       ]
     },
 
