@@ -40,22 +40,14 @@
     }
 
     /* ✅ Theme palettes */
-   body[data-theme="charcoal"]{
-  /* Backgrounds */
-  --bg: #202020;              /* near-black, not pure */
-
-  /* Text */
-  --text: #202020;            /* dim stone white */
-  --muted: #b9b6ad;           /* graphite gray */
-  --muted2: #8f8b81;          /* deep secondary */
-
-  /* Accent (barely there) */
-  --accent: #c9a76a;          /* dark mineral brass */
-
-  /* UI */
-  --line: 1px solid rgba(255,255,255,.07);
-  --shadow: 0 10px 34px rgba(0,0,0,.65);
-}
+    body[data-theme="charcoal"]{
+      --bg: #202020;
+      --text: #f1efe9;
+      --muted: #b9b6ad;
+      --muted2:#8f8b81;
+      --accent:#c9a76a;
+      --line: 1px solid rgba(255,255,255,.07);
+      --shadow: 0 7px 24px rgba(0,0,0,.35);
 
       /* slightly darker + more consistent surfaces */
       --surface: rgba(255,255,255,.055);
@@ -745,7 +737,7 @@
           color-mix(in srgb, var(--accent) 42%, transparent),
           transparent 62%),
         radial-gradient(900px 240px at 75% 100%,
-          color-mix(in srgb, var(--bg) 30%, transparent),
+          color-mix(in srgb, var(--accent) 30%, transparent),
           transparent 66%);
 
       filter: blur(10px);
