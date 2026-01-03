@@ -110,7 +110,7 @@
 
     "keep_company_3_guess_so_1": {
       "lines": [
-        "Exactly. Sometimes the shadowy part is just the distance."
+        "Exactly. Sometimes the shadowy part is just the distance..."
       ],
       "choices": [
         { "label": "Continue", "goto": "keep_company_4" },
@@ -120,7 +120,7 @@
 
     "keep_company_4": {
       "lines": [
-        "And remember: Just because something is invisible doesn't mean it isn't real -- like love, rest, or hope!"
+        "And remember: Just because something is invisible doesn't mean it isn't <i>real</i> -- like love, rest, or hope!"
       ],
       "choices": [
         { "label": "Tell me more...", "goto": "keep_company_5" },
@@ -130,7 +130,7 @@
 
     "keep_company_5": {
       "lines": [
-        "You know? Like, just because *I'm* invisible doesn't mean I don't care...  Now... Where *are* those crumpets? Hmm..."
+        "You know? Like, just because <i>I'm</i> invisible doesn't mean I don't care...  Now... Where <i>are</i> those crumpets? <i>Hmm...</i>"
       ],
       "choices": [
         { "label": "Write a new memory", "goto": "ask_mind_1" },
