@@ -1608,30 +1608,83 @@
       clearDataDoIt.disabled = true;
     }
 
-    async function clearAllSiteData(){
+    <script>
+  async function clearAllSiteData(){
+    try{
+      // Stop any audio first
+      try { stopMeditationAudio(); } catch {}
+      try { stopBackgroundMusic(); } catch {}
+
+      // ✅ Explicitly remove Journal Boo + Summon Boo keys (My Journal included)
       try{
-        // Stop any audio first
-        try { stopMeditationAudio(); } catch {}
-        try { stopBackgroundMusic(); } catch {}
+        const KEYS_TO_REMOVE = [
+          LS_KEY,           // My Journal entries
+          LS_SETTINGS,
+          LS_EMAIL,
+          LS_THEME,
 
-        // local/session storage
-        try { localStorage.clear(); } catch {}
-        try { sessionStorage.clear(); } catch {}
+          LS_BOO_MUTED,
+          LS_BOO_NAME,
+          LS_BOO_NOTES,
+          LS_BOO_SEEN_INTRO,
+        ];
 
-        // IndexedDB (best-effort)
-        try{
-          if (indexedDB && typeof indexedDB.databases === "function"){
-            const dbs = await indexedDB.databases();
-            for (const db of (dbs || [])){
-              if (!db || !db.name) continue;
-              await new Promise((resolve) => {
-                const req = indexedDB.deleteDatabase(db.name);
-                req.onsuccess = () => resolve();
-                req.onerror = () => resolve();
-                req.onblocked = () => resolve();
-              });
-            }
+        for (const k of KEYS_TO_REMOVE){
+          try { localStorage.removeItem(k); } catch {}
+        }
+      }catch{}
+
+      // local/session storage (best-effort)
+      try { localStorage.clear(); } catch {}
+      try { sessionStorage.clear(); } catch {}
+
+      // IndexedDB (best-effort)
+      try{
+        if (indexedDB && typeof indexedDB.databases === "function"){
+          const dbs = await indexedDB.databases();
+          for (const db of (dbs || [])){
+            if (!db || !db.name) continue;
+            await new Promise((resolve) => {
+              const req = indexedDB.deleteDatabase(db.name);
+              req.onsuccess = () => resolve();
+              req.onerror = () => resolve();
+              req.onblocked = () => resolve();
+            });
           }
+        }
+      }catch{}
+
+      // Cache Storage (best-effort)
+      try{
+        if (window.caches && typeof caches.keys === "function"){
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+      }catch{}
+
+      // Service workers (best-effort)
+      try{
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations){
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+        }
+      }catch{}
+
+      // Cookies (best-effort, current domain/path)
+      try{
+        const cookies = document.cookie ? document.cookie.split(";") : [];
+        for (const c of cookies){
+          const eqPos = c.indexOf("=");
+          const name = (eqPos > -1 ? c.substr(0, eqPos) : c).trim();
+          if (!name) continue;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+        }
+      }catch{}
+    } finally {
+      // hard reset
+      window.location.reload();
+    }
+  }
         }catch{}
 
         // Cache Storage (best-effort)
@@ -3070,15 +3123,44 @@ ${e.content}
     }
 
     function applyBooEffects(effects){
-      const arr = Array.isArray(effects) ? effects : [];
-      for (const ef of arr){
-        if (!ef || typeof ef !== "object") continue;
+  const arr = Array.isArray(effects) ? effects : [];
+  let halt = false;
 
-        if (ef.type === "set"){
-          const key = String(ef.key || "");
-          if (key === "booMuted"){
-            setBooMuted(!!ef.value);
-          }
+  for (const ef of arr){
+    if (!ef || typeof ef !== "object") continue;
+
+    if (ef.type === "set"){
+      const key = String(ef.key || "");
+      if (key === "booMuted"){
+        setBooMuted(!!ef.value);
+      }
+    }
+
+    if (ef.type === "appendNote"){
+      const text = (booPendingInputValue || "").trim();
+      if (!text) continue;
+      const notes = loadBooNotes();
+      notes.unshift({
+        id: (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)),
+        createdAt: nowIso(),
+        tag: ef.tag ? String(ef.tag) : "",
+        text
+      });
+      const capped = notes.slice(0, 40);
+      saveBooNotes(capped);
+    }
+
+    // ✅ NEW: Clear all site data effect (Summon Boo)
+    if (ef.type === "clearAllSiteData"){
+      // Use your existing confirmation modal (requires typing CLEAR)
+      openClearDataModal();
+      halt = true; // important: don't continue scene navigation after this
+    }
+  }
+
+  return { halt };
+}
+
         }
 
         if (ef.type === "appendNote"){
@@ -3109,14 +3191,18 @@ ${e.content}
         if (v) setUserName(v);
       }
 
-      applyBooEffects(choice.effects);
+     const { halt } = applyBooEffects(choice.effects);
+if (halt){
+  // openClearDataModal() already closed Boo overlay for clean layering
+  return;
+}
 
-      const goto = String(choice.goto || "");
-      if (!goto || goto === "end"){
-        closeBooOverlay();
-        return;
-      }
-      renderBooScene(goto);
+const goto = String(choice.goto || "");
+if (!goto || goto === "end"){
+  closeBooOverlay();
+  return;
+}
+renderBooScene(goto);
     }
 
     async function summonBoo(){
