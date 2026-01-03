@@ -143,6 +143,7 @@
     .subtitle,.kicker,.hint,.small,.brand p,.hero-sub,.entry .preview{
       font-family: var(--font-ui);
     }
+
     /* ✅ Landing / Welcome screen */
     .jbScreen{
       position: fixed;
@@ -1008,63 +1009,22 @@
       flex: 0 0 auto;
     }
 
-    /* ========= Hover behavior: ONLY edge outline + gold text glow ========= */
-
-    @keyframes goldOutlinePulse {
-      0%{
-        box-shadow:
-          inset 0 0 0 1px rgba(201,167,106,.28),
-          ;
-      }
-      100%{
-        box-shadow:
-          inset 0 0 0 1px rgba(201,167,106,.55),
-          ;
-      }
+    /***********************
+     * ✅ Clear all site data modal (used by Summon Boo)
+     ***********************/
+    #clearDataBackdrop{
+      z-index: 17000; /* above Boo overlay (16000) */
     }
-
-    /* Kill any previous "whole tile" glow on hover by hard-resetting shadow first */
-    .hero-tile{
-      box-shadow: var(--shadow); /* normal state */
+    .danger-note{
+      margin: 10px 0 0;
+      color: color-mix(in srgb, var(--text) 84%, transparent);
+      font-size: 13px;
+      line-height: 1.45;
+      font-family: var(--font-ui);
     }
-
-    /* Hover/focus: keep base shadow + ONLY the thin outline pulse */
-    .hero-tile:hover,
-    .hero-tile:focus-visible{
-      /* base shadow stays (no extra bloom layers) */
-      box-shadow: var(--shadow) !important;
-
-      /* outline pulse */
-      animation: goldOutlinePulse 2.8s ease-in-out infinite alternate;
-    }
-
-    /* Gold text glow on hover/focus (title + subtitle) */
-    .hero-tile:hover .hero-title,
-    .hero-tile:focus-visible .hero-title{
-      text-shadow:
-        0 0 0px rgba(201,167,106,.45),
-        0 0 0px rgba(201,167,106,.22);
-    }
-
-    .hero-tile:hover .hero-sub,
-    .hero-tile:focus-visible .hero-sub{
-      text-shadow:
-        0 0 1px rgba(201,167,106,.32),
-        0 0 1px rgba(201,167,106,.18);
-    }
-    /* ✅ Bring back the pop (lift) without the gold fill-glow */
-    .hero-tile:hover{
-      transform: translateY(-1px) scale(1.012);
-    }
-
-    .hero-tile:active{
-      transform: translateY(-1px) scale(0.995);
-    }
-
-    /* Optional: subtle border warm-up (keeps it premium) */
-    .hero-tile:hover,
-    .hero-tile:focus-visible{
-      border-color: rgba(201,167,106,.30);
+    .danger-note strong{
+      color: color-mix(in srgb, var(--text) 96%, transparent);
+      font-weight: 650;
     }
 
     /***********************
@@ -1266,6 +1226,35 @@
     </div>
   </div>
 
+  <!-- ✅ Clear all site data modal (Summon Boo) -->
+  <div id="clearDataBackdrop" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="clearDataTitle">
+      <div class="modal-inner">
+        <h3 class="modal-title" id="clearDataTitle">Clear all site data</h3>
+        <p class="modal-sub">
+          This will remove <strong>everything</strong> saved on this device for Journal Boo:
+          your name, Boo’s memories, saved entries, settings, and any cached data.
+        </p>
+
+        <p class="kicker">Type <strong>CLEAR</strong> to confirm</p>
+        <input id="clearDataConfirmInput" type="text" placeholder="Type CLEAR…" autocomplete="off" />
+
+        <p class="danger-note">
+          <strong>This cannot be undone.</strong>
+          If you want to keep anything, email yourself an entry first.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <p class="modal-reply" id="clearDataReply" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button class="btn ghost" id="clearDataCancel" type="button">Cancel</button>
+          <button class="btn danger" id="clearDataDoIt" type="button" disabled>Clear all</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ✅ MAIN APP (hidden until start) -->
   <div id="jbApp" class="app hidden">
     <div class="shell">
@@ -1427,6 +1416,13 @@
     const moodContinueBtn = document.getElementById("moodContinue");
     const moodCustomInput = document.getElementById("moodCustomInput");
 
+    // ✅ Clear all site data modal nodes
+    const clearDataBackdrop = document.getElementById("clearDataBackdrop");
+    const clearDataConfirmInput = document.getElementById("clearDataConfirmInput");
+    const clearDataCancel = document.getElementById("clearDataCancel");
+    const clearDataDoIt = document.getElementById("clearDataDoIt");
+    const clearDataReply = document.getElementById("clearDataReply");
+
     document.getElementById("btnHome").addEventListener("click", () => go("home"));
     document.getElementById("btnJournal").addEventListener("click", () => go("journal"));
 
@@ -1575,6 +1571,130 @@
     function saveEmail(email){
       try{ localStorage.setItem(LS_EMAIL, email || ""); }catch{}
     }
+
+    /***********************
+     * ✅ Clear all site data (Summon Boo)
+     ***********************/
+    function isClearDataModalOpen(){
+      return !!(clearDataBackdrop && clearDataBackdrop.classList.contains("active"));
+    }
+
+    function openClearDataModal(){
+      if (!clearDataBackdrop) return;
+
+      // close Boo overlay if open (keeps layering clean)
+      if (booOverlay?.classList.contains("active")) {
+        closeBooOverlay();
+      }
+
+      clearDataReply.textContent = "";
+      clearDataConfirmInput.value = "";
+      clearDataDoIt.disabled = true;
+
+      clearDataBackdrop.classList.add("active");
+      clearDataBackdrop.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+
+      setTimeout(() => clearDataConfirmInput?.focus(), 120);
+    }
+
+    function closeClearDataModal(){
+      if (!clearDataBackdrop) return;
+      clearDataBackdrop.classList.remove("active");
+      clearDataBackdrop.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      clearDataReply.textContent = "";
+      clearDataConfirmInput.value = "";
+      clearDataDoIt.disabled = true;
+    }
+
+    async function clearAllSiteData(){
+      try{
+        // Stop any audio first
+        try { stopMeditationAudio(); } catch {}
+        try { stopBackgroundMusic(); } catch {}
+
+        // local/session storage
+        try { localStorage.clear(); } catch {}
+        try { sessionStorage.clear(); } catch {}
+
+        // IndexedDB (best-effort)
+        try{
+          if (indexedDB && typeof indexedDB.databases === "function"){
+            const dbs = await indexedDB.databases();
+            for (const db of (dbs || [])){
+              if (!db || !db.name) continue;
+              await new Promise((resolve) => {
+                const req = indexedDB.deleteDatabase(db.name);
+                req.onsuccess = () => resolve();
+                req.onerror = () => resolve();
+                req.onblocked = () => resolve();
+              });
+            }
+          }
+        }catch{}
+
+        // Cache Storage (best-effort)
+        try{
+          if (window.caches && typeof caches.keys === "function"){
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+        }catch{}
+
+        // Service workers (best-effort)
+        try{
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations){
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+          }
+        }catch{}
+
+        // Cookies (best-effort, current domain/path)
+        try{
+          const cookies = document.cookie ? document.cookie.split(";") : [];
+          for (const c of cookies){
+            const eqPos = c.indexOf("=");
+            const name = (eqPos > -1 ? c.substr(0, eqPos) : c).trim();
+            if (!name) continue;
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+          }
+        }catch{}
+      } finally {
+        // hard reset
+        window.location.reload();
+      }
+    }
+
+    // Clear modal wiring
+    clearDataConfirmInput?.addEventListener("input", () => {
+      const v = (clearDataConfirmInput.value || "").trim();
+      const ok = (v === "CLEAR");
+      clearDataDoIt.disabled = !ok;
+      clearDataReply.textContent = ok ? "Ready. Press “Clear all” to wipe everything on this device." : "";
+    });
+
+    clearDataCancel?.addEventListener("click", () => closeClearDataModal());
+    clearDataDoIt?.addEventListener("click", async () => {
+      const v = (clearDataConfirmInput.value || "").trim();
+      if (v !== "CLEAR") return;
+      clearDataReply.textContent = "Clearing…";
+      clearDataDoIt.disabled = true;
+      clearDataCancel.disabled = true;
+      await clearAllSiteData();
+    });
+
+    clearDataBackdrop?.addEventListener("click", (e) => {
+      if (e.target === clearDataBackdrop) closeClearDataModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!isClearDataModalOpen()) return;
+      if (e.key === "Escape"){
+        e.preventDefault();
+        closeClearDataModal();
+      }
+    });
 
     // --- Developer blog helpers ---
     async function fetchBlogJson(){
