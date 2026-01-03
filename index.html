@@ -1607,8 +1607,7 @@
       clearDataConfirmInput.value = "";
       clearDataDoIt.disabled = true;
     }
-
-    <script>
+    
   async function clearAllSiteData(){
     try{
       // Stop any audio first
@@ -3189,41 +3188,6 @@ ${e.content}
       if (expectsInput && scene.input.storeAs === "name"){
         const v = (booPendingInputValue || "").trim();
         if (v) setUserName(v);
-      }
-
-     const { halt } = applyBooEffects(choice.effects);
-if (halt){
-  // openClearDataModal() already closed Boo overlay for clean layering
-  return;
-}
-
-const goto = String(choice.goto || "");
-if (!goto || goto === "end"){
-  closeBooOverlay();
-  return;
-}
-renderBooScene(goto);
-    }
-
-    async function summonBoo(){
-      if (!booCanSummon()){
-        toast("Boo can’t be summoned right now.");
-        return;
-      }
-
-      try{
-        await ensureBooLoaded();
-      }catch(err){
-        toast("Boo can’t be summoned right now.");
-        return;
-      }
-
-      const allowWhenMuted = !!booMeta?.allowSummonWhenMuted;
-      const muted = getBooMuted();
-
-      if (muted && !allowWhenMuted){
-        toast("Boo can’t be summoned right now.");
-        return;
       }
 
       // Determine which scene to show:
