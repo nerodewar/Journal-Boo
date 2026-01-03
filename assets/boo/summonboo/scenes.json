@@ -27,7 +27,7 @@
       "choices": [
         { "label": "A ghost?!", "goto": "ghost_1" },
         { "label": "Okay. Stay close.", "goto": "stay_1" },
-        { "label": "Back to writing.", "goto": "end" }
+        { "label": "Back to writing", "goto": "end" }
       ]
     },
 
@@ -36,7 +36,7 @@
         "That’s right. A friendly one.\n\nI won’t get in the way 🙂"
       ],
       "choices": [
-        { "label": "Back to writing.", "goto": "end" },
+        { "label": "Back to writing", "goto": "end" },
         { "label": "Stay with me.", "goto": "stay_1" }
       ]
     },
@@ -63,7 +63,7 @@
 
         { "label": "Clear all site data", "goto": "clear_data_1" },
 
-        { "label": "Back to writing", "goto": "end" }
+        { "label": "Close", "goto": "end" }
       ]
     },
 
